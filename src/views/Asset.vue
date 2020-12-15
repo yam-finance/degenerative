@@ -36,7 +36,7 @@
               </div>
             </div>
             <input
-              @if="tokenSelected"
+              v-if="tokenSelected"
               id=""
               class="numeric setvalue"
               type="number"
