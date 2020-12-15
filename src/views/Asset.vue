@@ -27,15 +27,24 @@
                 <input class="selectopt" name="test" type="radio" id="default" checked />
                 <label for="default" class="option">Select Token</label>
 
-                <input id="JAN21" class="selectopt" name="test" type="radio" value="0x00000000000JAN21" v-model="tokenSelected" />
+                <input id="JAN21" class="selectopt" name="test" type="radio" value="0x0000JAN21" v-model="tokenSelected" />
                 <label for="JAN21" class="option">uGAS-JAN21</label>
-                <input id="FEB" class="selectopt" name="test" type="radio" value="0x000022222222FEB" v-model="tokenSelected" />
+                <input id="FEB" class="selectopt" name="test" type="radio" value="0x0000FEB" v-model="tokenSelected" />
                 <label for="FEB" class="option">uGAS-FEB</label>
-                <input id="MAR" class="selectopt" name="test" type="radio" value="0x000033333333MAR" v-model="tokenSelected" />
+                <input id="MAR" class="selectopt" name="test" type="radio" value="0x0000MAR" v-model="tokenSelected" />
                 <label for="MAR" class="option">uGAS-MAR</label>
               </div>
             </div>
+            <input
+              @if="tokenSelected"
+              id=""
+              class="numeric setvalue"
+              type="number"
+              name=""
+              :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
+            />
             <input id="" class="numeric setvalue" type="number" name="" placeholder="0.00 WETH" />
+            <!-- to add max button -->
 
             <button id="act" @click="act">{{ actName }}</button>
 
@@ -45,7 +54,7 @@
               <label>Collateral Ratio (Global): <b>0.00</b></label>
               <label>Collateral Ratio (Tx): <b>0.00</b></label>
               <label
-                >Selected: <b>{{ tokenSelected }}</b></label
+                >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
               >
             </div>
           </div>

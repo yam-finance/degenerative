@@ -17,7 +17,7 @@
           <a href="https://yam.finance/" target="_blank">by Yam.finance</a>
         </div>
         <div class="flex vert">
-          <Swipe></Swipe>
+          <!-- <Swipe></Swipe> -->
           <Space />
           <button id="wallet" @click="auth" :class="{ connected: $auth.isAuthenticated }">
             <span v-if="!$auth.isAuthenticated">Connect Wallet</span>
