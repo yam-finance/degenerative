@@ -1,0 +1,25 @@
+:root {
+  --primary: #FF4A4A;
+  --accent: #9b60c1;
+  --text: rgb(45 45 45 / 95%);
+  --back: #fffefe;
+  --back-wallet: #ffeded;
+  --text-wallet: #FF4A4A;
+  --back-wallet-hover: #f6e6ffbf;
+  --back-gradient: linear-gradient(rgba(255, 255, 255, 0.11) 0%, #fffbff 100%);
+
+  // temp
+  --back-act: #fff;
+  --back-act: #ffeded;
+}
+
+[data-theme="dark"] {
+  --primary: #FF4A4A;
+  --accent: #d17aff;
+  --text: #ffffffe6;
+  --back: rgba(160, 68, 68, 0.603);
+  --back-wallet: #854a4a;
+  --text-wallet: #ffffffe6;
+  --back-wallet-hover: #2d202f8f;
+  --back-gradient: linear-gradient(#FF4A4A 0%, #c93b3b 100%);
+}

@@ -1,0 +1,22 @@
+{
+  "injected": {
+    "id": "injected",
+    "name": "MetaMask",
+    "chainId": 1,
+    "options": {
+      "rpc": {
+        "1": "https://fee7372b6e224441b747bf1fde15b2bd.eth.rpc.rivet.cloud/"
+      }
+    }
+  },
+  "walletconnect": {
+    "id": "walletconnect",
+    "name": "WalletConnect",
+    "chainId": 1,
+    "options": {
+      "rpc": {
+        "1": "https://fee7372b6e224441b747bf1fde15b2bd.eth.rpc.rivet.cloud/"
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+b {
+  font-weight: 500;
+}
+
+*,
+*::before,
+*::after {
+  outline: none !important;
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+li,
+figure,
+figcaption,
+blockquote,
+ul[class],
+ol[class],
+dl,
+dd {
+  padding: 0;
+  margin: 0;
+}
+
+ul[class],
+ol[class] {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
