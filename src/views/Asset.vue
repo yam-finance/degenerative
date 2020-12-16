@@ -17,36 +17,39 @@
           <div class="tabs">
             <button @click="toNavAct('create')" :class="{ active: navAct === 'create' }">Create</button>
             <button @click="toNavAct('redeem')" :class="{ active: navAct === 'redeem' }">Redeem</button>
-            <button @click="toNavAct('liquidity')" :class="{ active: navAct === 'liquidity' }">Liquidity</button>
-            <button @click="toNavAct('trade')" :class="{ active: navAct === 'trade' }">Trade</button>
+            <button @click="toNavAct('withdraw')" :class="{ active: navAct === 'withdraw' }">Withdraw</button>
+            <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP / Trade</button>
           </div>
 
           <div id="inputbox">
-            <div class="dropdown">
-              <div class="select" tabindex="1">
-                <input class="selectopt" name="test" type="radio" id="default" checked />
-                <label for="default" class="option">Select Token</label>
+            <div v-if="navAct !== 'lptrade'">
+              <div class="dropdown">
+                <div class="select" tabindex="1">
+                  <input class="selectopt" name="test" type="radio" id="default" checked />
+                  <label for="default" class="option">Select Token</label>
 
-                <input id="JAN21" class="selectopt" name="test" type="radio" value="0x0000JAN21" v-model="tokenSelected" />
-                <label for="JAN21" class="option">uGAS-JAN21</label>
-                <input id="FEB" class="selectopt" name="test" type="radio" value="0x0000FEB" v-model="tokenSelected" />
-                <label for="FEB" class="option">uGAS-FEB</label>
-                <input id="MAR" class="selectopt" name="test" type="radio" value="0x0000MAR" v-model="tokenSelected" />
-                <label for="MAR" class="option">uGAS-MAR</label>
+                  <input id="JAN21" class="selectopt" name="test" type="radio" value="0x0000JAN21" v-model="tokenSelected" />
+                  <label for="JAN21" class="option">uGAS-JAN21</label>
+                  <input id="FEB" class="selectopt" name="test" type="radio" value="0x0000FEB" v-model="tokenSelected" />
+                  <label for="FEB" class="option">uGAS-FEB</label>
+                  <input id="MAR" class="selectopt" name="test" type="radio" value="0x0000MAR" v-model="tokenSelected" />
+                  <label for="MAR" class="option">uGAS-MAR</label>
+                </div>
               </div>
-            </div>
-            <input
-              v-if="tokenSelected"
-              id=""
-              class="numeric setvalue"
-              type="number"
-              name=""
-              :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
-            />
-            <input id="" class="numeric setvalue" type="number" name="" placeholder="0.00 WETH" />
-            <!-- to add max button -->
+              <input
+                v-if="tokenSelected"
+                id=""
+                class="numeric setvalue"
+                type="number"
+                name=""
+                :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
+              />
+              <input id="" class="numeric setvalue" type="number" name="" placeholder="0.00 WETH" />
+              <!-- to add max button -->
 
-            <button id="act" @click="act">{{ actName }}</button>
+              <button id="act" @click="act">{{ actName }}</button>
+            </div>
+            <div v-if="navAct === 'lptrade'">Link to BAL Pools + Instructions</div>
 
             <div class="info" v-if="info">
               <label>Liquidation Price: <b>0.00</b></label>
