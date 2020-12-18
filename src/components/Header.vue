@@ -63,7 +63,7 @@ header {
 .degenerative-logo {
   display: flex;
   .picture {
-    background: url("../assets/logo/32.png?");
+    background: url("../assets/logo/32.png");
     background-size: 32px 32px;
     width: 32px;
     height: 32px;

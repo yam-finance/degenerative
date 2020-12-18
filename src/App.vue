@@ -20,6 +20,5 @@ export default {
     titleTemplate: "%s - Degenerative",
   },
   methods: {},
-  // mounted() {},
 };
 </script>

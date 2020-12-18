@@ -5,6 +5,7 @@ import { provider, TransactionReceipt } from "web3-core";
 import { AbiItem } from "web3-utils";
 import YAM from "./abi/yam.json";
 import { ethers } from "ethers";
+import BigNumber from "bignumber.js";
 
 // export async function connectWallet() { }
 
@@ -40,8 +41,25 @@ export const getBalance = async (provider: provider, tokenAddress: string, userA
   }
 };
 
+export const decToBn = (dec: number, decimals = 18) => {
+  return new BigNumber(dec).multipliedBy(new BigNumber(10).pow(decimals));
+};
+
 export const sleep = (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+export const splitChartData = (rawData: any) => {
+  const categoryData: any = [];
+  const values: any = [];
+  for (let i = 0; i < rawData.length; i++) {
+    categoryData.push(rawData[i].splice(0, 1)[0]);
+    values.push(rawData[i]);
+  }
+  return {
+    categoryData: categoryData,
+    values: values,
+  };
 };
 
 export const waitTransaction = async (provider: provider, txHash: string) => {

@@ -10,7 +10,31 @@
         </h1>
       </Card>
 
+      <Container :size="640">
+        <div>
+          <div class="chart-asset">
+            <chart :options="chartOptionsCandle" />
+          </div>
+        </div>
+      </Container>
+
       <Space size="md" />
+
+      <Container :size="640">
+        <div id="">
+          <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="640 - 60" :height="300 - 60">
+            <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+              <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
+                  {{ props.value }}
+                </text>
+              </g></la-line
+            >
+            <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
+            <!-- <la-y-axis prop="value"></la-y-axis> -->
+          </la-cartesian>
+        </div>
+      </Container>
 
       <Container :size="440" class="maker">
         <div>
@@ -19,7 +43,7 @@
             <button @click="toNavAct('deposit')" :class="{ active: navAct === 'deposit' }">Deposit</button>
             <button @click="toNavAct('redeem')" :class="{ active: navAct === 'redeem' }">Redeem</button>
             <button @click="toNavAct('withdraw')" :class="{ active: navAct === 'withdraw' }">Withdraw</button>
-            <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP / Trade</button>
+            <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
           </div>
           <div id="inputbox">
             <div v-if="navAct !== 'lptrade'">
@@ -30,7 +54,7 @@
               </div>
               <div class="dropdown">
                 <select class="select" tabindex="1" v-model="tokenSelected" v-on:change="getEMPState">
-                  <option disabled class="option" value="">Select Token</option>
+                  <option selected disabled hidden class="option" value="none">Select Token</option>
                   <option id="JAN21" class="option" name="test" value="uGAS-JAN21">uGAS-JAN21</option>
                   <option id="FEB" class="option" name="test" value="uGAS-FEB21">uGAS-FEB21</option>
                   <option id="MAR" class="option" name="test" value="uGAS-MAR21">uGAS-MAR21</option>
@@ -87,6 +111,13 @@
               <label
                 >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
               >
+              <br />
+              <label
+                >Your WETH: <b>{{ balanceWETH ? balanceWETH : "0" }}</b></label
+              >
+              <label
+                >Your UGASX: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
+              >
             </div>
           </div>
         </div>
@@ -98,18 +129,13 @@
 <script>
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { getLiquidationPrice } from "../utils";
+import { decToBn, getLiquidationPrice, splitChartData } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
+import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
-
-function toTitleCase(str) {
-  return str.replace(/\w\S*/g, function(txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
-}
 
 export default {
   name: "Asset",
@@ -139,9 +165,19 @@ export default {
       currentError: null,
       currPos: null,
       currEMP: null,
+      chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
+      chartOptionsCandle: {},
+      balanceWETH: 0,
+      balanceUGAS: 0,
       // showDropdown: false,
       // currentInfo: "",
     };
+  },
+  mounted() {
+    this.initAsset();
+    this.lastPrice();
+    this.initChart();
+    this.getWETHBalance();
   },
   components: {},
   methods: {
@@ -155,8 +191,296 @@ export default {
       "withdrawRequestFinalize",
       "withdraw",
       "redeem",
+      "getUserWETHBalance",
     ]),
     ...mapGetters(["empState"]),
+    async initAsset() {
+      const DAI = await Fetcher.fetchTokenData(1, "0x6B175474E89094C44Da98b954EedeAC495271d0F");
+      console.log("DAI", DAI);
+    },
+    async getWETHBalance() {
+      this.balanceWETH = await this.getUserWETHBalance();
+    },
+    initChart() {
+      const red = "#E40915";
+      const redBorder = "#E40915";
+      const green = "#007E0A";
+      const greenBorder = "#007E0A";
+      const chartData = splitChartData([
+        ["07/01/2020", 320, 320, 287, 362],
+        ["07/10/2020", 291, 291, 288, 308],
+        ["08/17/2020", 295, 346, 295, 346],
+        ["06/10/2020", 347, 358, 337, 363],
+        ["07/19/2020", 360, 382, 347, 383],
+        ["11/21/2020", 383, 385, 371, 391],
+        ["11/05/2020", 377, 419, 369, 421],
+        ["04/24/2020", 425, 428, 417, 440],
+        ["01/28/2020", 433, 433, 403, 437],
+        ["10/01/2020", 432, 434, 427, 441],
+        ["09/15/2020", 430, 418, 394, 433],
+        ["09/13/2020", 416, 432, 414, 443],
+        ["07/31/2020", 441, 421, 415, 444],
+        ["05/09/2020", 420, 382, 373, 427],
+        ["04/05/2020", 383, 397, 370, 397],
+        ["05/15/2020", 378, 325, 309, 378],
+        ["02/04/2020", 322, 314, 308, 330],
+        ["11/18/2020", 320, 325, 315, 338],
+        ["07/28/2020", 313, 293, 289, 340],
+        ["06/02/2020", 297, 313, 292, 324],
+        ["05/22/2020", 322, 365, 308, 366],
+        ["08/19/2020", 364, 359, 330, 369],
+        ["02/12/2020", 332, 273, 259, 333],
+        ["05/13/2020", 274, 326, 270, 328],
+        ["01/08/2020", 333, 347, 321, 351],
+        ["02/02/2020", 340, 324, 304, 352],
+        ["09/30/2020", 326, 318, 314, 333],
+        ["01/14/2020", 314, 310, 296, 320],
+        ["02/21/2020", 309, 286, 264, 333],
+        ["02/04/2020", 282, 263, 253, 286],
+        ["06/05/2020", 255, 270, 253, 276],
+        ["08/20/2020", 269, 278, 250, 312],
+        ["01/14/2020", 267, 240, 239, 276],
+        ["09/03/2020", 244, 257, 232, 261],
+        ["02/07/2020", 257, 317, 257, 317],
+        ["08/05/2020", 318, 324, 311, 330],
+        ["09/29/2020", 321, 328, 314, 332],
+        ["11/10/2020", 334, 326, 319, 344],
+        ["01/28/2020", 318, 297, 281, 319],
+        ["03/11/2020", 299, 301, 289, 323],
+        ["02/14/2020", 273, 236, 232, 273],
+        ["03/20/2020", 238, 236, 228, 246],
+        ["11/04/2020", 229, 234, 227, 243],
+        ["12/17/2020", 234, 227, 220, 253],
+        ["10/20/2020", 232, 225, 217, 241],
+        ["09/25/2020", 196, 211, 180, 212],
+        ["02/17/2020", 215, 225, 215, 234],
+        ["03/19/2020", 224, 226, 212, 233],
+        ["10/12/2020", 236, 219, 217, 242],
+        ["11/03/2020", 218, 206, 204, 226],
+        ["07/28/2020", 199, 181, 177, 204],
+        ["11/08/2020", 169, 194, 165, 196],
+        ["02/17/2020", 195, 193, 178, 197],
+        ["02/05/2020", 181, 197, 175, 206],
+        ["07/17/2020", 201, 244, 200, 250],
+        ["01/21/2020", 236, 242, 232, 245],
+        ["07/08/2020", 242, 184, 182, 242],
+        ["09/22/2020", 187, 218, 184, 226],
+        ["07/19/2020", 213, 199, 191, 224],
+        ["08/12/2020", 203, 177, 173, 210],
+        ["03/18/2020", 170, 174, 161, 179],
+        ["03/02/2020", 179, 205, 179, 222],
+        ["07/08/2020", 212, 231, 212, 236],
+        ["04/02/2020", 227, 235, 219, 240],
+        ["05/04/2020", 242, 246, 235, 255],
+        ["11/24/2020", 246, 232, 221, 247],
+        ["11/18/2020", 228, 246, 225, 247],
+        ["07/18/2020", 247, 241, 231, 250],
+        ["01/08/2020", 238, 217, 205, 239],
+        ["08/24/2020", 217, 224, 213, 225],
+        ["05/31/2020", 221, 251, 210, 252],
+        ["02/12/2020", 249, 282, 248, 288],
+        ["06/09/2020", 286, 299, 281, 309],
+        ["08/21/2020", 297, 305, 290, 305],
+        ["06/04/2020", 303, 302, 292, 314],
+        ["01/13/2020", 293, 275, 274, 304],
+        ["07/29/2020", 281, 288, 270, 292],
+        ["10/15/2020", 286, 293, 283, 301],
+        ["09/22/2020", 293, 321, 281, 322],
+        ["07/31/2020", 323, 324, 321, 334],
+        ["02/29/2020", 316, 317, 310, 325],
+        ["08/18/2020", 320, 300, 299, 325],
+        ["03/02/2020", 300, 299, 294, 313],
+        ["08/25/2020", 297, 272, 264, 297],
+        ["06/02/2020", 270, 270, 260, 276],
+        ["08/30/2020", 264, 242, 240, 266],
+        ["02/12/2020", 242, 210, 205, 250],
+        ["06/19/2020", 190, 148, 126, 190],
+      ]);
+      // chart: uniswap data
+      this.chartOptionsCandle = {
+        title: {
+          text: "uGAS",
+          left: 0,
+        },
+        // tooltip: {
+        //     trigger: 'axis',
+        //     axisPointer: {
+        //         type: 'cross'
+        //     }
+        // },
+        // legend: {
+        //   data: ["uGAS"],
+        // },
+        grid: {
+          left: "10%",
+          right: "10%",
+          bottom: "15%",
+        },
+        xAxis: {
+          type: "category",
+          data: chartData.categoryData,
+          scale: true,
+          boundaryGap: false,
+          axisLine: { onZero: false },
+          splitLine: { show: true },
+          splitArea: {
+            show: false,
+            areaStyle: {
+              color: [],
+            },
+          },
+          splitNumber: 20,
+          min: "dataMin",
+          max: "dataMax",
+        },
+        yAxis: {
+          scale: true,
+          splitLine: { show: true },
+          splitArea: {
+            show: false,
+            areaStyle: {
+              color: [],
+            },
+          },
+        },
+        dataZoom: [
+          {
+            type: "inside",
+            start: 50,
+            end: 100,
+          },
+          {
+            show: false,
+            type: "slider",
+            top: "90%",
+            start: 50,
+            end: 100,
+          },
+        ],
+        series: [
+          {
+            name: "uGas",
+            type: "candlestick",
+            data: chartData.values,
+            itemStyle: {
+              color: red,
+              color0: green,
+              borderColor: redBorder,
+              borderColor0: greenBorder,
+            },
+            markPoint: {
+              label: {
+                normal: {
+                  formatter: function(param) {
+                    return param != null ? Math.round(param.value) : "";
+                  },
+                },
+              },
+              data: [
+                {
+                  name: "price",
+                  coord: ["2013/5/31", 0],
+                  value: 0,
+                  itemStyle: {
+                    color: "rgb(2,2,2)",
+                  },
+                },
+                {
+                  name: "high",
+                  type: "max",
+                  valueDim: "high",
+                },
+                {
+                  name: "low",
+                  type: "min",
+                  valueDim: "low",
+                },
+                {
+                  name: "avg",
+                  type: "average",
+                  valueDim: "close",
+                },
+              ],
+              tooltip: {
+                formatter: function(param) {
+                  return param.name + "<br>" + (param.data.coord || "");
+                },
+              },
+            },
+            markLine: {
+              symbol: ["none", "none"],
+              data: [
+                [
+                  {
+                    name: "low to high",
+                    type: "min",
+                    valueDim: "low",
+                    symbol: "circle",
+                    symbolSize: 10,
+                    label: {
+                      show: false,
+                    },
+                    emphasis: {
+                      label: {
+                        show: false,
+                      },
+                    },
+                  },
+                  {
+                    type: "max",
+                    valueDim: "high",
+                    symbol: "circle",
+                    symbolSize: 10,
+                    label: {
+                      show: false,
+                    },
+                    emphasis: {
+                      label: {
+                        show: false,
+                      },
+                    },
+                  },
+                ],
+                {
+                  name: "min line on close",
+                  type: "min",
+                  valueDim: "close",
+                },
+                {
+                  name: "max line on close",
+                  type: "max",
+                  valueDim: "close",
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      // chart: median data
+      // this.values = [
+      //   { name: "Jan", value: 200 },
+      //   { name: "Feb", value: 420 },
+      //   { name: "Mar", value: 420 },
+      //   { name: "Apr", value: 420 },
+      //   { name: "May", value: 420 },
+      //   { name: "Jun", value: 420 },
+      //   { name: "Jul", value: 420 },
+      //   { name: "Aug", value: 420 },
+      //   { name: "Sep", value: 420 },
+      //   { name: "Oct", value: 420 },
+      //   { name: "Nov", value: 420 },
+      //   { name: "Dec", value: 420 },
+      // ];
+      this.chartOptionsMedianValues = [];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      for (let i = 0; i < months.length; i++) {
+        this.chartOptionsMedianValues.push({
+          name: months[i],
+          value: Math.floor(Math.random() * (420 - 25 + 1) + 25),
+        });
+      }
+    },
     checkHasPending() {
       if (this.currPos) {
         if (Number(this.currPos.withdrawalRequestPassTimestamp) != 0) {
@@ -206,10 +530,7 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt)) / new BigNumber(this.currPos.tokensOutstanding) <
-          this.gcr
-        ) {
+        } else if ((new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt)) / new BigNumber(this.currPos.tokensOutstanding) < this.gcr) {
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
@@ -368,7 +689,7 @@ export default {
       this.hasError = false;
       this.currentError = "";
       this.navAct = on;
-      this.actName = toTitleCase(on);
+      this.actName = this.titleCase(on);
       if (on == "withdraw") {
         this.toWithdrawType("new");
       }
@@ -394,9 +715,6 @@ export default {
       this.runChecks();
     },
   },
-  mounted() {
-    this.lastPrice();
-  },
 };
 </script>
 
@@ -421,7 +739,7 @@ export default {
   white-space: nowrap;
   button {
     cursor: pointer;
-    width: calc(100% / 5);
+    width: calc(100% / 4.99);
     // border-radius: 10px;
     border: none;
     height: 50px;
@@ -522,15 +840,11 @@ export default {
 
   .select {
     display: flex;
-    flex-direction: column;
     position: relative;
-    // font-family: "Share Tech Mono", monospace;
     font-family: "Inconsolata", monospace;
     height: 40px;
     font-size: 22px;
     width: 100%;
-    // font-weight: 600;
-    // margin-top: 20px;
     border: none;
     background-image: none;
     background-color: transparent;
@@ -539,6 +853,7 @@ export default {
     box-shadow: none;
     background: #fff;
     background: var(--back-act);
+    padding-left: 10px;
   }
 
   .option {
@@ -635,5 +950,17 @@ export default {
   color: var(--primary);
   background: var(--back-act);
   text-align: center;
+}
+
+#chart {
+  width: 200px;
+  height: 200px;
+}
+
+.echarts,
+.chart-wrapper,
+.chart-asset {
+  width: 100%;
+  height: 300px;
 }
 </style>

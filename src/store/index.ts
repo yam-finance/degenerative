@@ -23,16 +23,9 @@ const defaultState = () => {
     version: "A-0.1", // make dynamic
     theme: stateLoad("theme") || "light",
     account: stateLoad("account") || "0x0",
-    userType: "default", // seeker, provider, arbitrer
     currentEMP: "",
-    metapools: [],
-    quote: {
-      metapoolId: 0, // or
-      contractId: 0, // or
-      price: 0,
-    }, // populated with user choosing
     approvals: {
-      payToken: false,
+      tokenEMP: false,
     },
     canWithdraw: false,
 
@@ -419,10 +412,7 @@ export default new Vuex.Store({
       }
     },
 
-    requestWithdrawal: async (
-      { commit, dispatch },
-      payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }
-    ): Promise<boolean> => {
+    requestWithdrawal: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -600,6 +590,16 @@ export default new Vuex.Store({
         console.error("error", e);
         return false;
       }
+    },
+
+    getUserWETHBalance: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+      const balance = await getBalance(Vue.prototype.$provider, weth, store.state.account);
+      return balance;
     },
 
     // getMetapools: async ({ commit }) => {
