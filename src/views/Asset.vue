@@ -500,10 +500,6 @@ export default {
         });
       }
     },
-    getApprove() {
-      approve(store.acc);
-      console.log("store", store);
-    },
     checkTime() {
       // checking if current time and 1day is greater than THIS
       const current = this.moment();
