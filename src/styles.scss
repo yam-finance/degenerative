@@ -69,9 +69,12 @@ a {
 //   width: 24px;
 // }
 
+a,
 button {
   &.grph {
     cursor: pointer;
+    display: inline-block;
+    text-align: center;
     border-radius: 100px;
     font-size: 22px;
     color: #fff;

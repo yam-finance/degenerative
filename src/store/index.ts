@@ -607,8 +607,7 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const spenderAddress = "0x0";
-      const result = await approve(store.state.account, spenderAddress, EMP, Vue.prototype.$provider);
+      const result = await approve(store.state.account, EMP, WETH, Vue.prototype.$provider);
       // set state
       return result;
     },

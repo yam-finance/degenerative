@@ -15,7 +15,7 @@
               Degenerative Finance is a collaboration between Yam Finance and the UMA Project to develop a suite of innovative DeFi derivatives, starting with
               the inaugural launch of uGAS, which tracks and hedges the cost of gas on the Ethereum blockchain, and with many more exciting synthetics to come.
             </p>
-            <button class="grph">Launch</button>
+            <router-link class="grph" to="/assets/ugas">Launch</router-link>
           </div>
         </div>
         <h1>Get Degenerative</h1>
