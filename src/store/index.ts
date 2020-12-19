@@ -12,7 +12,8 @@ import { provider } from "web3-core";
 import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
-import EMP from "@/utils/abi/emp.json";
+import EMPContract from "@/utils/abi/emp.json";
+import { WETH, EMP } from "@/utils/addresses";
 
 Vue.use(Vuex);
 
@@ -25,7 +26,7 @@ const defaultState = () => {
     account: stateLoad("account") || "0x0",
     currentEMP: "",
     approvals: {
-      tokenEMP: false,
+      tokenEMP: {},
     },
     canWithdraw: false,
 
@@ -243,7 +244,7 @@ export default new Vuex.Store({
 
     getEMP: ({ commit, dispatch }, payload: { address: string }) => {
       const web3 = new Web3(Vue.prototype.$provider);
-      const empContract = new web3.eth.Contract((EMP.abi as unknown) as AbiItem, payload.address);
+      const empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.address);
       commit("GET_EMP", { currentEMP: empContract });
       return empContract;
     },
@@ -597,21 +598,20 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
-      const balance = await getBalance(Vue.prototype.$provider, weth, store.state.account);
+      const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
       return balance;
     },
 
-    // getMetapools: async ({ commit }) => {
-    //   let metapools;
-    //   commit('UPDATE', { metapools });
-    //   return metapools;
-    // },
-    // getMetapoolContract: async ({ commit }, { metapoolId }) => {
-    //   let contract;
-    //   commit('UPDATE', { selectedContract });
-    //   return contract;
-    // },
+    getApprovalEMP: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const spenderAddress = "0x0";
+      const result = await approve(store.state.account, spenderAddress, EMP, Vue.prototype.$provider);
+      // set state
+      return result;
+    },
   },
   getters: {
     theme(state) {

@@ -107,6 +107,52 @@ button {
 //   }
 // }
 
+.vue-picker {
+  width: 100%;
+
+  &:not(.vue-picker--has-val) > .vue-picker__opener {
+    color: rgba(255, 74, 74, 0.4) !important;
+  }
+  .vue-picker__opener-txt {
+    font-weight: bold;
+  }
+  .vue-picker-option:hover:not(:disabled) {
+    background-color: #ffffffbf;
+    cursor: pointer;
+  }
+  .vue-picker-option:nth-child(2n) {
+    background: #0000000a;
+  }
+  .vue-picker__dropdown {
+    background: #ffeded;
+    border: 2px solid #ff4a4a29;
+    padding: 0px;
+    border-radius: 0px 0px 10px 10px;
+    box-shadow: 0px 10px 10px -7px #00000017;
+  }
+}
+.vue-picker__opener {
+  cursor: pointer;
+  background: none;
+  text-align: start;
+  width: inherit;
+  border: none !important;
+  // color: var(--col);
+  padding: 10px;
+  display: grid;
+  grid: ". ico"/1fr auto;
+  gap: 10px;
+  align-items: center;
+  height: 46px;
+  color: #ff4a4a !important;
+  &:focus {
+    outline: none;
+    border-color: var(--col);
+    box-shadow: unset !important;
+  }
+}
+
+
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

@@ -6,122 +6,137 @@
         <h1 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <button @click="toNavPage('info')" :class="{ active: navPage === 'info' }">Info</button>
+          <button class="infoswitch" v-if="navPage === 'interact'" @click="toNavPage('info')" :class="{ active: navPage === 'info' }">Info</button>
+          <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Intract</button>
         </h1>
       </Card>
 
-      <Container :size="640">
-        <div>
-          <div class="chart-asset">
-            <chart :options="chartOptionsCandle" />
-          </div>
-        </div>
-      </Container>
-
       <Space size="md" />
 
-      <Container :size="640">
-        <div id="">
-          <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="640 - 60" :height="300 - 60">
-            <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
-              <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
-                <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
-                  {{ props.value }}
-                </text>
-              </g></la-line
-            >
-            <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
-            <!-- <la-y-axis prop="value"></la-y-axis> -->
-          </la-cartesian>
-        </div>
-      </Container>
+      <div v-if="navPage === 'interact'">
+        <Container :size="440" class="maker">
+          <div id="thebox">
+            <div class="tabs">
+              <button @click="toNavAct('mint')" :class="{ active: navAct === 'mint' }">Mint</button>
+              <button @click="toNavAct('deposit')" :class="{ active: navAct === 'deposit' }">Deposit</button>
+              <button @click="toNavAct('redeem')" :class="{ active: navAct === 'redeem' }">Redeem</button>
+              <button @click="toNavAct('withdraw')" :class="{ active: navAct === 'withdraw' }">Withdraw</button>
+              <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
+            </div>
+            <div id="inputbox">
+              <div v-if="navAct !== 'lptrade'">
+                <div v-if="navAct === 'withdraw'" class="subtabs">
+                  <button @click="toWithdrawType('instant')" :class="{ active: withdrawType === 'instant' }">Instant Withdraw</button>
+                  <button @click="toWithdrawType('new')" :class="{ active: withdrawType === 'new' }">Request New Withdraw</button>
+                  <button @click="toWithdrawType('existing')" :class="{ active: withdrawType === 'existing' }">Withdraw</button>
+                </div>
+                <div class="dropdown">
+                  <!-- <select class="" v-model="tokenSelected" v-on:change="getEMPState">
+                  <option value="" data-display-text="uGAS Tokens">None</option>
+                  <option value="uGAS_JAN21">uGAS JAN21</option>
+                  <option value="uGAS_FEB21">uGAS FEB21</option>
+                  <option value="uGAS_MAR21">uGAS MAR21</option>
+                </select> -->
 
-      <Container :size="440" class="maker">
-        <div>
-          <div class="tabs">
-            <button @click="toNavAct('mint')" :class="{ active: navAct === 'mint' }">Mint</button>
-            <button @click="toNavAct('deposit')" :class="{ active: navAct === 'deposit' }">Deposit</button>
-            <button @click="toNavAct('redeem')" :class="{ active: navAct === 'redeem' }">Redeem</button>
-            <button @click="toNavAct('withdraw')" :class="{ active: navAct === 'withdraw' }">Withdraw</button>
-            <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
-          </div>
-          <div id="inputbox">
-            <div v-if="navAct !== 'lptrade'">
-              <div v-if="navAct === 'withdraw'" class="tabsThree">
-                <button @click="toWithdrawType('instant')" :class="{ active: withdrawType === 'instant' }">Instant Withdraw</button>
-                <button @click="toWithdrawType('new')" :class="{ active: withdrawType === 'new' }">Request New Withdraw</button>
-                <button @click="toWithdrawType('existing')" :class="{ active: withdrawType === 'existing' }">Withdraw</button>
-              </div>
-              <div class="dropdown">
-                <select class="select" tabindex="1" v-model="tokenSelected" v-on:change="getEMPState">
-                  <option selected disabled hidden class="option" value="none">Select Token</option>
-                  <option id="JAN21" class="option" name="test" value="uGAS-JAN21">uGAS-JAN21</option>
-                  <option id="FEB" class="option" name="test" value="uGAS-FEB21">uGAS-FEB21</option>
-                  <option id="MAR" class="option" name="test" value="uGAS-MAR21">uGAS-MAR21</option>
-                </select>
-              </div>
-              <input
-                v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw'"
-                id=""
-                class="numeric setvalue"
-                type="number"
-                name=""
-                v-model="tokenAmt"
-                v-on:keyup="tokenHandler"
-                :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
-              />
-              <input
-                v-if="navAct != 'redeem'"
-                id=""
-                class="numeric setvalue"
-                type="number"
-                name=""
-                v-model="collatAmt"
-                v-on:keyup="collatHandler"
-                placeholder="0.00 WETH"
-                :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
-              />
-              <!-- to add max button -->
-              <div class="error" v-if="hasError">
-                {{ this.currentError }}
-              </div>
-              <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
+                  <vue-picker class="select" v-model="tokenSelected" v-on:change="getEMPState" placeholder="Select uGas Token" autofocus>
+                    <vue-picker-option value="">Select uGas Token</vue-picker-option>
+                    <vue-picker-option value="uGAS_JAN21">uGAS JAN21</vue-picker-option>
+                    <vue-picker-option value="uGAS_FEB21">uGAS FEB21</vue-picker-option>
+                    <vue-picker-option value="uGAS_MAR21">uGAS MAR21</vue-picker-option>
+                  </vue-picker>
+                </div>
+                <input
+                  v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw'"
+                  id=""
+                  class="numeric setvalue"
+                  type="number"
+                  name=""
+                  v-model="tokenAmt"
+                  v-on:keyup="tokenHandler"
+                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
+                />
+                <input
+                  v-if="navAct != 'redeem'"
+                  id=""
+                  class="numeric setvalue"
+                  type="number"
+                  name=""
+                  v-model="collatAmt"
+                  v-on:keyup="collatHandler"
+                  placeholder="0.00 WETH"
+                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
+                />
+                <!-- to add max button -->
+                <div class="error" v-if="hasError">
+                  {{ this.currentError }}
+                </div>
+                <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
                 Info ▼
                 <div :class="{ hideDropdown: !showDropdown }">
                   {{ this.currentInfo }}
                 </div>
               </div> -->
-              <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">{{ actName }}</button>
-            </div>
-            <div v-if="navAct === 'lptrade'">Link to BAL Pools + Instructions</div>
-
-            <div class="info" v-if="info">
-              <label
-                >Liquidation Price: <b>{{ this.liquidationPrice }}</b></label
-              >
-              <label
-                >Collateral Ratio: <b>{{ this.pricedCR }}</b></label
-              >
-              <label
-                >Collateral Ratio (Global): <b>{{ this.gcr }}</b></label
-              >
-              <label
-                >Collateral Ratio (Tx): <b>{{ this.pricedTxCR }}</b></label
-              >
-              <label
-                >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
-              >
-              <br />
-              <label
-                >Your WETH: <b>{{ balanceWETH ? balanceWETH : "0" }}</b></label
-              >
-              <label
-                >Your UGASX: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
-              >
+                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">{{ actName }}</button>
+              </div>
+              <div class="uniswap-info" v-if="navAct === 'lptrade'">
+                <h2>Unsiwap</h2>
+                <div><a href="#">Uniswap LP</a></div>
+                <div><a href="#">Trade uGas on Uniswap.</a></div>
+              </div>
             </div>
           </div>
-        </div>
-      </Container>
+          <div class="info" v-if="info">
+            <label
+              >Liquidation Price: <b>{{ this.liquidationPrice }}</b></label
+            >
+            <label
+              >Collateral Ratio: <b>{{ this.pricedCR }}</b></label
+            >
+            <label
+              >Collateral Ratio (Global): <b>{{ this.gcr }}</b></label
+            >
+            <label
+              >Collateral Ratio (Tx): <b>{{ this.pricedTxCR }}</b></label
+            >
+            <label
+              >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
+            >
+            <br />
+            <label
+              >Your WETH: <b>{{ balanceWETH ? balanceWETH : "0" }}</b></label
+            >
+            <label
+              >Your UGASX: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
+            >
+          </div>
+        </Container>
+
+        <Container :size="800">
+          <div>
+            <div class="chart-asset">
+              <chart :options="chartOptionsCandle" />
+            </div>
+          </div>
+        </Container>
+      </div>
+
+      <div v-if="navPage === 'info'">
+        <Container :size="800">
+          <div id="">
+            <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="800 - 60" :height="300 - 60">
+              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
+                    {{ props.value }}
+                  </text>
+                </g></la-line
+              >
+              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
+              <!-- <la-y-axis prop="value"></la-y-axis> -->
+            </la-cartesian>
+          </div>
+        </Container>
+      </div>
     </Container>
   </div>
 </template>
@@ -129,7 +144,7 @@
 <script>
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { decToBn, getLiquidationPrice, splitChartData } from "../utils";
+import { approve, decToBn, getLiquidationPrice, splitChartData } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
@@ -145,9 +160,9 @@ export default {
   },
   data() {
     return {
+      navPage: "interact",
       actName: "Mint",
       withdrawType: "new",
-      navPage: "info",
       navAct: "mint",
       info: true,
       tokenSelected: null,
@@ -178,6 +193,9 @@ export default {
     this.lastPrice();
     this.initChart();
     this.getWETHBalance();
+
+    // this.getApproval();
+    this.checkTime();
   },
   components: {},
   methods: {
@@ -192,6 +210,7 @@ export default {
       "withdraw",
       "redeem",
       "getUserWETHBalance",
+      "getApprovalEMP",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -299,7 +318,7 @@ export default {
       // chart: uniswap data
       this.chartOptionsCandle = {
         title: {
-          text: "uGAS",
+          text: "Gwei",
           left: 0,
         },
         // tooltip: {
@@ -312,9 +331,9 @@ export default {
         //   data: ["uGAS"],
         // },
         grid: {
-          left: "10%",
-          right: "10%",
-          bottom: "15%",
+          left: "5%",
+          right: "1%",
+          bottom: "10%",
         },
         xAxis: {
           type: "category",
@@ -363,10 +382,10 @@ export default {
             type: "candlestick",
             data: chartData.values,
             itemStyle: {
-              color: red,
-              color0: green,
-              borderColor: redBorder,
-              borderColor0: greenBorder,
+              color: green,
+              color0: red,
+              borderColor: greenBorder,
+              borderColor0: redBorder,
             },
             markPoint: {
               label: {
@@ -480,6 +499,18 @@ export default {
           value: Math.floor(Math.random() * (420 - 25 + 1) + 25),
         });
       }
+    },
+    getApprove() {
+      approve(store.acc);
+      console.log("store", store);
+    },
+    checkTime() {
+      // checking if current time and 1day is greater than THIS
+      const current = this.moment();
+      const withdrawTime = this.moment(1608332874734);
+      const result = this.moment(current).isAfter(withdrawTime.add(1, "days")); // false
+      // const result = this.moment(current.add(1, "days")).isAfter(withdrawTime); // true
+      console.log("result", result);
     },
     checkHasPending() {
       if (this.currPos) {
@@ -611,8 +642,12 @@ export default {
     },
     empAddr() {
       switch (this.tokenSelected) {
-        case "uGAS-JAN21":
+        case "uGAS_JAN21":
           return "0x516f595978d87b67401dab7afd8555c3d28a3af4";
+        case "uGAS_FEB21":
+          return "0x0";
+        case "uGAS_MAR21":
+          return "0x0";
         default:
           return "";
       }
@@ -714,6 +749,10 @@ export default {
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
     },
+    async getApproval() {
+      await this.getApprovalEMP();
+      this.approvedEMP = store.state.approvals.tokenEMP;
+    },
   },
 };
 </script>
@@ -748,6 +787,7 @@ export default {
     transition: all 0.1s linear;
     color: var(--primary);
     background: var(--back-act);
+    border-bottom: 2px solid #00000017;
 
     &.active,
     &:hover {
@@ -762,20 +802,20 @@ export default {
     }
   }
 }
-.tabsThree {
+.subtabs {
   overflow: hidden;
   white-space: nowrap;
   button {
     cursor: pointer;
-    width: calc(100% / 3);
-    // border-radius: 10px;
+    width: calc(100% / 2.9);
     border: none;
-    height: 50px;
-    font-size: 11px;
+    height: 33px;
+    font-size: 12px;
     font-weight: 500;
     transition: all 0.1s linear;
     color: var(--primary);
     background: var(--back-act);
+    border-bottom: 2px solid #00000017;
 
     &.active,
     &:hover {
@@ -793,7 +833,7 @@ export default {
 .info {
   font-size: 12px;
   margin: 0px 8px 0px 8px;
-  padding: 4px 10px 8px 10px;
+  padding: 8px 10px 8px 10px;
   color: #00000080;
   /* background: #ffe7e721; */
   border-radius: 0px 0px 10px 10px;
@@ -839,87 +879,96 @@ export default {
   border-radius: 0px 0px 10px 10px;
 
   .select {
-    display: flex;
-    position: relative;
     font-family: "Inconsolata", monospace;
-    height: 40px;
-    font-size: 22px;
-    width: 100%;
-    border: none;
-    background-image: none;
-    background-color: transparent;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
-    box-shadow: none;
-    background: #fff;
-    background: var(--back-act);
-    padding-left: 10px;
+    background: #ffeded;
   }
 
-  .option {
-    cursor: pointer;
-    padding: 0 30px 0 10px;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    background: var(--back-act);
-    border-top: var(--back-act) solid 1px;
-    color: #ff4a4a;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    pointer-events: none;
-    order: 2;
-    z-index: 1;
-    transition: background 0.4s ease-in-out;
-    box-sizing: border-box;
-    overflow: hidden;
-    white-space: nowrap;
-  }
+  // .select {
+  //   display: flex;
+  //   position: relative;
+  //   font-family: "Inconsolata", monospace;
+  //   height: 40px;
+  //   font-size: 22px;
+  //   width: 100%;
+  //   border: none;
+  //   background-image: none;
+  //   background-color: transparent;
+  //   -webkit-box-shadow: none;
+  //   -moz-box-shadow: none;
+  //   box-shadow: none;
+  //   background: #fff;
+  //   background: var(--back-act);
+  //   padding-left: 10px;
+  // }
 
-  .select:focus .option {
-    position: relative;
-    pointer-events: all;
-  }
+  // .option {
+  //   cursor: pointer;
+  //   padding: 0 30px 0 10px;
+  //   min-height: 40px;
+  //   display: flex;
+  //   align-items: center;
+  //   background: var(--back-act);
+  //   border-top: var(--back-act) solid 1px;
+  //   color: #ff4a4a;
+  //   position: absolute;
+  //   top: 0;
+  //   width: 100%;
+  //   pointer-events: none;
+  //   order: 2;
+  //   z-index: 1;
+  //   transition: background 0.4s ease-in-out;
+  //   box-sizing: border-box;
+  //   overflow: hidden;
+  //   white-space: nowrap;
+  // }
 
-  input {
-    opacity: 0;
-    position: absolute;
-    left: -99999px;
-  }
+  // .select:focus .option {
+  //   position: relative;
+  //   pointer-events: all;
+  // }
 
-  input:checked + label {
-    order: 1;
-    z-index: 2;
-    background: #fff;
-    background: var(--back-act);
-    border-top: none;
-    position: relative;
-  }
+  // input {
+  //   opacity: 0;
+  //   position: absolute;
+  //   left: -99999px;
+  // }
 
-  input:checked + label:after {
-    content: "";
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #ff4a4a;
-    position: absolute;
-    right: 10px;
-    top: calc(50% - 2.5px);
-    pointer-events: none;
-    z-index: 3;
-  }
+  // input:checked + label {
+  //   order: 1;
+  //   z-index: 2;
+  //   background: #fff;
+  //   background: var(--back-act);
+  //   border-top: none;
+  //   position: relative;
+  // }
 
-  input:checked + label:before {
-    position: absolute;
-    right: 0;
-    height: 40px;
-    width: 40px;
-    content: "";
-    background: #fff;
-    background: var(--back-act);
-  }
+  // input:checked + label:after {
+  //   content: "";
+  //   width: 0;
+  //   height: 0;
+  //   border-left: 5px solid transparent;
+  //   border-right: 5px solid transparent;
+  //   border-top: 5px solid #ff4a4a;
+  //   position: absolute;
+  //   right: 10px;
+  //   top: calc(50% - 2.5px);
+  //   pointer-events: none;
+  //   z-index: 3;
+  // }
+
+  // input:checked + label:before {
+  //   position: absolute;
+  //   right: 0;
+  //   height: 40px;
+  //   width: 40px;
+  //   content: "";
+  //   background: #fff;
+  //   background: var(--back-act);
+  // }
+}
+#thebox {
+  box-shadow: 0px 1px 6px -2px #5a131669;
+  border-radius: 10px;
 }
 #act {
   cursor: pointer;
@@ -952,9 +1001,29 @@ export default {
   text-align: center;
 }
 
+.uniswap-info {
+  background: #ffeded;
+  border-radius: 0px 0px 10px 10px;
+  padding: 2px 10px 5px 10px;
+  min-height: 150px;
+}
+
 #chart {
   width: 200px;
   height: 200px;
+}
+
+.infoswitch {
+  cursor: pointer;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  padding: 0px 10px;
+  font-size: 22px;
+  font-weight: normal;
+  height: 36px;
+  margin: 6px 0px;
 }
 
 .echarts,
