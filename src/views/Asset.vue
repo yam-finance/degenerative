@@ -15,6 +15,12 @@
 
       <div v-if="navPage === 'interact'">
         <Container :size="440" class="maker">
+          <div v-if="this.assetChartData">
+            <div class="chart-asset">
+              <chart :options="chartOptionsCandle" />
+            </div>
+          </div>
+
           <div id="thebox">
             <div class="tabs">
               <button @click="toNavAct('mint')" :class="{ active: navAct === 'mint' }">Mint</button>
@@ -76,7 +82,9 @@
                   {{ this.currentInfo }}
                 </div>
               </div> -->
-                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">{{ actName }}</button>
+                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">
+                  {{ $store.state.approvals.tokenEMP === true ? actName : "Approve" }}
+                </button>
               </div>
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
                 <h2>Unsiwap</h2>
@@ -111,13 +119,13 @@
           </div>
         </Container>
 
-        <Container :size="800">
+        <!-- <Container :size="800">
           <div>
             <div class="chart-asset">
               <chart :options="chartOptionsCandle" />
             </div>
           </div>
-        </Container>
+        </Container> -->
       </div>
 
       <div v-if="navPage === 'info'">
@@ -144,10 +152,11 @@
 <script>
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { approve, decToBn, getLiquidationPrice, splitChartData } from "../utils";
+import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourly, getUniswapDataDaily, splitChartData } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
+import { UGAS_JAN21 } from "@/utils/addresses";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -184,6 +193,7 @@ export default {
       chartOptionsCandle: {},
       balanceWETH: 0,
       balanceUGAS: 0,
+      assetChartData: null,
       // showDropdown: false,
       // currentInfo: "",
     };
@@ -194,7 +204,6 @@ export default {
     this.initChart();
     this.getWETHBalance();
 
-    // this.getApproval();
     this.checkTime();
   },
   components: {},
@@ -211,142 +220,100 @@ export default {
       "redeem",
       "getUserWETHBalance",
       "getApprovalEMP",
+      "fetchAllowanceEMP",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
-      const DAI = await Fetcher.fetchTokenData(1, "0x6B175474E89094C44Da98b954EedeAC495271d0F");
-      console.log("DAI", DAI);
+      this.fetchAllowance(); // checks Approval
+
+      // const from = 1606742010;
+      // const hourly = await getUniswapDataHourly(UGAS_JAN21, from);
+      // console.log("UGAS_JAN21 getUniswapDataHourly", hourly);
+      // const daily = await getUniswapDataDaily(UGAS_JAN21, from);
+      // console.log("UGAS_JAN21 getUniswapDataDaily", daily);
+      // this.assetChartData = daily;
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
     },
-    initChart() {
-      const red = "#E40915";
-      const redBorder = "#E40915";
-      const green = "#007E0A";
-      const greenBorder = "#007E0A";
-      const chartData = splitChartData([
-        ["07/01/2020", 320, 320, 287, 362],
-        ["07/10/2020", 291, 291, 288, 308],
-        ["08/17/2020", 295, 346, 295, 346],
-        ["06/10/2020", 347, 358, 337, 363],
-        ["07/19/2020", 360, 382, 347, 383],
-        ["11/21/2020", 383, 385, 371, 391],
-        ["11/05/2020", 377, 419, 369, 421],
-        ["04/24/2020", 425, 428, 417, 440],
-        ["01/28/2020", 433, 433, 403, 437],
-        ["10/01/2020", 432, 434, 427, 441],
-        ["09/15/2020", 430, 418, 394, 433],
-        ["09/13/2020", 416, 432, 414, 443],
-        ["07/31/2020", 441, 421, 415, 444],
-        ["05/09/2020", 420, 382, 373, 427],
-        ["04/05/2020", 383, 397, 370, 397],
-        ["05/15/2020", 378, 325, 309, 378],
-        ["02/04/2020", 322, 314, 308, 330],
-        ["11/18/2020", 320, 325, 315, 338],
-        ["07/28/2020", 313, 293, 289, 340],
-        ["06/02/2020", 297, 313, 292, 324],
-        ["05/22/2020", 322, 365, 308, 366],
-        ["08/19/2020", 364, 359, 330, 369],
-        ["02/12/2020", 332, 273, 259, 333],
-        ["05/13/2020", 274, 326, 270, 328],
-        ["01/08/2020", 333, 347, 321, 351],
-        ["02/02/2020", 340, 324, 304, 352],
-        ["09/30/2020", 326, 318, 314, 333],
-        ["01/14/2020", 314, 310, 296, 320],
-        ["02/21/2020", 309, 286, 264, 333],
-        ["02/04/2020", 282, 263, 253, 286],
-        ["06/05/2020", 255, 270, 253, 276],
-        ["08/20/2020", 269, 278, 250, 312],
-        ["01/14/2020", 267, 240, 239, 276],
-        ["09/03/2020", 244, 257, 232, 261],
-        ["02/07/2020", 257, 317, 257, 317],
-        ["08/05/2020", 318, 324, 311, 330],
-        ["09/29/2020", 321, 328, 314, 332],
-        ["11/10/2020", 334, 326, 319, 344],
-        ["01/28/2020", 318, 297, 281, 319],
-        ["03/11/2020", 299, 301, 289, 323],
-        ["02/14/2020", 273, 236, 232, 273],
-        ["03/20/2020", 238, 236, 228, 246],
-        ["11/04/2020", 229, 234, 227, 243],
-        ["12/17/2020", 234, 227, 220, 253],
-        ["10/20/2020", 232, 225, 217, 241],
-        ["09/25/2020", 196, 211, 180, 212],
-        ["02/17/2020", 215, 225, 215, 234],
-        ["03/19/2020", 224, 226, 212, 233],
-        ["10/12/2020", 236, 219, 217, 242],
-        ["11/03/2020", 218, 206, 204, 226],
-        ["07/28/2020", 199, 181, 177, 204],
-        ["11/08/2020", 169, 194, 165, 196],
-        ["02/17/2020", 195, 193, 178, 197],
-        ["02/05/2020", 181, 197, 175, 206],
-        ["07/17/2020", 201, 244, 200, 250],
-        ["01/21/2020", 236, 242, 232, 245],
-        ["07/08/2020", 242, 184, 182, 242],
-        ["09/22/2020", 187, 218, 184, 226],
-        ["07/19/2020", 213, 199, 191, 224],
-        ["08/12/2020", 203, 177, 173, 210],
-        ["03/18/2020", 170, 174, 161, 179],
-        ["03/02/2020", 179, 205, 179, 222],
-        ["07/08/2020", 212, 231, 212, 236],
-        ["04/02/2020", 227, 235, 219, 240],
-        ["05/04/2020", 242, 246, 235, 255],
-        ["11/24/2020", 246, 232, 221, 247],
-        ["11/18/2020", 228, 246, 225, 247],
-        ["07/18/2020", 247, 241, 231, 250],
-        ["01/08/2020", 238, 217, 205, 239],
-        ["08/24/2020", 217, 224, 213, 225],
-        ["05/31/2020", 221, 251, 210, 252],
-        ["02/12/2020", 249, 282, 248, 288],
-        ["06/09/2020", 286, 299, 281, 309],
-        ["08/21/2020", 297, 305, 290, 305],
-        ["06/04/2020", 303, 302, 292, 314],
-        ["01/13/2020", 293, 275, 274, 304],
-        ["07/29/2020", 281, 288, 270, 292],
-        ["10/15/2020", 286, 293, 283, 301],
-        ["09/22/2020", 293, 321, 281, 322],
-        ["07/31/2020", 323, 324, 321, 334],
-        ["02/29/2020", 316, 317, 310, 325],
-        ["08/18/2020", 320, 300, 299, 325],
-        ["03/02/2020", 300, 299, 294, 313],
-        ["08/25/2020", 297, 272, 264, 297],
-        ["06/02/2020", 270, 270, 260, 276],
-        ["08/30/2020", 264, 242, 240, 266],
-        ["02/12/2020", 242, 210, 205, 250],
-        ["06/19/2020", 190, 148, 126, 190],
-      ]);
+    async initChart() {
+      const redColor = "#ad3c3c";
+      const redBorderColor = "#ad3c3c";
+      const greenColor = "#48ad3c";
+      const greenBorderColor = "#48ad3c";
+      const twapLineColor = "#333";
+
+      const from = 1606742010; // NOV: 1606742010 - test: 1604150010
+      // const assetChart = await getUniswapDataHourly(UGAS_JAN21, from); // Hourly
+      const assetChart = await getUniswapDataDaily(UGAS_JAN21, from); // Daily
+      // console.log("UGAS_JAN21 assetChart", assetChart);
+
+      const tempChartData = [];
+      const tempChartTWAPData = [];
+      for (const element of assetChart) {
+        tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
+        tempChartTWAPData.push(element.twapETH);
+      }
+
       // chart: uniswap data
+      this.assetChartData = splitChartData(tempChartData);
+      // this.assetChartData = splitChartData([
+      //   ["07/01/2020", 320, 320, 287, 362],
+      //   ["06/19/2020", 190, 148, 126, 190],
+      // ]);
+      const colors = ["#5793f3", "#d14a61", "#675bba"];
+
       this.chartOptionsCandle = {
         title: {
-          text: "Gwei",
+          // text: "Price in ETH",
           left: 0,
         },
-        // tooltip: {
-        //     trigger: 'axis',
-        //     axisPointer: {
-        //         type: 'cross'
-        //     }
-        // },
         // legend: {
         //   data: ["uGAS"],
         // },
+        tooltip: {
+          show: false,
+          trigger: "item",
+          axisPointer: {
+            type: "cross",
+          },
+        },
         grid: {
-          left: "5%",
-          right: "1%",
+          top: "4%",
+          left: "12%", // 6
           bottom: "10%",
+          right: "4%",
+        },
+        toolbox: {
+          show: false,
+          feature: {
+            dataView: { show: false, readOnly: false },
+            magicType: { show: false, type: ["line", "bar"] },
+            saveAsImage: { show: true },
+            restore: { show: true },
+          },
         },
         xAxis: {
           type: "category",
-          data: chartData.categoryData,
+          data: this.assetChartData.categoryData,
           scale: true,
           boundaryGap: false,
-          axisLine: { onZero: false },
           splitLine: { show: true },
           splitArea: {
             show: false,
             areaStyle: {
               color: [],
             },
+          },
+          axisLabel: {
+            show: true,
+            fontSize: 9,
+          },
+          axisLine: {
+            onZero: false,
+            // lineStyle: {
+            //   color: colors,
+            // },
           },
           splitNumber: 20,
           min: "dataMin",
@@ -361,18 +328,23 @@ export default {
               color: [],
             },
           },
+          axisLabel: {
+            show: true,
+            fontSize: 9,
+            margin: 15,
+          },
         },
         dataZoom: [
           {
             type: "inside",
-            start: 50,
+            start: 45,
             end: 100,
           },
           {
             show: false,
             type: "slider",
             top: "90%",
-            start: 50,
+            start: 45,
             end: 100,
           },
         ],
@@ -380,97 +352,32 @@ export default {
           {
             name: "uGas",
             type: "candlestick",
-            data: chartData.values,
-            itemStyle: {
-              color: green,
-              color0: red,
-              borderColor: greenBorder,
-              borderColor0: redBorder,
-            },
+            data: this.assetChartData.values,
             markPoint: {
-              label: {
-                normal: {
-                  formatter: function(param) {
-                    return param != null ? Math.round(param.value) : "";
-                  },
-                },
-              },
               data: [
-                {
-                  name: "price",
-                  coord: ["2013/5/31", 0],
-                  value: 0,
-                  itemStyle: {
-                    color: "rgb(2,2,2)",
-                  },
-                },
-                {
-                  name: "high",
-                  type: "max",
-                  valueDim: "high",
-                },
-                {
-                  name: "low",
-                  type: "min",
-                  valueDim: "low",
-                },
-                {
-                  name: "avg",
-                  type: "average",
-                  valueDim: "close",
-                },
+                { name: "年最高", value: 0.04, xAxis: 7, yAxis: 15 },
+                { name: "年最低", value: 0.047, xAxis: 11, yAxis: 2 },
               ],
-              tooltip: {
-                formatter: function(param) {
-                  return param.name + "<br>" + (param.data.coord || "");
-                },
-              },
             },
-            markLine: {
-              symbol: ["none", "none"],
-              data: [
-                [
-                  {
-                    name: "low to high",
-                    type: "min",
-                    valueDim: "low",
-                    symbol: "circle",
-                    symbolSize: 10,
-                    label: {
-                      show: false,
-                    },
-                    emphasis: {
-                      label: {
-                        show: false,
-                      },
-                    },
-                  },
-                  {
-                    type: "max",
-                    valueDim: "high",
-                    symbol: "circle",
-                    symbolSize: 10,
-                    label: {
-                      show: false,
-                    },
-                    emphasis: {
-                      label: {
-                        show: false,
-                      },
-                    },
-                  },
-                ],
-                {
-                  name: "min line on close",
-                  type: "min",
-                  valueDim: "close",
-                },
-                {
-                  name: "max line on close",
-                  type: "max",
-                  valueDim: "close",
-                },
-              ],
+            itemStyle: {
+              color: greenColor,
+              color0: redColor,
+              borderColor: greenBorderColor,
+              borderColor0: redBorderColor,
+            },
+          },
+          {
+            name: "TWAP",
+            type: "line",
+            data: tempChartTWAPData,
+            smooth: false,
+            symbolSize: 3,
+            itemStyle: {
+              color: twapLineColor,
+            },
+            lineStyle: {
+              width: 1,
+              opacity: 0.6,
             },
           },
         ],
@@ -501,12 +408,12 @@ export default {
       }
     },
     checkTime() {
-      // checking if current time and 1day is greater than THIS
+      // checking if current time and 1day is greater than withdrawTime
       const current = this.moment();
       const withdrawTime = this.moment(1608332874734);
       const result = this.moment(current).isAfter(withdrawTime.add(1, "days")); // false
       // const result = this.moment(current.add(1, "days")).isAfter(withdrawTime); // true
-      console.log("result", result);
+      // console.log("result", result);
     },
     checkHasPending() {
       if (this.currPos) {
@@ -580,10 +487,10 @@ export default {
         if (this.checkHasPending()) {
           this.hasError = true;
           this.currentError = "Cannot redeem with an active withdrawal request";
-        } else if (Number(this.currPos.tokensOutstanding) == 0) {
+        } else if (this.currPos && Number(this.currPos.tokensOutstanding) == 0) {
           this.hasError = true;
           this.currentError = "No Position Tokens to redeem";
-        } else if (Number(this.tokenAmt) > Number(this.currPos.tokensOutstanding)) {
+        } else if (this.currPos && Number(this.tokenAmt) > Number(this.currPos.tokensOutstanding)) {
           this.hasError = true;
           this.currentError = "Not enough tokens in position to redeem";
         }
@@ -679,37 +586,41 @@ export default {
       console.log("uGas price", this.price);
       return this.price;
     },
-    act() {
+    async act() {
       console.log("Act");
-      switch (this.actName) {
-        case "Mint":
-          console.log("mint");
-          this.mint({
-            contract: this.empAddr(),
-            collat: new BigNumber(this.collatAmt).times(ethDecs).toString(),
-            tokens: new BigNumber(this.tokenAmt).times(empDecs).toString(),
-          });
-          break;
-        case "Deposit":
-          console.log("deposit");
-          this.deposit({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() });
-          break;
-        case "Request Withdraw":
-          console.log("req withdraw");
-          this.requestWithdrawal(new BigNumber(this.collatAmt).times(ethDecs).toString());
-          break;
-        case "Withdraw":
-          console.log("withdraw");
-          this.withdrawRequestFinalize();
-          break;
-        case "Instant Withdraw":
-          console.log("instant withdraw");
-          this.withdraw(new BigNumber(this.collatAmt).times(ethDecs).toString());
-          break;
-        case "Redeem":
-          console.log("redeem");
-          this.redeem(new BigNumber(this.tokenAmt).times(empDecs).toString());
-          break;
+      if (!store.state.approvals.tokenEMP) {
+        await this.getApproval();
+      } else {
+        switch (this.actName) {
+          case "Mint":
+            console.log("mint");
+            this.mint({
+              contract: this.empAddr(),
+              collat: new BigNumber(this.collatAmt).times(ethDecs).toString(),
+              tokens: new BigNumber(this.tokenAmt).times(empDecs).toString(),
+            });
+            break;
+          case "Deposit":
+            console.log("deposit");
+            this.deposit({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() });
+            break;
+          case "Request Withdraw":
+            console.log("req withdraw");
+            this.requestWithdrawal(new BigNumber(this.collatAmt).times(ethDecs).toString());
+            break;
+          case "Withdraw":
+            console.log("withdraw");
+            this.withdrawRequestFinalize();
+            break;
+          case "Instant Withdraw":
+            console.log("instant withdraw");
+            this.withdraw(new BigNumber(this.collatAmt).times(ethDecs).toString());
+            break;
+          case "Redeem":
+            console.log("redeem");
+            this.redeem(new BigNumber(this.tokenAmt).times(empDecs).toString());
+            break;
+        }
       }
     },
     toNavPage(on) {
@@ -747,7 +658,9 @@ export default {
     },
     async getApproval() {
       await this.getApprovalEMP();
-      this.approvedEMP = store.state.approvals.tokenEMP;
+    },
+    async fetchAllowance() {
+      await this.fetchAllowanceEMP();
     },
   },
 };
@@ -878,89 +791,6 @@ export default {
     font-family: "Inconsolata", monospace;
     background: #ffeded;
   }
-
-  // .select {
-  //   display: flex;
-  //   position: relative;
-  //   font-family: "Inconsolata", monospace;
-  //   height: 40px;
-  //   font-size: 22px;
-  //   width: 100%;
-  //   border: none;
-  //   background-image: none;
-  //   background-color: transparent;
-  //   -webkit-box-shadow: none;
-  //   -moz-box-shadow: none;
-  //   box-shadow: none;
-  //   background: #fff;
-  //   background: var(--back-act);
-  //   padding-left: 10px;
-  // }
-
-  // .option {
-  //   cursor: pointer;
-  //   padding: 0 30px 0 10px;
-  //   min-height: 40px;
-  //   display: flex;
-  //   align-items: center;
-  //   background: var(--back-act);
-  //   border-top: var(--back-act) solid 1px;
-  //   color: #ff4a4a;
-  //   position: absolute;
-  //   top: 0;
-  //   width: 100%;
-  //   pointer-events: none;
-  //   order: 2;
-  //   z-index: 1;
-  //   transition: background 0.4s ease-in-out;
-  //   box-sizing: border-box;
-  //   overflow: hidden;
-  //   white-space: nowrap;
-  // }
-
-  // .select:focus .option {
-  //   position: relative;
-  //   pointer-events: all;
-  // }
-
-  // input {
-  //   opacity: 0;
-  //   position: absolute;
-  //   left: -99999px;
-  // }
-
-  // input:checked + label {
-  //   order: 1;
-  //   z-index: 2;
-  //   background: #fff;
-  //   background: var(--back-act);
-  //   border-top: none;
-  //   position: relative;
-  // }
-
-  // input:checked + label:after {
-  //   content: "";
-  //   width: 0;
-  //   height: 0;
-  //   border-left: 5px solid transparent;
-  //   border-right: 5px solid transparent;
-  //   border-top: 5px solid #ff4a4a;
-  //   position: absolute;
-  //   right: 10px;
-  //   top: calc(50% - 2.5px);
-  //   pointer-events: none;
-  //   z-index: 3;
-  // }
-
-  // input:checked + label:before {
-  //   position: absolute;
-  //   right: 0;
-  //   height: 40px;
-  //   width: 40px;
-  //   content: "";
-  //   background: #fff;
-  //   background: var(--back-act);
-  // }
 }
 #thebox {
   box-shadow: 0px 1px 6px -2px #5a131669;
@@ -1026,6 +856,7 @@ export default {
 .chart-wrapper,
 .chart-asset {
   width: 100%;
-  height: 300px;
+  height: 160px;
+  margin-bottom: 15px;
 }
 </style>

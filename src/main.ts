@@ -9,6 +9,7 @@ import moment from "moment";
 import ECharts from "vue-echarts";
 import { Laue } from "laue";
 import { VuePicker, VuePickerOption } from "@invisiburu/vue-picker";
+import "@/plugins/graphql";
 import "@/store/auth";
 import "@/filters";
 import "@/styles.scss";
@@ -23,7 +24,6 @@ import "echarts/lib/component/toolbox";
 import "echarts/lib/component/tooltip";
 import "@invisiburu/vue-picker/dist/vue-picker.min.css";
 
-Vue.config.productionTip = false;
 Vue.mixin(mixins);
 Vue.use(VueMeta, { keyName: "head" });
 Vue.use(iView);
@@ -43,10 +43,13 @@ Vue.component("Space", () => import("@/repo_palette/Space.vue"));
 Vue.component("SpacePush", () => import("@/repo_palette/SpacePush.vue"));
 Vue.component("Swipe", () => import("@/repo_palette/Swipe.vue"));
 
+Vue.config.productionTip = false;
+Vue.prototype.eth = {};
 Vue.prototype.moment = moment;
 
 new Vue({
   router,
   store,
+  apollo: Vue.prototype.gql.provider,
   render: h => h(App),
 }).$mount("#app");

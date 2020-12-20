@@ -78,13 +78,12 @@ button {
     border-radius: 100px;
     font-size: 22px;
     color: #fff;
-    /* color: rgb(107 0 0); */
     background: radial-gradient(174.47% 188.91% at 1.84% 10%, #ff7575 20%, #ec0e5c 80%), rgb(237, 238, 242);
     box-shadow: rgb(15 10 12 / 18%) 8px 8px 18px 0px, rgba(255, 255, 255, 0.075) 8px -8px 16px 0px;
     min-width: 190px;
     padding: 10px 20px;
     border: none;
-    margin: 15px 0px;
+    margin: 20px 0px;
     font-weight: 100;
     transition: all 0.1s linear;
     &:hover {
@@ -128,7 +127,7 @@ button {
   }
   .vue-picker__dropdown {
     background: #ffeded;
-    border: 2px solid #ff4a4a29;
+    border: none;
     padding: 0px;
     border-radius: 0px 0px 10px 10px;
     box-shadow: 0px 10px 10px -7px #00000017;
@@ -140,7 +139,6 @@ button {
   text-align: start;
   width: inherit;
   border: none !important;
-  // color: var(--col);
   padding: 10px;
   display: grid;
   grid: ". ico"/1fr auto;

@@ -18,7 +18,7 @@
             <router-link class="grph" to="/assets/ugas">Launch</router-link>
           </div>
         </div>
-        <h1>Get Degenerative</h1>
+        <!-- <h1>Get Degenerative</h1> -->
       </Container>
     </div>
   </div>
@@ -27,7 +27,7 @@
 <style lang="scss" scoped>
 .home {
   background: url("../assets/graphics/city.svg") no-repeat center -60px;
-  background-size: 1360px 2024px;
+  background-size: 1420px 2254px; // 1360px 2164px;
   min-height: 900px;
 }
 .home-content {
@@ -41,7 +41,7 @@
 }
 
 .getdegenerative {
-  min-height: calc(100vh - 40px);
+  min-height: 960px;
   h1 {
     font-size: 85px;
   }
@@ -51,6 +51,7 @@
   }
   .sub2 {
     font-size: 26px;
+    margin-bottom: 12px;
   }
   div {
     font-size: 18px;

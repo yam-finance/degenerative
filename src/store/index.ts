@@ -5,7 +5,7 @@ import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
-import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve } from "@/utils";
+import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve, getTWAP, getAllowance } from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
 import { AbiItem } from "web3-utils";
 import { provider } from "web3-core";
@@ -26,7 +26,7 @@ const defaultState = () => {
     account: stateLoad("account") || "0x0",
     currentEMP: "",
     approvals: {
-      tokenEMP: {},
+      tokenEMP: null,
     },
     canWithdraw: false,
 
@@ -158,6 +158,7 @@ export default new Vuex.Store({
           }
         }, 500);
       }
+
       // setTimeout(async () => {
       //   const connector = await Vue.prototype.$auth.getConnector();
       //   if (connector) {
@@ -188,7 +189,7 @@ export default new Vuex.Store({
         Vue.prototype.$web3 = auth.web3;
         Vue.prototype.$provider = auth.web3.provider;
         await dispatch("loadProvider");
-        console.log("Vue.prototype.$web3", Vue.prototype.$web3);
+        // console.log("Vue.prototype.$web3", Vue.prototype.$web3);
       }
     },
     disconnect: async ({ commit }) => {
@@ -222,6 +223,8 @@ export default new Vuex.Store({
         commit("ON_CHAIN_CHANGED", { chainId: network.chainId });
         const account = accounts.length > 0 ? accounts[0] : null;
         commit("ON_PROVIDER_SUCCESS", { account });
+
+        await dispatch("fetchAllowanceEMP");
         stateSave("account", account);
       } catch (e) {
         commit("ON_PROVIDER_FAILURE", { e });
@@ -607,8 +610,27 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const result = await approve(store.state.account, EMP, WETH, Vue.prototype.$provider);
-      // set state
+      if (!store.state.approvals.tokenEMP) {
+        await approve(store.state.account, EMP, WETH, Vue.prototype.$provider);
+        return -1;
+      } else {
+        commit("UPDATE", { approvals: { tokenEMP: true } });
+        return 1;
+      }
+    },
+
+    fetchAllowanceEMP: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const result = await getAllowance(store.state.account, EMP, WETH, Vue.prototype.$provider);
+      console.log("result", result);
+      if (Number(result) > 0) {
+        commit("UPDATE", { approvals: { tokenEMP: true } });
+      } else {
+        commit("UPDATE", { approvals: { tokenEMP: false } });
+      }
       return result;
     },
   },
