@@ -7,7 +7,7 @@ import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
 import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve, getTWAP, getAllowance } from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
-import { AbiItem } from "web3-utils";
+import { AbiItem, toHex } from "web3-utils";
 import { provider } from "web3-core";
 import config from "@/config";
 import store from "@/store";
@@ -346,9 +346,14 @@ export default new Vuex.Store({
       const emp = await dispatch("getEMP", { address: payload.contract });
       try {
         const web3Provider = Vue.prototype.$provider;
-        const ge = await emp.methods.create([payload.collat], [payload.tokens]).estimateGas(
+        const web3 = new Web3(web3Provider);
+        let data = emp.methods.create([payload.collat], [payload.tokens]).encodeABI();
+        data = data.concat(web3.utils.toHex("0x97990b693835da58a281636296d2bf02787dea17").slice(2));
+        const ge = await web3.eth.estimateGas(
           {
             from: store.state.account,
+            to: emp.options.address,
+            data: data,
             gas: 50000000,
           },
           async (error: any) => {
@@ -356,9 +361,11 @@ export default new Vuex.Store({
             return [false, error];
           }
         );
-        return emp.methods.create([payload.collat], [payload.tokens]).send(
+        return web3.eth.sendTransaction(
           {
             from: store.state.account,
+            to: emp.options.address,
+            data: data,
             gas: ge,
           },
           async (error: any, txHash: string) => {
@@ -672,8 +679,40 @@ export default new Vuex.Store({
       const weth = await dispatch("getWETH", { address: WETH });
       try {
         const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
-        const ge = await weth.methods.deposit().estimateGas({ from: store.state.account, value: amount, gas: 50000000 });
-        const wrap = await weth.methods.deposit().send({ from: store.state.account, value: amount, gas: ge });
+        const ge = await weth.methods.deposit().estimateGas(
+          {
+            from: store.state.account,
+            vale: amount,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        const wrap = await weth.methods.deposit().send(
+          {
+            from: store.state.account,
+            value: amount,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("WETH could not wrap", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Wrap transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
         console.log("wrap", wrap);
         return wrap;
       } catch (e) {
@@ -690,8 +729,38 @@ export default new Vuex.Store({
       const weth = await dispatch("getWETH", { address: WETH });
       try {
         const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
-        const ge = await weth.methods.withdraw().estimateGas({ from: store.state.account, value: amount, gas: 50000000 });
-        const unwrap = await weth.methods.withdraw().send({ from: store.state.account, value: amount, gas: ge });
+        const ge = await weth.methods.withdraw(amount).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        const wrap = await weth.methods.withdraw(amount).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("WETH could not wrap", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Wrap transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
         console.log("unwrap", unwrap);
         return unwrap;
       } catch (e) {

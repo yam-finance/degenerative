@@ -137,6 +137,12 @@
             <label v-if="tokenSelected"
               >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
             >
+            <label v-if="tokenSelected"
+              >Position Collateral (WETH): <b>{{ currCollat ? currCollat : "0" }}</b></label
+            >
+            <label v-if="tokenSelected"
+              >Position Outstanding Tokens ({{ tokenSelected }}): <b>{{ currTokens ? currTokens : "0" }}</b></label
+            >
           </div>
         </Container>
 
@@ -641,7 +647,7 @@ export default {
     },
     checkWithdraw() {
       if (this.currPos) {
-        this.collatAmt = this.currPos.withdrawalRequestAmount;
+        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(ethDecs);
         const tn = new Date().getTime() / 1000;
         if (Number(this.currPos.withdrawalRequestPassTimestamp) == 0) {
           this.hasError = true;
@@ -719,15 +725,10 @@ export default {
         } else if (this.currPos && this.currPos.rawCollateral == 0) {
           this.hasError = true;
           this.currentError = "No open position. Mint tokens first";
+        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+          this.hasError = true;
+          this.currentError = "Not enough WETH. Please wrap ETH below";
         }
-
-        //  else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
-        //   this.hasError = true;
-        //   this.currentError = "Insufficient WETH";
-        // }
-      } else if (this.currPos && this.currPos.rawCollateral == 0) {
-        this.hasError = true;
-        this.currentError = "No open position. Mint tokens first";
       } else if (this.navAct == "mint") {
         this.liquidationPrice = getLiquidationPrice(
           this.collatAmt,
@@ -744,7 +745,12 @@ export default {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
           return;
+        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+          this.hasError = true;
+          this.currentError = "Not enough WETH. Please wrap ETH below";
+          return;
         }
+        console.log(this.display);
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
           if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
@@ -809,6 +815,14 @@ export default {
         pos = res[1];
       }
       this.currPos = pos;
+      this.currTokens = new BigNumber(this.currPos.tokensOutstanding)
+        .div(empDecs)
+        .toFixed(4)
+        .toString();
+      this.currCollat = new BigNumber(this.currPos.rawCollateral)
+        .div(ethDecs)
+        .toFixed(4)
+        .toString();
       this.currEMP = k;
       const totalColl = k.cumulativeFeeMultiplier.div(ethDecs).times(k.rawTotalPositionCollateral.dividedBy(ethDecs));
       const totalTokens = k.totalTokensOutstanding.div(empDecs);
@@ -989,6 +1003,7 @@ export default {
             break;
         }
       }
+      this.getEMPState();
     },
     toNavPage(on) {
       this.navPage = on;
@@ -1006,6 +1021,7 @@ export default {
       console.log("toNavAct", on);
     },
     tokenHandler() {
+      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
       this.posUpdateHandler();
     },
     collatHandler() {
