@@ -18,7 +18,56 @@
             <router-link class="grph" to="/assets/ugas">Launch</router-link>
           </div>
         </div>
-        <!-- <h1>Get Degenerative</h1> -->
+
+        <div>
+          <h1>How to use Degenerative</h1>
+          <Space size="sm" />
+
+          <div class="row">
+            <div class="item">
+              <img src="../assets/graphics/graphic_create.svg" />
+              <h4>Create</h4>
+              <div>
+                Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the following
+                month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained
+              </div>
+            </div>
+
+            <Space size="32" />
+
+            <div class="item">
+              <img src="../assets/graphics/graphic_trade.svg" />
+              <h4>Trade</h4>
+              <div>
+                Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
+                spot price as profit.
+              </div>
+            </div>
+          </div>
+
+          <Space size="32" />
+
+          <div class="row">
+            <div class="item">
+              <img src="../assets/graphics/graphic_liqudity.svg" />
+              <h4>Provide Liquidity</h4>
+              <div>
+                Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
+                deposit their uGAS tokens. Tokens which are traded and then deposited will not qualify.
+              </div>
+            </div>
+
+            <Space size="32" />
+
+            <div class="item">
+              <img src="../assets/graphics/graphic_redeem.svg" />
+              <h4>Redeem</h4>
+              <div>
+                Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median and 2-hour TWAP of gas.
+              </div>
+            </div>
+          </div>
+        </div>
       </Container>
     </div>
   </div>
@@ -41,7 +90,7 @@
 }
 
 .getdegenerative {
-  min-height: 960px;
+  min-height: 980px;
   h1 {
     font-size: 85px;
   }
@@ -60,6 +109,18 @@
 }
 .side {
   max-width: 560px;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+
+  div.item {
+    flex: 1 1 0%;
+  }
+  img {
+    margin: 0 auto;
+  }
 }
 </style>
 

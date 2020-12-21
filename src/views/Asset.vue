@@ -15,7 +15,7 @@
 
       <div v-if="navPage === 'interact'">
         <Container :size="440" class="maker">
-          <div v-if="this.assetChartData">
+          <div v-if="assetChartData">
             <div class="chart-asset">
               <chart :options="chartOptionsCandle" />
             </div>
@@ -74,12 +74,12 @@
                 />
                 <!-- to add max button -->
                 <div class="error" v-if="hasError && navAct !== 'lptrade'">
-                  {{ this.currentError }}
+                  {{ currentError }}
                 </div>
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
                 Info ▼
                 <div :class="{ hideDropdown: !showDropdown }">
-                  {{ this.currentInfo }}
+                  {{ currentInfo }}
                 </div>
               </div> -->
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
@@ -91,9 +91,9 @@
                 <div v-if="!tokenSelected">Select Token.</div>
                 <div v-if="tokenSelected">
                   <h2>Unsiwap</h2>
-                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + this.assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
+                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
                   <div>
-                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + this.assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
+                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
                   </div>
                 </div>
               </div>
@@ -116,16 +116,16 @@
 
           <div class="info" v-if="info">
             <label
-              >Liquidation Price: <b>{{ this.liquidationPrice }}</b></label
+              >Liquidation Price: <b>{{ liquidationPrice }}</b></label
             >
             <label
-              >Collateral Ratio: <b>{{ this.pricedCR }}</b></label
+              >Collateral Ratio: <b>{{ pricedCR }}</b></label
             >
             <label
-              >Collateral Ratio (Global): <b>{{ this.gcr }}</b></label
+              >Collateral Ratio (Global): <b>{{ gcr }}</b></label
             >
             <label
-              >Collateral Ratio (Tx): <b>{{ this.pricedTxCR }}</b></label
+              >Collateral Ratio (Tx): <b>{{ pricedTxCR }}</b></label
             >
             <label
               >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
@@ -397,6 +397,7 @@ export default {
     tokenSelected: function(newVal, oldVal) {
       console.log("here", newVal, oldVal);
       this.getEMPState();
+      this.initChart();
     },
   },
   components: {},
@@ -438,6 +439,10 @@ export default {
       this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
     },
     async initChart() {
+      if (!this.assetTokens[this.tokenSelected]) {
+        return;
+      }
+
       const redColor = "#ad3c3c";
       const redBorderColor = "#ad3c3c";
       const greenColor = "#48ad3c";
@@ -446,7 +451,8 @@ export default {
 
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
       // const assetChart = await getUniswapDataHourly(UGAS_JAN21, from); // Hourly
-      const assetChart = await getUniswapDataDaily(UGAS_JAN21, from); // Daily
+      // const assetChart = await getUniswapDataDaily(UGAS_JAN21, from); // Daily
+      const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
       // console.log("UGAS_JAN21 assetChart", assetChart);
 
       const tempChartData = [];
@@ -482,7 +488,7 @@ export default {
         grid: {
           top: "4%",
           left: "12%", // 6
-          bottom: "10%",
+          bottom: "14%",
           right: "4%",
         },
         toolbox: {
