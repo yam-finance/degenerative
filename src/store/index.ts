@@ -326,7 +326,7 @@ export default new Vuex.Store({
     mint: async (
       { commit, dispatch },
       payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }
-    ): Promise<boolean> => {
+    ): Promise<[boolean, string]> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -340,7 +340,7 @@ export default new Vuex.Store({
           },
           async (error: any) => {
             console.log("SimTx Failed, ", error);
-            return false;
+            return [false, error];
           }
         );
         return emp.methods.create([payload.collat], [payload.tokens]).send(
@@ -352,7 +352,7 @@ export default new Vuex.Store({
             if (error) {
               console.error("EMP could not mint tokens", error);
               payload.onTxHash && payload.onTxHash("");
-              return false;
+              return [false, error];
             }
             if (payload.onTxHash) {
               payload.onTxHash(txHash);
@@ -360,14 +360,14 @@ export default new Vuex.Store({
             const status = await waitTransaction(web3Provider, txHash);
             if (!status) {
               console.log("Mint transaction failed.");
-              return false;
+              return [false, "Mint transaction failed."];
             }
-            return true;
+            return [true, ""];
           }
         );
       } catch (e) {
         console.error("error", e);
-        return false;
+        return [false, e];
       }
     },
 
@@ -593,6 +593,23 @@ export default new Vuex.Store({
       } catch (e) {
         console.error("error", e);
         return false;
+      }
+    },
+
+    getUserUGasBalance: async ({ commit, dispatch }, payload: { contract: string }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        console.log("getting ugas bal", emp);
+        const synth = await emp.methods.tokenCurrency().call();
+        const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
+        console.log("bal", balance);
+        return balance;
+      } catch (e) {
+        console.log("here");
+        return 0;
       }
     },
 

@@ -44,7 +44,7 @@
                   <option value="uGAS_MAR21">uGAS MAR21</option>
                 </select> -->
 
-                  <vue-picker class="select" v-model="tokenSelected" v-on:change="getEMPState" placeholder="Select uGas Token" autofocus>
+                  <vue-picker class="select" v-model="tokenSelected" @change="getEMPState" placeholder="Select uGas Token" autofocus>
                     <vue-picker-option value="">Select uGas Token</vue-picker-option>
                     <vue-picker-option value="uGAS_JAN21">uGAS JAN21</vue-picker-option>
                     <vue-picker-option value="uGAS_FEB21">uGAS FEB21</vue-picker-option>
@@ -83,7 +83,8 @@
                 </div>
               </div> -->
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">
-                  {{ $store.state.approvals.tokenEMP === true ? actName : "Approve" }}
+                  {{ !isPending ? ($store.state.approvals.tokenEMP === true ? actName : "Approve") : "" }}
+                  <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
@@ -111,10 +112,10 @@
             >
             <br />
             <label
-              >Your WETH: <b>{{ balanceWETH ? balanceWETH : "0" }}</b></label
+              >Your WETH: <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b></label
             >
             <label
-              >Your UGASX: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
+              >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
             >
           </div>
         </Container>
@@ -156,7 +157,7 @@ import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourl
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { UGAS_JAN21 } from "@/utils/addresses";
+import { EMP, EMPFEB, EMPMAR, UGAS_JAN21, UGAS_FEB21, UGAS_MAR21 } from "@/utils/addresses";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -192,8 +193,10 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       balanceWETH: 0,
+      displayBalanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
+      isPending: false,
       // showDropdown: false,
       // currentInfo: "",
     };
@@ -205,6 +208,12 @@ export default {
     this.getWETHBalance();
 
     this.checkTime();
+  },
+  watch: {
+    tokenSelected: function(newVal, oldVal) {
+      console.log("here", newVal, oldVal);
+      this.getEMPState();
+    },
   },
   components: {},
   methods: {
@@ -221,6 +230,7 @@ export default {
       "getUserWETHBalance",
       "getApprovalEMP",
       "fetchAllowanceEMP",
+      "getUserUGasBalance",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -235,6 +245,11 @@ export default {
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
+      this.displayBalanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
+    },
+    async getUGasBalance() {
+      this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr() });
+      this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
     },
     async initChart() {
       const redColor = "#ad3c3c";
@@ -456,7 +471,6 @@ export default {
     },
     checkInstantWithdraw() {
       if (this.currPos) {
-        this.collatAmt = this.currPos.withdrawalRequestAmount;
         const tn = new Date().getTime() / 1000;
         if (this.checkHasPending()) {
           this.hasError = true;
@@ -464,7 +478,25 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if ((new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt)) / new BigNumber(this.currPos.tokensOutstanding) < this.gcr) {
+        } else if (
+          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
+            new BigNumber(this.currPos.tokensOutstanding) /
+            this.price <
+          this.gcr
+        ) {
+          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
+          console.log("numerator", numerator);
+          console.log("denom", this.currPos.tokensOutstanding);
+          const newcr =
+            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
+          console.log(
+            "HERE",
+            newcr.toString(),
+            new BigNumber(this.currPos.rawCollateral),
+            new BigNumber(this.collatAmt).times(ethDecs),
+            this.currPos.tokensOutstanding,
+            this.gcr
+          );
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
@@ -499,6 +531,10 @@ export default {
           this.hasError = true;
           this.currentError = "Cannot deposit with an active withdrawal request";
         }
+        //  else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+        //   this.hasError = true;
+        //   this.currentError = "Insufficient WETH";
+        // }
       } else if (this.navAct == "mint") {
         this.liquidationPrice = getLiquidationPrice(
           this.collatAmt,
@@ -506,6 +542,11 @@ export default {
           this.collReq.div(ethDecs),
           isPricefeedInvertedFromTokenSymbol("uGAS")
         ).toFixed(4);
+        // if (this.collatAmt < this.displayBalanceWETH) {
+        //   this.hasError = true;
+        //   this.currentError = "Insufficient";
+        //   return;
+        // }
         if (this.tokenAmt && this.tokenAmt < 5) {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
@@ -546,11 +587,11 @@ export default {
     empAddr() {
       switch (this.tokenSelected) {
         case "uGAS_JAN21":
-          return "0x516f595978d87b67401dab7afd8555c3d28a3af4";
+          return EMP;
         case "uGAS_FEB21":
-          return "0x0";
+          return EMPFEB;
         case "uGAS_MAR21":
-          return "0x0";
+          return EMPMAR;
         default:
           return "";
       }
@@ -560,6 +601,7 @@ export default {
       return pos;
     },
     async getEMPState() {
+      console.log("getting emp state");
       const contractAddr = this.empAddr();
       let k;
       let pos;
@@ -579,6 +621,7 @@ export default {
       const totalTokens = k.totalTokensOutstanding.div(empDecs);
       this.gcr = totalTokens > 0 ? (totalColl / totalTokens / this.price).toFixed(4) : 0;
       this.collReq = k.collateralRequirement;
+      this.getUGasBalance();
       this.posUpdateHandler();
     },
     async lastPrice() {
@@ -589,36 +632,148 @@ export default {
     async act() {
       console.log("Act");
       if (!store.state.approvals.tokenEMP) {
+        this.isPending = true;
         await this.getApproval();
+        this.isPending = false;
       } else {
         switch (this.actName) {
           case "Mint":
             console.log("mint");
+            this.isPending = true;
             this.mint({
               contract: this.empAddr(),
               collat: new BigNumber(this.collatAmt).times(ethDecs).toString(),
               tokens: new BigNumber(this.tokenAmt).times(empDecs).toString(),
-            });
+            })
+              .then(async e => {
+                console.log("mint", e[1]);
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              })
+              .catch(async e => {
+                console.log("error", e[1]);
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              });
             break;
           case "Deposit":
             console.log("deposit");
-            this.deposit({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() });
+            this.isPending = true;
+            this.deposit({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+              .then(async e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              })
+              .catch(async e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              });
             break;
           case "Request Withdraw":
             console.log("req withdraw");
-            this.requestWithdrawal(new BigNumber(this.collatAmt).times(ethDecs).toString());
+            this.isPending = true;
+            this.requestWithdrawal({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+              .then(async e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              })
+              .catch(async e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+                await this.getUGasBalance();
+              });
             break;
           case "Withdraw":
             console.log("withdraw");
-            this.withdrawRequestFinalize();
+            this.isPending = true;
+            this.withdrawRequestFinalize({ contract: this.empAddr() })
+              .then(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              })
+              .catch(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              });
             break;
           case "Instant Withdraw":
             console.log("instant withdraw");
-            this.withdraw(new BigNumber(this.collatAmt).times(ethDecs).toString());
+            this.isPending = true;
+            this.withdraw({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+              .then(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              })
+              .catch(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              });
             break;
           case "Redeem":
             console.log("redeem");
-            this.redeem(new BigNumber(this.tokenAmt).times(empDecs).toString());
+            this.isPending = true;
+            this.redeem({ contract: this.empAddr(), tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
+              .then(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              })
+              .catch(e => {
+                this.isPending = false;
+                if (e[1] && e[1] != "") {
+                  this.hasError = true;
+                  this.currentError = "Transaction would fail. Check balances & approvals";
+                }
+                this.getWETHBalance();
+              });
             break;
         }
       }

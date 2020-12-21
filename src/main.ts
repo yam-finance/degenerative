@@ -9,6 +9,7 @@ import moment from "moment";
 import ECharts from "vue-echarts";
 import { Laue } from "laue";
 import { VuePicker, VuePickerOption } from "@invisiburu/vue-picker";
+import BeatLoader from "vue-spinner/src/PulseLoader.vue";
 import "@/plugins/graphql";
 import "@/store/auth";
 import "@/filters";
@@ -36,6 +37,7 @@ Vue.component("Button", () => import("@/components/Button.vue"));
 Vue.component("chart", ECharts);
 Vue.component("VuePicker", VuePicker);
 Vue.component("VuePickerOption", VuePickerOption);
+Vue.component("beat-loader", BeatLoader);
 
 // palette repo
 Vue.component("Container", () => import("@/repo_palette/Container.vue"));
