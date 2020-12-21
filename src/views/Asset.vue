@@ -132,7 +132,7 @@
             <label
               >Your WETH: <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b></label
             >
-            <label
+            <label v-if="tokenSelected"
               >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
             >
           </div>
@@ -149,7 +149,7 @@
 
       <div v-if="navPage === 'info'">
         <Card>
-          <div style="display: flex; justify-content:center">
+          <div style="display: flex; justify-content: center">
             <img
               src="https://lh6.googleusercontent.com/2oUnz2NYbdZBRCZcm-_LVhtQeB6nM09FjnV_eg6zce8eW7snQjR02spr9ZhDxNQtjaMY5_salgt1WeOQlS40OcglfqVGdhQGVZP35292"
             />
@@ -161,13 +161,9 @@
           </b>
           <br />
           <br />
-          <h1>
-            What is uGAS?
-          </h1>
+          <h1>What is uGAS?</h1>
           <br />
-          <p>
-            uGAS is a Synthetic Gas Futures Token.
-          </p>
+          <p>uGAS is a Synthetic Gas Futures Token.</p>
           <br />
           <p>
             Each uGAS token is named after the month that it’ll expire at the end of (for example, the uGAS-JAN21 token will expire at 0:00 UTC, Feb 1st 2021.)
@@ -185,9 +181,7 @@
           </p>
         </Card>
         <Card>
-          <h1>
-            Wait, what’s a Synthetic?
-          </h1>
+          <h1>Wait, what’s a Synthetic?</h1>
           <br />
           <p>Synthetic tokens are collateral-backed tokens whose value changes depending on the tokens’ <i>reference</i> index.</p>
           <br />
@@ -199,18 +193,14 @@
           </p>
         </Card>
         <Card>
-          <h1>
-            How do I get a uGAS token?
-          </h1>
+          <h1>How do I get a uGAS token?</h1>
           <br />
           <p>
             You can get a uGAS token by either creating them by depositing collateral or trading for them on a DEX like Uniswap. Both can be done via our
             Degenerative.Finance site.
           </p>
           <br />
-          <h2>
-            To Create uGAS:
-          </h2>
+          <h2>To Create uGAS:</h2>
           <p>
             Deposit ETH as collateral to mint uGAS tokens. Synthetics are priceless, so you will initially mint at the Global Collateralization Ratio (GCR.) The
             GCR is calculated by dividing the total amount of collateral deposited by the total number of uGAS tokens outstanding.
@@ -221,21 +211,15 @@
           </p>
         </Card>
         <Card>
-          <h1>
-            How do we use uGAS?
-          </h1>
+          <h1>How do we use uGAS?</h1>
           <br />
-          <p>
-            Let’s walk through some examples!
-          </p>
+          <p>Let’s walk through some examples!</p>
           <br />
-          <h2>
-            Zombie Rick the Trader
-          </h2>
+          <h2>Zombie Rick the Trader</h2>
           <br />
-          <div style="display: flex; justify-content:center">
+          <div style="display: flex; justify-content: center">
             <img
-              style="max-width: 300px;"
+              style="max-width: 300px"
               src="https://lh6.googleusercontent.com/ClpK8LmDgJU_k1xbRC8wrCREnoBkhJpaI9cFJinsmNt09TPG7BsnFnGzeSYN5ibubhA5QUu7Pw7mozRJMRhyZ4nWNY_VRKFFYlsLqx-W-qCVEnBp6oMFIMDZ1mlg0gw6WRCctZ-r"
             />
           </div>
@@ -252,13 +236,11 @@
           </p>
           <br />
           <br />
-          <h2>
-            Zombie Glenn the Farmer
-          </h2>
+          <h2>Zombie Glenn the Farmer</h2>
           <br />
-          <div style="display: flex; justify-content:center">
+          <div style="display: flex; justify-content: center">
             <img
-              style="max-width: 300px;"
+              style="max-width: 300px"
               src="https://lh6.googleusercontent.com/SlXxbLpUENMQ1_3YjlModmczHDSstkuj0UOxyHp5_t9On1-ERyUuI5e6IDNd6_IMYwFCG_CSgtZySnpp0DOCxboS0isNdNnv5xdicCwjiaEOqg4mRijFHTBlx1JU-78LpnyITwb0"
             />
           </div>
@@ -286,13 +268,11 @@
           </p>
           <br />
           <br />
-          <h2>
-            Zombie Carol the Miner
-          </h2>
+          <h2>Zombie Carol the Miner</h2>
           <br />
-          <div style="display: flex; justify-content:center">
+          <div style="display: flex; justify-content: center">
             <img
-              style="max-width: 300px;"
+              style="max-width: 300px"
               src="https://lh4.googleusercontent.com/cgMF3hpDPqV1Y25CusBJYw9Isgv1kuM4HDix7l9gardw4umisGK-A2svn_g_HDIU6B-ZWUuVty2A8vcFvW57yOxm72M-yPttqCLFBigOMl_jD42I56_z6bHdGkvUO02CRXe33Elo"
             />
           </div>
