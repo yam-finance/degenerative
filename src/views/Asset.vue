@@ -7,7 +7,7 @@
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
           <button class="infoswitch" v-if="navPage === 'interact'" @click="toNavPage('info')" :class="{ active: navPage === 'info' }">Info</button>
-          <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Intract</button>
+          <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Interact</button>
         </h1>
       </Card>
 
