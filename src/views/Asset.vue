@@ -91,8 +91,10 @@
                 <div v-if="!tokenSelected">Select Token.</div>
                 <div v-if="tokenSelected">
                   <h2>Unsiwap</h2>
-                  <div><a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + this.assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
-                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + this.assetTokens[tokenSelected]" target="_blank">Click here to Trade</a></div>
+                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + this.assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
+                  <div>
+                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + this.assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
+                  </div>
                 </div>
               </div>
             </div>
