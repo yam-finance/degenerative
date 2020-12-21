@@ -335,10 +335,7 @@ export default new Vuex.Store({
       }
     },
 
-    mint: async (
-      { commit, dispatch },
-      payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }
-    ): Promise<[boolean, string]> => {
+    mint: async ({ commit, dispatch }, payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -674,13 +671,14 @@ export default new Vuex.Store({
       return result;
     },
 
-    wrapETH: async ({ commit, dispatch }, payload: { amount: any }) => {
+    wrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
       const weth = await dispatch("getWETH", { address: WETH });
       try {
+        const web3Provider = Vue.prototype.$provider;
         const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
         const ge = await weth.methods.deposit().estimateGas(
           {
@@ -724,13 +722,14 @@ export default new Vuex.Store({
       }
     },
 
-    unwrapETH: async ({ commit, dispatch }, payload: { amount: any }) => {
+    unwrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
       const weth = await dispatch("getWETH", { address: WETH });
       try {
+        const web3Provider = Vue.prototype.$provider;
         const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
         const ge = await weth.methods.withdraw(amount).estimateGas(
           {
@@ -742,7 +741,7 @@ export default new Vuex.Store({
             return false;
           }
         );
-        const wrap = await weth.methods.withdraw(amount).send(
+        const unwrap = await weth.methods.withdraw(amount).send(
           {
             from: store.state.account,
             gas: ge,
