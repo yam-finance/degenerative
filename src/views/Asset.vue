@@ -15,7 +15,7 @@
 
       <div v-if="navPage === 'interact'">
         <Container :size="440" class="maker">
-          <div v-if="assetChartData">
+          <div v-if="assetChartData && tokenSelected">
             <div class="chart-asset">
               <chart :options="chartOptionsCandle" />
             </div>
@@ -32,9 +32,36 @@
             <div id="inputbox">
               <div>
                 <div v-if="navAct === 'withdraw'" class="subtabs">
-                  <button @click="toWithdrawType('instant')" :class="{ active: withdrawType === 'instant' }">Instant Withdraw</button>
-                  <button @click="toWithdrawType('new')" :class="{ active: withdrawType === 'new' }">Request New Withdraw</button>
-                  <button @click="toWithdrawType('existing')" :class="{ active: withdrawType === 'existing' }">Withdraw</button>
+                  <button
+                    @click="toWithdrawType('instant')"
+                    :class="{ active: withdrawType === 'instant' }"
+                    v-tooltip="{
+                      content: '<b>Instant Withdraw</b>: Withdraw up to the current GCR.',
+                      delay: { show: 250, hide: 100 },
+                    }"
+                  >
+                    Instant Withdraw
+                  </button>
+                  <button
+                    @click="toWithdrawType('new')"
+                    :class="{ active: withdrawType === 'new' }"
+                    v-tooltip="{
+                      content: '<b>Request New Withdraw</b> Request to withdraw collateral up to the Minimum Collateral Ratio.',
+                      delay: { show: 250, hide: 100 },
+                    }"
+                  >
+                    Request New Withdraw
+                  </button>
+                  <button
+                    @click="toWithdrawType('existing')"
+                    :class="{ active: withdrawType === 'existing' }"
+                    v-tooltip="{
+                      content: '<b>Withdraw</b>: here',
+                      delay: { show: 250, hide: 100 },
+                    }"
+                  >
+                    Withdraw
+                  </button>
                 </div>
                 <div class="dropdown">
                   <!-- <select class="" v-model="tokenSelected" v-on:change="getEMPState">
@@ -383,6 +410,8 @@ export default {
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
+      currTokens: null,
+      currCollat: null,
       // showDropdown: false,
       // currentInfo: "",
     };

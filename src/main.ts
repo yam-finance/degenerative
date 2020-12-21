@@ -10,7 +10,9 @@ import ECharts from "vue-echarts";
 import { Laue } from "laue";
 import { VuePicker, VuePickerOption } from "@invisiburu/vue-picker";
 import BeatLoader from "vue-spinner/src/PulseLoader.vue";
+import VTooltip from "v-tooltip";
 import "@/plugins/graphql";
+import "@/plugins/tooltip/tooltip.scss";
 import "@/store/auth";
 import "@/filters";
 import "@/styles.scss";
@@ -29,6 +31,7 @@ Vue.mixin(mixins);
 Vue.use(VueMeta, { keyName: "head" });
 Vue.use(iView);
 Vue.use(Laue);
+Vue.use(VTooltip);
 
 Vue.component("Header", () => import("@/components/Header.vue"));
 Vue.component("Footer", () => import("@/components/Footer.vue"));

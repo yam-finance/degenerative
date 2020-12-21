@@ -645,7 +645,7 @@ export default new Vuex.Store({
     // approvalEMPFEB: null,
     // approvalEMPMAR: null,
 
-    getApprovalEMP: async ({ commit, dispatch }, payload: { address: any }) => {
+    getApprovalEMP: async ({ commit, dispatch }, payload: { address: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
@@ -659,7 +659,7 @@ export default new Vuex.Store({
       }
     },
 
-    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { address: any }) => {
+    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { address: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
