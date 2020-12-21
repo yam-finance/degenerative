@@ -811,8 +811,27 @@ export default {
       console.log("Act");
       if (!store.state.approvals.tokenEMP) {
         this.isPending = true;
-        await this.getApproval();
-        this.isPending = false;
+        this.getApproval()
+          .then(async e => {
+            console.log("approve", e[1]);
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+            await this.getUGasBalance();
+          })
+          .catch(async e => {
+            console.log("error", e[1]);
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+            await this.getUGasBalance();
+          });
       } else {
         switch (this.actName) {
           case "Mint":
