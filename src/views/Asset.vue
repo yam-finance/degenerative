@@ -149,6 +149,12 @@
             Once the uGAS token expires, it will settle at the median gas price of all Ethereum transactions for the past 30 days.
             <br />
             <br />
+            <b
+              >NOTE: Expiry price is determined by 30-day median price, while liquidation and disputes are determined by 2 hour uniswap TWAP (time-weighted
+              average price).
+            </b>
+            <br />
+            <br />
             Each uGAS token represents 1,000,000 GAS, so if the median gas price over the 30 days before expiry was 70 Gwei, the uGAS token would be worth 0.07
             ETH.
           </p>
