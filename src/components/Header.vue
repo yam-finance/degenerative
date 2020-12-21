@@ -12,7 +12,7 @@
         <div class="router-links">
           <router-link to="/">Home</router-link>
           <router-link to="/assets/ugas">uGAS</router-link>
-          <a href="#" target="_blank">Learn More</a>
+          <!-- <a href="#" target="_blank">Learn More</a> -->
           <!-- <router-link to="/assets">Assets</router-link> -->
           <!-- <a href="https://yam.finance/" target="_blank">by Yam.finance</a> -->
         </div>
