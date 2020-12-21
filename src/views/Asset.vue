@@ -30,7 +30,7 @@
               <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
             </div>
             <div id="inputbox">
-              <div v-if="navAct !== 'lptrade'">
+              <div>
                 <div v-if="navAct === 'withdraw'" class="subtabs">
                   <button @click="toWithdrawType('instant')" :class="{ active: withdrawType === 'instant' }">Instant Withdraw</button>
                   <button @click="toWithdrawType('new')" :class="{ active: withdrawType === 'new' }">Request New Withdraw</button>
@@ -52,7 +52,7 @@
                   </vue-picker>
                 </div>
                 <input
-                  v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw'"
+                  v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
                   id=""
                   class="numeric setvalue"
                   type="number"
@@ -62,7 +62,7 @@
                   :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
                 />
                 <input
-                  v-if="navAct != 'redeem'"
+                  v-if="navAct != 'redeem' && navAct !== 'lptrade'"
                   id=""
                   class="numeric setvalue"
                   type="number"
@@ -73,7 +73,7 @@
                   :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
                 <!-- to add max button -->
-                <div class="error" v-if="hasError">
+                <div class="error" v-if="hasError && navAct !== 'lptrade'">
                   {{ this.currentError }}
                 </div>
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
@@ -82,18 +82,36 @@
                   {{ this.currentInfo }}
                 </div>
               </div> -->
-                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }">
+                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
                   {{ !isPending ? ($store.state.approvals.tokenEMP === true ? actName : "Approve") : "" }}
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
-                <h2>Unsiwap</h2>
-                <div><a href="#">Uniswap LP</a></div>
-                <div><a href="#">Trade uGas on Uniswap.</a></div>
+                <div v-if="!tokenSelected">Select Token.</div>
+                <div v-if="tokenSelected">
+                  <h2>Unsiwap</h2>
+                  <div><a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + this.assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
+                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + this.assetTokens[tokenSelected]" target="_blank">Click here to Trade</a></div>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="wrapETH">
+            <button class="toggle" @click="toggleWrap">Wrap ETH</button>
+            <div v-if="showWrapETH">
+              <div class="wraprow">
+                <input type="number" placeholder="Amount" v-model="amountToWrap" />
+                <button class="wrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
+              </div>
+              <div class="wraprow">
+                <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
+                <button class="unwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+              </div>
+            </div>
+          </div>
+
           <div class="info" v-if="info">
             <label
               >Liquidation Price: <b>{{ this.liquidationPrice }}</b></label
@@ -151,6 +169,7 @@
 </template>
 
 <script>
+/* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
 import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourly, getUniswapDataDaily, splitChartData } from "../utils";
@@ -197,6 +216,10 @@ export default {
       balanceUGAS: 0,
       assetChartData: null,
       isPending: false,
+      assetTokens: {},
+      showWrapETH: false,
+      amountToWrap: 0,
+      amountToUnwrap: 0,
       // showDropdown: false,
       // currentInfo: "",
     };
@@ -206,8 +229,13 @@ export default {
     this.lastPrice();
     this.initChart();
     this.getWETHBalance();
-
     this.checkTime();
+
+    this.assetTokens = {
+      uGAS_JAN21: UGAS_JAN21,
+      uGAS_FEB21: UGAS_FEB21,
+      uGAS_MAR21: UGAS_MAR21,
+    };
   },
   watch: {
     tokenSelected: function(newVal, oldVal) {
@@ -231,6 +259,8 @@ export default {
       "getApprovalEMP",
       "fetchAllowanceEMP",
       "getUserUGasBalance",
+      "wrapETH",
+      "unwrapETH",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -535,6 +565,9 @@ export default {
         //   this.hasError = true;
         //   this.currentError = "Insufficient WETH";
         // }
+      } else if (this.currPos && this.currPos.rawCollateral == 0) {
+        this.hasError = true;
+        this.currentError = "No open position. Mint tokens first";
       } else if (this.navAct == "mint") {
         this.liquidationPrice = getLiquidationPrice(
           this.collatAmt,
@@ -803,7 +836,6 @@ export default {
       if (this.price == 0) {
         await this.lastPrice();
       }
-
       const resultantCR = this.tokenAmt > 0 ? Number(this.collatAmt) / Number(this.tokenAmt) : 0;
       this.pricedTxCR = this.price !== 0 ? (resultantCR / this.price).toFixed(4) : 0;
       const newCollat = Number(this.collatAmt) + Number(this.existingColl);
@@ -816,6 +848,17 @@ export default {
     },
     async fetchAllowance() {
       await this.fetchAllowanceEMP();
+    },
+    toggleWrap() {
+      this.showWrapETH = !this.showWrapETH;
+    },
+    async makeWrapETH(amount) {
+      const wrap = await this.wrapETH({ amount: amount });
+      console.log("wrapETH", wrap);
+    },
+    async makeUnwrapETH(amount) {
+      const wrap = await this.unwrapETH({ amount: amount });
+      console.log("unwrapETH", wrap);
     },
   },
 };
@@ -916,7 +959,7 @@ export default {
   width: 100%;
   border: 0px;
   background: var(--back-act);
-  color: #ff4a4a;
+  color: var(--primary);
   // font-weight: 800;
   height: 50px;
   padding: 10px;
@@ -924,18 +967,13 @@ export default {
   // font-family: "Share Tech Mono", monospace;
   font-family: "Inconsolata", monospace;
   &::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: rgba(255, 74, 74, 0.2);
-    opacity: 1; /* Firefox */
+    opacity: 1;
   }
-
   &:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
     color: rgba(255, 74, 74, 0.2);
   }
-
   &::-ms-input-placeholder {
-    /* Microsoft Edge */
     color: rgba(255, 74, 74, 0.2);
   }
 }
@@ -953,7 +991,7 @@ export default {
 }
 #act {
   cursor: pointer;
-  color: #ff4a4a;
+  color: var(--primary);
   background: #ffe7e7;
   height: 50px;
   font-size: 20px;
@@ -1013,5 +1051,55 @@ export default {
   width: 100%;
   height: 160px;
   margin-bottom: 15px;
+}
+
+.wrapETH {
+  width: 80%;
+  margin: 10px auto;
+  .toggle {
+    background: #e570671f;
+    color: #e57067;
+    border: none;
+    border-radius: 8px;
+    padding: 2px 20px;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  .wraprow {
+    float: left;
+    width: 100%;
+    margin: 0px 0px 5px 0px;
+    input {
+      width: 65%;
+      border: none;
+      padding: 0px 10px;
+      border-radius: 8px 0px 0px 8px;
+      height: 30px;
+      background: var(--back-act);
+      color: var(--primary);
+      float: left;
+      font-size: 15px;
+      &::placeholder {
+        color: rgba(255, 74, 74, 0.2);
+        opacity: 1;
+      }
+      &:-ms-input-placeholder {
+        color: rgba(255, 74, 74, 0.2);
+      }
+      &::-ms-input-placeholder {
+        color: rgba(255, 74, 74, 0.2);
+      }
+    }
+    button {
+      width: 35%;
+      background: #e570671f;
+      color: #e57067;
+      border: none;
+      border-radius: 0px 8px 8px 0px;
+      height: 30px;
+      text-align: left;
+      float: right;
+    }
+  }
 }
 </style>

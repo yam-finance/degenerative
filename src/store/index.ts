@@ -13,6 +13,7 @@ import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
+import WETHContract from "@/utils/abi/weth.json";
 import { WETH, EMP } from "@/utils/addresses";
 
 Vue.use(Vuex);
@@ -25,6 +26,7 @@ const defaultState = () => {
     theme: stateLoad("theme") || "light",
     account: stateLoad("account") || "0x0",
     currentEMP: "",
+    contractWETH: "",
     approvals: {
       tokenEMP: null,
     },
@@ -139,6 +141,10 @@ export default new Vuex.Store({
       state.currentEMP = data.currentEMP;
       console.debug("GET_EMP", data);
     },
+    GET_WETH(state, data) {
+      state.contractWETH = data.contractWETH;
+      console.debug("GET_WETH", data);
+    },
 
     // to sort all once finished (-camelcase reminder)
     SOMETHING_NEW_TO_STORE(state, data) {
@@ -250,6 +256,13 @@ export default new Vuex.Store({
       const empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.address);
       commit("GET_EMP", { currentEMP: empContract });
       return empContract;
+    },
+
+    getWETH: ({ commit, dispatch }, payload: { address: string }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const contractWETH = new web3.eth.Contract((WETHContract.abi as unknown) as AbiItem, payload.address);
+      commit("GET_WETH", { contractWETH: contractWETH });
+      return contractWETH;
     },
 
     getPositionData: async ({ commit, dispatch }, contract: string) => {
@@ -649,6 +662,42 @@ export default new Vuex.Store({
         commit("UPDATE", { approvals: { tokenEMP: false } });
       }
       return result;
+    },
+
+    wrapETH: async ({ commit, dispatch }, payload: { amount: any }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const weth = await dispatch("getWETH", { address: WETH });
+      try {
+        const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
+        const ge = await weth.methods.deposit().estimateGas({ from: store.state.account, value: amount, gas: 50000000 });
+        const wrap = await weth.methods.deposit().send({ from: store.state.account, value: amount, gas: ge });
+        console.log("wrap", wrap);
+        return wrap;
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
+    },
+
+    unwrapETH: async ({ commit, dispatch }, payload: { amount: any }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const weth = await dispatch("getWETH", { address: WETH });
+      try {
+        const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
+        const ge = await weth.methods.withdraw().estimateGas({ from: store.state.account, value: amount, gas: 50000000 });
+        const unwrap = await weth.methods.withdraw().send({ from: store.state.account, value: amount, gas: ge });
+        console.log("unwrap", unwrap);
+        return unwrap;
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
     },
   },
   getters: {

@@ -52,6 +52,6 @@ Vue.prototype.moment = moment;
 new Vue({
   router,
   store,
-  apollo: Vue.prototype.gql.provider,
+  // apollo: Vue.prototype.gql.provider,
   render: h => h(App),
 }).$mount("#app");

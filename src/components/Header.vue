@@ -96,7 +96,7 @@ header {
     box-shadow: 0px 2px 3px var(--back-wallet-hover);
   }
   &.connected {
-    background: #ff4a4a; //temp
+    background: var(--primary); //temp
     color: #fff; //temp
   }
 }
