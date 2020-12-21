@@ -64,13 +64,6 @@
                   </button>
                 </div>
                 <div class="dropdown">
-                  <!-- <select class="" v-model="tokenSelected" v-on:change="getEMPState">
-                  <option value="" data-display-text="uGAS Tokens">None</option>
-                  <option value="uGAS_JAN21">uGAS JAN21</option>
-                  <option value="uGAS_FEB21">uGAS FEB21</option>
-                  <option value="uGAS_MAR21">uGAS MAR21</option>
-                </select> -->
-
                   <vue-picker class="select" v-model="tokenSelected" @change="getEMPState" placeholder="Select uGas Token" autofocus>
                     <vue-picker-option value="">Select uGas Token</vue-picker-option>
                     <vue-picker-option value="uGAS_JAN21">uGAS JAN21</vue-picker-option>
@@ -170,16 +163,11 @@
             <label v-if="tokenSelected"
               >Position Outstanding Tokens ({{ tokenSelected }}): <b>{{ currTokens ? currTokens : "0" }}</b></label
             >
+            <label v-if="tokenSelected"
+              >Current Liquidation Price: <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b></label
+            >
           </div>
         </Container>
-
-        <!-- <Container :size="800">
-          <div>
-            <div class="chart-asset">
-              <chart :options="chartOptionsCandle" />
-            </div>
-          </div>
-        </Container> -->
       </div>
 
       <div v-if="navPage === 'info'">
@@ -356,7 +344,6 @@
     </Container>
   </div>
 </template>
-
 <script>
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
@@ -410,10 +397,10 @@ export default {
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
-      currTokens: null,
       currCollat: null,
-      // showDropdown: false,
-      // currentInfo: "",
+      currTokens: null,
+      chartHourly: false,
+      currLiquidationPrice: null,
     };
   },
   mounted() {
@@ -485,13 +472,11 @@ export default {
       if (!this.assetTokens[this.tokenSelected]) {
         return;
       }
-
       const redColor = "#ad3c3c";
       const redBorderColor = "#ad3c3c";
       const greenColor = "#48ad3c";
       const greenBorderColor = "#48ad3c";
       const twapLineColor = "#333";
-
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
       // const assetChart = await getUniswapDataHourly(this.assetTokens[this.tokenSelected], from); // Hourly
       const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
@@ -673,6 +658,7 @@ export default {
       return false;
     },
     checkNewWithdraw() {
+      this.updateLiqPrice(false, true);
       if (this.currPos) {
         const tn = new Date().getTime() / 1000;
         if (this.checkHasPending()) {
@@ -688,6 +674,7 @@ export default {
       }
     },
     checkWithdraw() {
+      this.updateLiqPrice(false, true);
       if (this.currPos) {
         this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(ethDecs);
         const tn = new Date().getTime() / 1000;
@@ -704,6 +691,7 @@ export default {
       }
     },
     checkInstantWithdraw() {
+      this.updateLiqPrice(false, true);
       if (this.currPos) {
         const tn = new Date().getTime() / 1000;
         if (this.checkHasPending()) {
@@ -736,11 +724,44 @@ export default {
         }
       }
     },
+    updateLiqPrice(removeTokens = false, removeCollateral = false) {
+      if (this.currPos) {
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
+        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
+        let totalTokens;
+        let totalCollat;
+        if (!removeTokens) {
+          totalTokens = this.tokenAmt ? Number(this.tokenAmt) + pos : pos;
+        } else {
+          totalTokens = this.tokenAmt ? pos - Number(this.tokenAmt) : pos;
+        }
+        if (!removeCollateral) {
+          totalCollat = this.collatAmt ? Number(this.collatAmt) + col : col;
+        } else {
+          totalCollat = this.collatAmt ? col - Number(this.collatAmt) : col;
+        }
+        this.liquidationPrice = getLiquidationPrice(totalCollat, totalTokens, this.collReq.div(ethDecs), isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
+      } else {
+        this.liquidationPrice = getLiquidationPrice(
+          this.tokenAmt ? this.tokenAmt : 0,
+          this.collatAmt ? this.collatAmt : 0,
+          this.collReq.div(ethDecs),
+          isPricefeedInvertedFromTokenSymbol("uGAS")
+        ).toFixed(4);
+      }
+    },
+    currLiqPrice() {
+      if (this.currPos) {
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
+        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
+        this.currLiquidationPrice = getLiquidationPrice(col, pos, this.collReq.div(ethDecs), isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
+      }
+    },
     runChecks() {
       this.hasError = false;
       this.currentError = "";
-      this.liquidationPrice = 0;
       if (this.navAct == "withdraw") {
+        this.currLiqPrice();
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
         } else if (this.withdrawType == "new") {
@@ -749,7 +770,9 @@ export default {
           this.checkInstantWithdraw();
         }
       } else if (this.navAct == "redeem") {
-        console.log("is redeem check");
+        this.collatAmt = 0;
+        this.currLiqPrice();
+        this.updateLiqPrice(true, false);
         if (this.checkHasPending()) {
           this.hasError = true;
           this.currentError = "Cannot redeem with an active withdrawal request";
@@ -761,6 +784,9 @@ export default {
           this.currentError = "Not enough tokens in position to redeem";
         }
       } else if (this.navAct == "deposit") {
+        this.tokenAmt = 0;
+        this.currLiqPrice();
+        this.updateLiqPrice();
         if (this.checkHasPending()) {
           this.hasError = true;
           this.currentError = "Cannot deposit with an active withdrawal request";
@@ -772,12 +798,8 @@ export default {
           this.currentError = "Not enough WETH. Please wrap ETH below";
         }
       } else if (this.navAct == "mint") {
-        this.liquidationPrice = getLiquidationPrice(
-          this.collatAmt,
-          this.tokenAmt,
-          this.collReq.div(ethDecs),
-          isPricefeedInvertedFromTokenSymbol("uGAS")
-        ).toFixed(4);
+        this.currLiqPrice();
+        this.updateLiqPrice();
         // if (this.collatAmt < this.displayBalanceWETH) {
         //   this.hasError = true;
         //   this.currentError = "Insufficient";
@@ -796,7 +818,6 @@ export default {
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
           if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
-            console.log("below gcr", this.pricedCR, this.gcr);
             this.hasError = true;
             this.currentError = thisError;
           } else {
@@ -842,7 +863,6 @@ export default {
       return pos;
     },
     async getEMPState() {
-      console.log("getting emp state");
       const contractAddr = this.empAddr();
       let k;
       let pos;
@@ -879,7 +899,6 @@ export default {
       return this.price;
     },
     async act() {
-      console.log("Act");
       if (!store.state.approvals.tokenEMP) {
         this.isPending = true;
         this.getApproval()
@@ -1106,7 +1125,6 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .maker {
   zoom: 1;
