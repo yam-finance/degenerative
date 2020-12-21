@@ -31,7 +31,6 @@ const defaultState = () => {
       tokenEMP: null,
     },
     canWithdraw: false,
-
     theNewKey: null,
     approved: {
       contractA: false,
@@ -642,31 +641,35 @@ export default new Vuex.Store({
       return balance;
     },
 
-    getApprovalEMP: async ({ commit, dispatch }) => {
+    // approvalEMPJAN: null,
+    // approvalEMPFEB: null,
+    // approvalEMPMAR: null,
+
+    getApprovalEMP: async ({ commit, dispatch }, payload: { address: any }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      if (!store.state.approvals.tokenEMP) {
-        await approve(store.state.account, EMP, WETH, Vue.prototype.$provider);
+      if (!store.state.approvals[payload.address]) {
+        await approve(store.state.account, payload.address, WETH, Vue.prototype.$provider);
         return -1;
       } else {
-        commit("UPDATE", { approvals: { tokenEMP: true } });
+        commit("UPDATE", { approvals: { [payload.address]: true } });
         return 1;
       }
     },
 
-    fetchAllowanceEMP: async ({ commit, dispatch }) => {
+    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { address: any }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const result = await getAllowance(store.state.account, EMP, WETH, Vue.prototype.$provider);
+      const result = await getAllowance(store.state.account, payload.address, WETH, Vue.prototype.$provider);
       console.log("result", result);
       if (Number(result) > 0) {
-        commit("UPDATE", { approvals: { tokenEMP: true } });
+        commit("UPDATE", { approvals: { [payload.address]: true } });
       } else {
-        commit("UPDATE", { approvals: { tokenEMP: false } });
+        commit("UPDATE", { approvals: { [payload.address]: false } });
       }
       return result;
     },

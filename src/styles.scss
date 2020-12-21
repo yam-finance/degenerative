@@ -154,7 +154,7 @@ h5 {}
   gap: 10px;
   align-items: center;
   height: 46px;
-  color: #ff4a4a !important;
+  color: var(--primary) !important;
   &:focus {
     outline: none;
     border-color: var(--col);

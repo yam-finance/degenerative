@@ -83,7 +83,7 @@
                 </div>
               </div> -->
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
-                  {{ !isPending ? ($store.state.approvals.tokenEMP === true ? actName : "Approve") : "" }}
+                  {{ !isPending ? ($store.state.approvals[assetEMPs[tokenSelected]] === true ? actName : "Approve") : "" }}
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
@@ -379,6 +379,7 @@ export default {
       assetChartData: null,
       isPending: false,
       assetTokens: {},
+      assetEMPs: {},
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
@@ -398,12 +399,19 @@ export default {
       uGAS_FEB21: UGAS_FEB21,
       uGAS_MAR21: UGAS_MAR21,
     };
+
+    this.assetEMPs = {
+      uGAS_JAN21: EMP,
+      uGAS_FEB21: EMPFEB,
+      uGAS_MAR21: EMPMAR,
+    };
   },
   watch: {
     tokenSelected: function(newVal, oldVal) {
       console.log("here", newVal, oldVal);
-      this.getEMPState();
       this.initChart();
+      this.getEMPState();
+      this.fetchAllowance();
     },
   },
   components: {},
@@ -456,8 +464,7 @@ export default {
       const twapLineColor = "#333";
 
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
-      // const assetChart = await getUniswapDataHourly(UGAS_JAN21, from); // Hourly
-      // const assetChart = await getUniswapDataDaily(UGAS_JAN21, from); // Daily
+      // const assetChart = await getUniswapDataHourly(this.assetTokens[this.tokenSelected], from); // Hourly
       const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
       // console.log("UGAS_JAN21 assetChart", assetChart);
 
@@ -1045,10 +1052,16 @@ export default {
       this.runChecks();
     },
     async getApproval() {
-      await this.getApprovalEMP();
+      const addressEMP = this.empAddr();
+      if (addressEMP) {
+        await this.getApprovalEMP({ address: addressEMP });
+      }
     },
     async fetchAllowance() {
-      await this.fetchAllowanceEMP();
+      const addressEMP = this.empAddr();
+      if (addressEMP) {
+        await this.fetchAllowanceEMP({ address: addressEMP });
+      }
     },
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;
