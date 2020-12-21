@@ -109,7 +109,7 @@ export default new Vuex.Store({
       console.debug("ON_PROVIDER_SUCCESS", data);
     },
     ON_PROVIDER_FAILURE(state, data) {
-      state.account = null;
+      // state.account = null;
       console.debug("ON_PROVIDER_FAILURE", data);
     },
     ON_CHAIN_CHANGED(state, data) {
