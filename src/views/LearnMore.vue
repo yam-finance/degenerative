@@ -115,5 +115,20 @@
   </Container>
 </template>
 
-<script></script>
+<script>
+export default {
+  name: "LearnMore",
+  head: {},
+  data() {
+    return {
+      delay: 200,
+      scroller: 0,
+    };
+  },
+  components: {},
+  //   methods: {},
+  //   created() {},
+  //   destroyed() {},
+};
+</script>
 <style></style>
