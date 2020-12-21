@@ -136,6 +136,13 @@
               src="https://lh6.googleusercontent.com/2oUnz2NYbdZBRCZcm-_LVhtQeB6nM09FjnV_eg6zce8eW7snQjR02spr9ZhDxNQtjaMY5_salgt1WeOQlS40OcglfqVGdhQGVZP35292"
             />
           </div>
+          <br />
+          <b>
+            For a deeper dive into how synthetic assets work, please go here:
+            <u><router-link to="/faq">Learn More</router-link></u>
+          </b>
+          <br />
+          <br />
           <h1>
             What is uGAS?
           </h1>
