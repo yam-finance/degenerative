@@ -638,10 +638,6 @@ export default new Vuex.Store({
       return balance;
     },
 
-    // approvalEMPJAN: null,
-    // approvalEMPFEB: null,
-    // approvalEMPMAR: null,
-
     getApprovalEMP: async ({ commit, dispatch }, payload: { address: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
