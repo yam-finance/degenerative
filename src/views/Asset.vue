@@ -106,9 +106,9 @@
                 <div class="dropdown">
                   <vue-picker class="select" v-model="tokenSelected" @change="getEMPState" placeholder="Select uGas Token" autofocus>
                     <vue-picker-option value="">Select uGas Token</vue-picker-option>
-                    <vue-picker-option value="uGAS_JAN21">uGAS JAN21</vue-picker-option>
-                    <vue-picker-option value="uGAS_FEB21">uGAS FEB21</vue-picker-option>
-                    <vue-picker-option value="uGAS_MAR21">uGAS MAR21</vue-picker-option>
+                    <vue-picker-option value="UGASJAN21">uGAS JAN21</vue-picker-option>
+                    <vue-picker-option value="UGASFEB21">uGAS FEB21</vue-picker-option>
+                    <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
                   </vue-picker>
                 </div>
                 <input
@@ -145,10 +145,12 @@
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
                   {{
                     !isPending
-                      ? $store.state.approvals[assetEMPs[tokenSelected]] === true ||
-                        (navAct == "redeem" && $store.state.approvals[assetTokens[tokenSelected]] === true)
-                        ? actName
-                        : "Approve"
+                      ? tokenSelected
+                        ? $store.state.approvals[assetEMP[tokenSelected][0] + "_WETH"] === true ||
+                          (navAct == "redeem" && $store.state.approvals[assetEMP[tokenSelected][0] + "_" + tokenSelected] === true)
+                          ? actName
+                          : "Approve"
+                        : "Select Token"
                       : ""
                   }}
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
@@ -261,6 +263,21 @@
       </div>
 
       <div v-if="navPage === 'info'">
+        <Container :size="800">
+          <!-- <div id="">
+            <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="800 - 60" :height="300 - 60">
+              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
+                    {{ props.value }}
+                  </text>
+                </g></la-line
+              >
+              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
+              <la-y-axis prop="value"></la-y-axis>
+            </la-cartesian>
+          </div> -->
+        </Container>
         <Card>
           <div style="display: flex; justify-content: center">
             <img
@@ -415,21 +432,6 @@
             the uGAS token hedge resulted in Zombie Carol locking her mining revenues at 70 Gwei and provided her with certainty on her revenue amount.
           </p>
         </Card>
-        <Container :size="800">
-          <!-- <div id="">
-            <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="800 - 60" :height="300 - 60">
-              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
-                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
-                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
-                    {{ props.value }}
-                  </text>
-                </g></la-line
-              >
-              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
-              <la-y-axis prop="value"></la-y-axis>
-            </la-cartesian>
-          </div> -->
-        </Container>
       </div>
     </Container>
   </div>
@@ -442,7 +444,7 @@ import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourl
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { EMP, EMPFEB, EMPMAR, UGAS_JAN21, UGAS_FEB21, UGAS_MAR21, WETH } from "@/utils/addresses";
+import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21 } from "@/utils/addresses";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -482,8 +484,17 @@ export default {
       balanceUGAS: 0,
       assetChartData: null,
       isPending: false,
-      assetTokens: {},
-      assetEMPs: {},
+      assetTokens: {
+        UGASJAN21: UGASJAN21,
+        UGASFEB21: UGASFEB21,
+        UGASMAR21: UGASMAR21,
+      },
+      assetEMP: {
+        UGASJAN21: ["EMPJAN", EMPJAN],
+        UGASFEB21: ["EMPFEB", EMPFEB],
+        UGASMAR21: ["EMPMAR", EMPMAR],
+      },
+      assetEMPName: {},
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
@@ -493,43 +504,33 @@ export default {
       currLiquidationPrice: null,
     };
   },
-  mounted() {
-    this.initAsset();
-    this.lastPrice();
-    this.initChart();
-    this.getWETHBalance();
-    // this.checkTime();
-
-    this.assetTokens = {
-      uGAS_JAN21: UGAS_JAN21,
-      uGAS_FEB21: UGAS_FEB21,
-      uGAS_MAR21: UGAS_MAR21,
-    };
-
-    this.assetEMPs = {
-      uGAS_JAN21: EMP,
-      uGAS_FEB21: EMPFEB,
-      uGAS_MAR21: EMPMAR,
-    };
-
-    // $store.state.approvals[assetTokens[tokenSelected]]
+  async mounted() {
+    await this.initAsset();
+    await this.lastPrice();
+    await this.initChart();
+    await this.getWETHBalance();
   },
   watch: {
     tokenSelected: function(newVal, oldVal) {
-      console.log("here", newVal, oldVal);
+      if (!this.tokenSelected) {
+        return;
+      }
+      if (this.navAct == "redeem") {
+        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
+      } else {
+        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
+      }
       this.initChart();
       this.getEMPState();
-      if (this.navAct == "redeem") {
-        this.fetchAllowanceRedeem();
-      } else {
-        this.fetchAllowance();
-      }
     },
     navAct: function(newVal, oldVal) {
+      if (!this.tokenSelected) {
+        return;
+      }
       if (newVal == "redeem") {
-        this.fetchAllowanceRedeem();
+        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
       } else {
-        this.fetchAllowance();
+        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
       }
     },
   },
@@ -546,21 +547,23 @@ export default {
       "withdraw",
       "redeem",
       "getUserWETHBalance",
-      "getApprovalEMP",
-      "fetchAllowanceEMP",
       "getUserUGasBalance",
+      "getContractApproval",
+      "fetchContractApproval",
       "wrapETH",
       "unwrapETH",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
-      this.fetchAllowance(); // checks Approval
+      if (this.tokenSelected) {
+        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH); // checks Approval
+      }
 
       // const from = 1606742010;
-      // const hourly = await getUniswapDataHourly(UGAS_JAN21, from);
-      // console.log("UGAS_JAN21 getUniswapDataHourly", hourly);
-      // const daily = await getUniswapDataDaily(UGAS_JAN21, from);
-      // console.log("UGAS_JAN21 getUniswapDataDaily", daily);
+      // const hourly = await getUniswapDataHourly(UGASJAN21, from);
+      // console.log("UGASJAN21 getUniswapDataHourly", hourly);
+      // const daily = await getUniswapDataDaily(UGASJAN21, from);
+      // console.log("UGASJAN21 getUniswapDataDaily", daily);
       // this.assetChartData = daily;
     },
     async getWETHBalance() {
@@ -583,7 +586,7 @@ export default {
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
       // const assetChart = await getUniswapDataHourly(this.assetTokens[this.tokenSelected], from); // Hourly
       const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
-      // console.log("UGAS_JAN21 assetChart", assetChart);
+      // console.log("UGASJAN21 assetChart", assetChart);
 
       const tempChartData = [];
       const tempChartTWAPData = [];
@@ -971,12 +974,12 @@ export default {
     },
     empAddr() {
       switch (this.tokenSelected) {
-        case "uGAS_JAN21":
-          return [EMP, UGAS_JAN21];
-        case "uGAS_FEB21":
-          return [EMPFEB, UGAS_FEB21];
-        case "uGAS_MAR21":
-          return [EMPMAR, UGAS_MAR21];
+        case "UGASJAN21":
+          return [EMPJAN, UGASJAN21];
+        case "UGASFEB21":
+          return [EMPFEB, UGASFEB21];
+        case "UGASMAR21":
+          return [EMPMAR, UGASMAR21];
         default:
           return "";
       }
@@ -1022,9 +1025,13 @@ export default {
       return this.price;
     },
     async act() {
-      if (!store.state.approvals[this.empAddr()[0]] && this.actName !== "Redeem") {
+      if (!this.tokenSelected) {
+        return;
+      }
+      if (!store.state.approvals[this.assetEMP[this.tokenSelected][0] + "_WETH"] && this.actName !== "Redeem") {
         this.isPending = true;
-        this.getApproval()
+
+        this.getApproval(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH)
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1166,9 +1173,9 @@ export default {
             break;
         }
       }
-      if (!store.state.approvals[this.empAddr()[1]] && this.actName === "Redeem") {
+      if (!store.state.approvals[this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected] && this.actName === "Redeem") {
         this.isPending = true;
-        this.getApprovalRedeem()
+        this.getApproval(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1245,24 +1252,14 @@ export default {
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
     },
-    async getApproval() {
-      if (this.empAddr()[0]) {
-        await this.getApprovalEMP({ spenderAddress: this.empAddr()[0], tokenAddress: WETH });
+    async getApproval(identifier, spenderAddress, tokenAddress) {
+      if (spenderAddress) {
+        await this.getContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
       }
     },
-    async fetchAllowance() {
-      if (this.empAddr()[0]) {
-        await this.fetchAllowanceEMP({ spenderAddress: this.empAddr()[0], tokenAddress: WETH });
-      }
-    },
-    async getApprovalRedeem() {
-      if (this.empAddr()[0]) {
-        await this.getApprovalEMP({ spenderAddress: this.empAddr()[1], tokenAddress: this.empAddr()[0] });
-      }
-    },
-    async fetchAllowanceRedeem() {
-      if (this.empAddr()[0]) {
-        await this.fetchAllowanceEMP({ spenderAddress: this.empAddr()[1], tokenAddress: this.empAddr()[0] });
+    async fetchAllowance(identifier, spenderAddress, tokenAddress) {
+      if (spenderAddress) {
+        await this.fetchContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
       }
     },
     toggleWrap() {
