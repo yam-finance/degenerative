@@ -1315,7 +1315,7 @@ export default {
 }
 
 .wrapETH {
-  width: 80%;
+  width: 90%;
   margin: 10px auto;
   .toggle {
     background: #e570671f;
@@ -1353,8 +1353,8 @@ export default {
     }
     button {
       width: 35%;
-      background: #e570671f;
-      color: #e57067;
+      background: var(--primary);
+      color: #ffffff;
       border: none;
       border-radius: 0px 8px 8px 0px;
       height: 30px;
