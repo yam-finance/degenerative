@@ -1014,6 +1014,7 @@ export default {
       this.collReq = k.collateralRequirement;
       this.getUGasBalance();
       this.posUpdateHandler();
+      this.updateUserInfo();
     },
     async lastPrice() {
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
@@ -1035,10 +1036,7 @@ export default {
               this.hasError = true;
               this.currentError = "Transaction would fail. Check balances & approvals";
             }
-            this.getWETHBalance();
-            await this.getUGasBalance();
-            await this.updateApprovals();
-            await this.getPosition();
+            this.updateUserInfo();
           })
           .catch(async e => {
             console.log("error", e[1]);
@@ -1047,10 +1045,7 @@ export default {
               this.hasError = true;
               this.currentError = "Transaction would fail. Check balances & approvals";
             }
-            this.getWETHBalance();
-            await this.getUGasBalance();
-            await this.updateApprovals();
-            await this.getPosition();
+            this.updateUserInfo();
           });
       } else {
         switch (this.actName) {
@@ -1069,9 +1064,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 console.log("error", e[1]);
@@ -1080,9 +1073,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               });
             break;
           case "Deposit":
@@ -1095,9 +1086,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1105,9 +1094,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               });
             break;
           case "Request Withdraw":
@@ -1120,9 +1107,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1130,9 +1115,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
-                await this.getPosition();
+                this.updateUserInfo();
               });
             break;
           case "Withdraw":
@@ -1145,8 +1128,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                this.getPosition();
+                this.updateUserInfo();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1154,8 +1136,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                this.getPosition();
+                this.updateUserInfo();
               });
             break;
           case "Instant Withdraw":
@@ -1168,8 +1149,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                this.getPosition();
+                this.updateUserInfo();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1177,8 +1157,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                this.getPosition();
+                this.updateUserInfo();
               });
             break;
           case "Redeem":
@@ -1192,10 +1171,7 @@ export default {
                     this.hasError = true;
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
-                  this.getWETHBalance();
-                  await this.getUGasBalance();
-                  await this.updateApprovals();
-                  await this.getPosition();
+                  this.updateUserInfo();
                 })
                 .catch(async e => {
                   console.log("error", e[1]);
@@ -1204,10 +1180,7 @@ export default {
                     this.hasError = true;
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
-                  this.getWETHBalance();
-                  await this.getUGasBalance();
-                  await this.updateApprovals();
-                  await this.getPosition();
+                  this.updateUserInfo();
                 });
             } else {
               console.log("redeem");
@@ -1219,9 +1192,7 @@ export default {
                     this.hasError = true;
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
-                  this.getWETHBalance();
-                  this.getUGasBalance();
-                  this.getPosition();
+                  this.updateUserInfo();
                 })
                 .catch(e => {
                   this.isPending = false;
@@ -1229,9 +1200,6 @@ export default {
                     this.hasError = true;
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
-                  this.getWETHBalance();
-                  this.getUGasBalance();
-                  this.getPosition();
                 });
             }
             break;
@@ -1239,6 +1207,9 @@ export default {
       }
 
       this.getEMPState();
+    },
+    async updateUserInfo() {
+      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.updateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
