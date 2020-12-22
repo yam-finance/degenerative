@@ -7,8 +7,8 @@
           <div class="side">
             <p class="subtitle">Cutting Edge DeFi Derivatives</p>
             <p class="subtitle sub2">
-              Built by <b><a href="https://yam.finance/">Yam</a></b
-              >. Built on <b><a href="https://umaproject.org/">UMA</a></b
+              Built by <b><a href="https://yam.finance/" target="_blank">Yam</a></b
+              >. Built on <b><a href="https://umaproject.org/" target="_blank">UMA</a></b
               >. Built for Degens.
             </p>
             <p>
