@@ -146,10 +146,12 @@
                   {{
                     !isPending
                       ? tokenSelected
-                        ? $store.state.approvals[assetEMP[tokenSelected][0] + "_WETH"] === true ||
-                          (navAct == "redeem" && $store.state.approvals[assetEMP[tokenSelected][0] + "_" + tokenSelected] === true)
-                          ? actName
-                          : "Approve"
+                        ? approvals
+                          ? approvals[assetEMP[tokenSelected][0] + "_WETH"] === true ||
+                            (navAct == "redeem" && approvals[assetEMP[tokenSelected][0] + "_" + tokenSelected] === true)
+                            ? actName
+                            : "Approve"
+                          : "Select Token"
                         : "Select Token"
                       : ""
                   }}
@@ -281,7 +283,7 @@
         <Card>
           <div style="display: flex; justify-content: center">
             <img
-              src="https://lh6.googleusercontent.com/2oUnz2NYbdZBRCZcm-_LVhtQeB6nM09FjnV_eg6zce8eW7snQjR02spr9ZhDxNQtjaMY5_salgt1WeOQlS40OcglfqVGdhQGVZP35292"
+              src="https://lh4.googleusercontent.com/lcIV49d4j16mN5xrLN3XNTRR8TWJty4gnAuHhryWaGONwX1s3Brtvyk6HvGC328agHpvxXuY08Lsb2lU6dHVeOKce--cta2XJdm9Dgjb=s1600"
             />
           </div>
           <br />
@@ -494,6 +496,14 @@ export default {
         UGASFEB21: ["EMPFEB", EMPFEB],
         UGASMAR21: ["EMPMAR", EMPMAR],
       },
+      approvals: {
+        EMPFEB_WETH: false,
+        EMPJAN_WETH: false,
+        EMPMAR_WETH: false,
+        EMPMAR_UGASMAR21: false,
+        EMPJAN_UGASJAN21: false,
+        EMPFEB_UGASFEB21: false,
+      },
       assetEMPName: {},
       showWrapETH: false,
       amountToWrap: 0,
@@ -509,6 +519,12 @@ export default {
     await this.lastPrice();
     await this.initChart();
     await this.getWETHBalance();
+    await this.updateApprovals();
+  },
+  computed: {
+    account() {
+      return store.state.account;
+    },
   },
   watch: {
     tokenSelected: function(newVal, oldVal) {
@@ -533,6 +549,9 @@ export default {
         this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
       }
     },
+    account(newAccount, oldAccount) {
+      this.updateUserInfo();
+    },
   },
   components: {},
   methods: {
@@ -552,6 +571,7 @@ export default {
       "fetchContractApproval",
       "wrapETH",
       "unwrapETH",
+      "checkContractApprovals",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -715,22 +735,6 @@ export default {
           },
         ],
       };
-
-      // chart: median data
-      // this.values = [
-      //   { name: "Jan", value: 200 },
-      //   { name: "Feb", value: 420 },
-      //   { name: "Mar", value: 420 },
-      //   { name: "Apr", value: 420 },
-      //   { name: "May", value: 420 },
-      //   { name: "Jun", value: 420 },
-      //   { name: "Jul", value: 420 },
-      //   { name: "Aug", value: 420 },
-      //   { name: "Sep", value: 420 },
-      //   { name: "Oct", value: 420 },
-      //   { name: "Nov", value: 420 },
-      //   { name: "Dec", value: 420 },
-      // ];
       this.chartOptionsMedianValues = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       for (let i = 0; i < months.length; i++) {
@@ -1018,6 +1022,7 @@ export default {
       this.collReq = k.collateralRequirement;
       this.getUGasBalance();
       this.posUpdateHandler();
+      this.updateUserInfo();
     },
     async lastPrice() {
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
@@ -1028,7 +1033,7 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-      if (!store.state.approvals[this.assetEMP[this.tokenSelected][0] + "_WETH"] && this.actName !== "Redeem") {
+      if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_WETH"] && this.actName !== "Redeem") {
         this.isPending = true;
 
         this.getApproval(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH)
@@ -1039,8 +1044,7 @@ export default {
               this.hasError = true;
               this.currentError = "Transaction would fail. Check balances & approvals";
             }
-            this.getWETHBalance();
-            await this.getUGasBalance();
+            this.updateUserInfo();
           })
           .catch(async e => {
             console.log("error", e[1]);
@@ -1049,8 +1053,7 @@ export default {
               this.hasError = true;
               this.currentError = "Transaction would fail. Check balances & approvals";
             }
-            this.getWETHBalance();
-            await this.getUGasBalance();
+            this.updateUserInfo();
           });
       } else {
         switch (this.actName) {
@@ -1069,8 +1072,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 console.log("error", e[1]);
@@ -1079,8 +1081,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               });
             break;
           case "Deposit":
@@ -1093,8 +1094,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1102,8 +1102,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               });
             break;
           case "Request Withdraw":
@@ -1116,8 +1115,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1125,8 +1123,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
-                await this.getUGasBalance();
+                this.updateUserInfo();
               });
             break;
           case "Withdraw":
@@ -1139,7 +1136,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
+                this.updateUserInfo();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1147,7 +1144,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
+                this.updateUserInfo();
               });
             break;
           case "Instant Withdraw":
@@ -1160,7 +1157,7 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
+                this.updateUserInfo();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1168,56 +1165,59 @@ export default {
                   this.hasError = true;
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
-                this.getWETHBalance();
+                this.updateUserInfo();
               });
+            break;
+          case "Redeem":
+            if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected]) {
+              this.isPending = true;
+              this.getApproval(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
+                .then(async e => {
+                  console.log("approve", e[1]);
+                  this.isPending = false;
+                  if (e[1] && e[1] != "") {
+                    this.hasError = true;
+                    this.currentError = "Transaction would fail. Check balances & approvals";
+                  }
+                  this.updateUserInfo();
+                })
+                .catch(async e => {
+                  console.log("error", e[1]);
+                  this.isPending = false;
+                  if (e[1] && e[1] != "") {
+                    this.hasError = true;
+                    this.currentError = "Transaction would fail. Check balances & approvals";
+                  }
+                  this.updateUserInfo();
+                });
+            } else {
+              console.log("redeem");
+              this.isPending = true;
+              this.redeem({ contract: this.empAddr()[0], tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
+                .then(e => {
+                  this.isPending = false;
+                  if (e[1] && e[1] != "") {
+                    this.hasError = true;
+                    this.currentError = "Transaction would fail. Check balances & approvals";
+                  }
+                  this.updateUserInfo();
+                })
+                .catch(e => {
+                  this.isPending = false;
+                  if (e[1] && e[1] != "") {
+                    this.hasError = true;
+                    this.currentError = "Transaction would fail. Check balances & approvals";
+                  }
+                });
+            }
             break;
         }
       }
-      if (!store.state.approvals[this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected] && this.actName === "Redeem") {
-        this.isPending = true;
-        this.getApproval(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
-          .then(async e => {
-            console.log("approve", e[1]);
-            this.isPending = false;
-            if (e[1] && e[1] != "") {
-              this.hasError = true;
-              this.currentError = "Transaction would fail. Check balances & approvals";
-            }
-            this.getWETHBalance();
-            await this.getUGasBalance();
-          })
-          .catch(async e => {
-            console.log("error", e[1]);
-            this.isPending = false;
-            if (e[1] && e[1] != "") {
-              this.hasError = true;
-              this.currentError = "Transaction would fail. Check balances & approvals";
-            }
-            this.getWETHBalance();
-            await this.getUGasBalance();
-          });
-      } else {
-        console.log("redeem");
-        this.isPending = true;
-        this.redeem({ contract: this.empAddr()[0], tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
-          .then(e => {
-            this.isPending = false;
-            if (e[1] && e[1] != "") {
-              this.hasError = true;
-              this.currentError = "Transaction would fail. Check balances & approvals";
-            }
-            this.getWETHBalance();
-          })
-          .catch(e => {
-            this.isPending = false;
-            if (e[1] && e[1] != "") {
-              this.hasError = true;
-              this.currentError = "Transaction would fail. Check balances & approvals";
-            }
-            this.getWETHBalance();
-          });
-      }
+
       this.getEMPState();
+    },
+    async updateUserInfo() {
+      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.updateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
@@ -1261,6 +1261,11 @@ export default {
       if (spenderAddress) {
         await this.fetchContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
       }
+    },
+    async updateApprovals() {
+      console.log("updating approvals");
+      this.approvals = await this.checkContractApprovals();
+      console.log("approvals", this.approvals);
     },
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;

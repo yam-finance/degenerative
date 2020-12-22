@@ -25,6 +25,7 @@ const defaultState = () => {
     version: "A-0.1", // make dynamic
     theme: stateLoad("theme") || "light",
     account: stateLoad("account") || "0x0",
+    hasConnectedBefore: false,
     currentEMP: "",
     contractWETH: "",
     canWithdraw: false,
@@ -32,7 +33,7 @@ const defaultState = () => {
     contracts: {},
     approvals: {
       EMPFEB_WETH: false,
-      EMPJAN_WETH: true,
+      EMPJAN_WETH: false,
       EMPMAR_WETH: false,
       EMPMAR_UGASMAR21: false,
       EMPJAN_UGASJAN21: false,
@@ -194,16 +195,22 @@ export default new Vuex.Store({
     },
 
     // wallet
-    connect: async ({ commit, dispatch }, connector = "injected") => {
-      auth = getInstance();
-      await auth.login(connector);
-      if (auth.provider) {
-        stateSave("provider", connector);
-        auth.web3 = new Web3Provider(auth.provider);
-        Vue.prototype.$web3 = auth.web3;
-        Vue.prototype.$provider = auth.web3.provider;
-        await dispatch("loadProvider");
-        // console.log("Vue.prototype.$web3", Vue.prototype.$web3);
+    connect: async ({ commit, dispatch }, payload = { connector: "injected", organic: false }) => {
+      let hasConnected = localStorage.getItem("connected");
+      hasConnected = hasConnected ? eval(hasConnected) : false;
+      store.state.hasConnectedBefore = hasConnected;
+      console.log(store.state.hasConnectedBefore);
+      if (store.state.hasConnectedBefore || payload.organic) {
+        localStorage.setItem("connected", "true");
+        auth = getInstance();
+        await auth.login(payload.connector);
+        if (auth.provider) {
+          stateSave("provider", payload.connector);
+          auth.web3 = new Web3Provider(auth.provider);
+          Vue.prototype.$web3 = auth.web3;
+          Vue.prototype.$provider = auth.web3.provider;
+          await dispatch("loadProvider");
+        }
       }
     },
     disconnect: async ({ commit }) => {
@@ -644,7 +651,9 @@ export default new Vuex.Store({
       const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
       return balance;
     },
-
+    checkContractApprovals: async ({ commit, dispatch }) => {
+      return store.state.approvals;
+    },
     getContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
@@ -652,6 +661,7 @@ export default new Vuex.Store({
       }
       if (!store.state.approvals[payload.spenderAddress]) {
         await approve(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
+        await dispatch("fetchContractApproval", payload);
         return -1;
       } else {
         commit("UPDATE_APPROVAL", { identifier: payload.identifier, value: true });
@@ -698,7 +708,7 @@ export default new Vuex.Store({
           {
             from: store.state.account,
             value: amount,
-            gas: ge,
+            gas: 70000,
           },
           async (error: any, txHash: string) => {
             if (error) {
@@ -747,7 +757,7 @@ export default new Vuex.Store({
         const unwrap = await weth.methods.withdraw(amount).send(
           {
             from: store.state.account,
-            gas: ge,
+            gas: 70000,
           },
           async (error: any, txHash: string) => {
             if (error) {
