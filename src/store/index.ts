@@ -708,7 +708,7 @@ export default new Vuex.Store({
           {
             from: store.state.account,
             value: amount,
-            gas: ge,
+            gas: 70000,
           },
           async (error: any, txHash: string) => {
             if (error) {
@@ -757,7 +757,7 @@ export default new Vuex.Store({
         const unwrap = await weth.methods.withdraw(amount).send(
           {
             from: store.state.account,
-            gas: ge,
+            gas: 70000,
           },
           async (error: any, txHash: string) => {
             if (error) {
