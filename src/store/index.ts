@@ -25,6 +25,7 @@ const defaultState = () => {
     version: "A-0.1", // make dynamic
     theme: stateLoad("theme") || "light",
     account: stateLoad("account") || "0x0",
+    hasConnectedBefore: false,
     currentEMP: "",
     contractWETH: "",
     canWithdraw: false,
@@ -194,16 +195,22 @@ export default new Vuex.Store({
     },
 
     // wallet
-    connect: async ({ commit, dispatch }, connector = "injected") => {
-      auth = getInstance();
-      await auth.login(connector);
-      if (auth.provider) {
-        stateSave("provider", connector);
-        auth.web3 = new Web3Provider(auth.provider);
-        Vue.prototype.$web3 = auth.web3;
-        Vue.prototype.$provider = auth.web3.provider;
-        await dispatch("loadProvider");
-        // console.log("Vue.prototype.$web3", Vue.prototype.$web3);
+    connect: async ({ commit, dispatch }, payload = { connector: "injected", organic: false }) => {
+      let hasConnected = localStorage.getItem("connected");
+      hasConnected = hasConnected ? eval(hasConnected) : false;
+      store.state.hasConnectedBefore = hasConnected;
+      console.log(store.state.hasConnectedBefore);
+      if (store.state.hasConnectedBefore || payload.organic) {
+        localStorage.setItem("connected", "true");
+        auth = getInstance();
+        await auth.login(payload.connector);
+        if (auth.provider) {
+          stateSave("provider", payload.connector);
+          auth.web3 = new Web3Provider(auth.provider);
+          Vue.prototype.$web3 = auth.web3;
+          Vue.prototype.$provider = auth.web3.provider;
+          await dispatch("loadProvider");
+        }
       }
     },
     disconnect: async ({ commit }) => {

@@ -132,7 +132,7 @@ export default {
       if (connected) {
         console.log("open user mini popup");
       } else {
-        await this.connect();
+        await this.connect({ connector: "injected", organic: true });
       }
     },
     async logout() {
