@@ -899,7 +899,7 @@ export default {
       return this.price;
     },
     async act() {
-      if (!store.state.approvals.tokenEMP) {
+      if (!store.state.approvals[this.empAddr()]) {
         this.isPending = true;
         this.getApproval()
           .then(async e => {
