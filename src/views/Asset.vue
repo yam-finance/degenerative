@@ -1038,6 +1038,7 @@ export default {
             this.getWETHBalance();
             await this.getUGasBalance();
             await this.updateApprovals();
+            await this.getPosition();
           })
           .catch(async e => {
             console.log("error", e[1]);
@@ -1049,6 +1050,7 @@ export default {
             this.getWETHBalance();
             await this.getUGasBalance();
             await this.updateApprovals();
+            await this.getPosition();
           });
       } else {
         switch (this.actName) {
@@ -1069,6 +1071,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               })
               .catch(async e => {
                 console.log("error", e[1]);
@@ -1079,6 +1082,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               });
             break;
           case "Deposit":
@@ -1093,6 +1097,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1102,6 +1107,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               });
             break;
           case "Request Withdraw":
@@ -1116,6 +1122,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               })
               .catch(async e => {
                 this.isPending = false;
@@ -1125,6 +1132,7 @@ export default {
                 }
                 this.getWETHBalance();
                 await this.getUGasBalance();
+                await this.getPosition();
               });
             break;
           case "Withdraw":
@@ -1138,6 +1146,7 @@ export default {
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
                 this.getWETHBalance();
+                this.getPosition();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1146,6 +1155,7 @@ export default {
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
                 this.getWETHBalance();
+                this.getPosition();
               });
             break;
           case "Instant Withdraw":
@@ -1159,6 +1169,7 @@ export default {
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
                 this.getWETHBalance();
+                this.getPosition();
               })
               .catch(e => {
                 this.isPending = false;
@@ -1167,6 +1178,7 @@ export default {
                   this.currentError = "Transaction would fail. Check balances & approvals";
                 }
                 this.getWETHBalance();
+                this.getPosition();
               });
             break;
           case "Redeem":
@@ -1183,6 +1195,7 @@ export default {
                   this.getWETHBalance();
                   await this.getUGasBalance();
                   await this.updateApprovals();
+                  await this.getPosition();
                 })
                 .catch(async e => {
                   console.log("error", e[1]);
@@ -1194,6 +1207,7 @@ export default {
                   this.getWETHBalance();
                   await this.getUGasBalance();
                   await this.updateApprovals();
+                  await this.getPosition();
                 });
             } else {
               console.log("redeem");
@@ -1206,6 +1220,8 @@ export default {
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
                   this.getWETHBalance();
+                  this.getUGasBalance();
+                  this.getPosition();
                 })
                 .catch(e => {
                   this.isPending = false;
@@ -1214,6 +1230,8 @@ export default {
                     this.currentError = "Transaction would fail. Check balances & approvals";
                   }
                   this.getWETHBalance();
+                  this.getUGasBalance();
+                  this.getPosition();
                 });
             }
             break;
