@@ -37,7 +37,7 @@
                     :class="{ active: withdrawType === 'instant' }"
                     v-tooltip="{
                       content: '<b>Instant Withdraw</b>: Withdraw up to the current GCR.',
-                      delay: { show: 250, hide: 100 },
+                      delay: { show: 150, hide: 100 },
                     }"
                   >
                     Instant Withdraw
@@ -46,8 +46,8 @@
                     @click="toWithdrawType('new')"
                     :class="{ active: withdrawType === 'new' }"
                     v-tooltip="{
-                      content: '<b>Request New Withdraw</b> Request to withdraw collateral up to the Minimum Collateral Ratio.',
-                      delay: { show: 250, hide: 100 },
+                      content: '<b>Request Withdraw</b> Request to withdraw collateral up to the Minimum Collateral Ratio.',
+                      delay: { show: 150, hide: 100 },
                     }"
                   >
                     Request New Withdraw
@@ -56,8 +56,8 @@
                     @click="toWithdrawType('existing')"
                     :class="{ active: withdrawType === 'existing' }"
                     v-tooltip="{
-                      content: '<b>Withdraw</b>: here',
-                      delay: { show: 250, hide: 100 },
+                      content: '<b>Withdraw</b>: After a withdrawal request passes, you can withdraw collateral here.',
+                      delay: { show: 150, hide: 100 },
                     }"
                   >
                     Withdraw
@@ -136,18 +136,43 @@
 
           <div class="info" v-if="info">
             <label
+              v-tooltip="{
+                content: 'Price at which your position can be liquidated',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Liquidation Price: <b>{{ liquidationPrice }}</b></label
             >
             <label
-              >Collateral Ratio: <b>{{ pricedCR }}</b></label
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+              >Collateral Ratio (Post-Tx): <b>{{ pricedCR }}</b></label
             >
             <label
+              v-tooltip="{
+                content: 'Global collateral ratio',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Collateral Ratio (Global): <b>{{ gcr }}</b></label
             >
             <label
+              v-tooltip="{
+                content: 'Collateral ratio of this particular tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Collateral Ratio (Tx): <b>{{ pricedTxCR }}</b></label
             >
             <label
+              v-tooltip="{
+                content: 'Synthetic selected',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
             >
             <br />
@@ -157,13 +182,31 @@
             <label v-if="tokenSelected"
               >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
             >
-            <label v-if="tokenSelected"
+            <label
+              v-if="tokenSelected"
+              v-tooltip="{
+                content: 'Total WETH locked as collateral',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Position Collateral (WETH): <b>{{ currCollat ? currCollat : "0" }}</b></label
             >
-            <label v-if="tokenSelected"
+            <label
+              v-if="tokenSelected"
+              v-tooltip="{
+                content: 'Total minted uTokens in this position',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Position Outstanding Tokens ({{ tokenSelected }}): <b>{{ currTokens ? currTokens : "0" }}</b></label
             >
-            <label v-if="tokenSelected"
+            <label
+              v-if="tokenSelected"
+              v-tooltip="{
+                content: 'Current liquidation price of your position',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
               >Current Liquidation Price: <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b></label
             >
           </div>
@@ -724,7 +767,34 @@ export default {
         }
       }
     },
+    updateCR(removeTokens = false, removeCollateral = false) {
+      if (this.currPos) {
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
+        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
+        let totalTokens;
+        let totalCollat;
+        if (!removeTokens) {
+          totalTokens = this.tokenAmt ? Number(this.tokenAmt) + pos : pos;
+        } else {
+          totalTokens = this.tokenAmt ? pos - Number(this.tokenAmt) : pos;
+        }
+        if (!removeCollateral) {
+          totalCollat = this.collatAmt ? Number(this.collatAmt) + col : col;
+        } else {
+          totalCollat = this.collatAmt ? col - Number(this.collatAmt) : col;
+        }
+        if (this.tokenAmt && this.collatAmt) {
+          this.pricedTxCR = this.collatAmt / this.tokenAmt / this.price;
+        }
+        this.pricedCR = (totalCollat / totalTokens / this.price).toFixed(4);
+      } else {
+        if (this.tokenAmt && this.collatAmt) {
+          this.pricedTxCR = (this.collatAmt / this.tokenAmt / this.price).toFixed(4);
+        }
+      }
+    },
     updateLiqPrice(removeTokens = false, removeCollateral = false) {
+      this.updateCR(removeTokens, removeCollateral);
       if (this.currPos) {
         const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
         const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
