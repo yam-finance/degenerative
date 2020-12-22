@@ -32,7 +32,7 @@ const defaultState = () => {
     contracts: {},
     approvals: {
       EMPFEB_WETH: false,
-      EMPJAN_WETH: true,
+      EMPJAN_WETH: false,
       EMPMAR_WETH: false,
       EMPMAR_UGASMAR21: false,
       EMPJAN_UGASJAN21: false,
@@ -644,7 +644,9 @@ export default new Vuex.Store({
       const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
       return balance;
     },
-
+    checkContractApprovals: async ({ commit, dispatch }) => {
+      return store.state.approvals;
+    },
     getContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
@@ -652,6 +654,7 @@ export default new Vuex.Store({
       }
       if (!store.state.approvals[payload.spenderAddress]) {
         await approve(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
+        await dispatch("fetchContractApproval", payload);
         return -1;
       } else {
         commit("UPDATE_APPROVAL", { identifier: payload.identifier, value: true });
