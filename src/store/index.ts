@@ -32,10 +32,7 @@ const defaultState = () => {
     },
     canWithdraw: false,
     theNewKey: null,
-    approved: {
-      contractA: false,
-      contractB: false,
-    },
+
     web3: {
       core: null,
       isInjected: false,
@@ -228,7 +225,7 @@ export default new Vuex.Store({
         commit("ON_CHAIN_CHANGED", { chainId: network.chainId });
         const account = accounts.length > 0 ? accounts[0] : null;
         commit("ON_PROVIDER_SUCCESS", { account });
-        await dispatch("fetchAllowanceEMP", { account });
+        // await dispatch("fetchAllowanceEMP", { spenderAddress: store.state.approvals.tokenEMP, tokenAddress: WETH });
         stateSave("account", account);
       } catch (e) {
         commit("ON_PROVIDER_FAILURE", { e });
@@ -637,31 +634,31 @@ export default new Vuex.Store({
       return balance;
     },
 
-    getApprovalEMP: async ({ commit, dispatch }, payload: { address: string }) => {
+    getApprovalEMP: async ({ commit, dispatch }, payload: { spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      if (!store.state.approvals[payload.address]) {
-        await approve(store.state.account, payload.address, WETH, Vue.prototype.$provider);
+      if (!store.state.approvals[payload.spenderAddress]) {
+        await approve(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
         return -1;
       } else {
-        commit("UPDATE", { approvals: { [payload.address]: true } });
+        commit("UPDATE", { approvals: { [payload.spenderAddress]: true } });
         return 1;
       }
     },
 
-    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { address: string }) => {
+    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const result = await getAllowance(store.state.account, payload.address, WETH, Vue.prototype.$provider);
+      const result = await getAllowance(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
       console.log("result", result);
       if (Number(result) > 0) {
-        commit("UPDATE", { approvals: { [payload.address]: true } });
+        commit("UPDATE", { approvals: { [payload.spenderAddress]: true } });
       } else {
-        commit("UPDATE", { approvals: { [payload.address]: false } });
+        commit("UPDATE", { approvals: { [payload.spenderAddress]: false } });
       }
       return result;
     },
