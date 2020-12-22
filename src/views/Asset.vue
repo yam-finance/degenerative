@@ -1318,6 +1318,7 @@ export default {
   width: 90%;
   margin: 10px auto;
   .toggle {
+    cursor: pointer;
     background: #e570671f;
     color: #e57067;
     border: none;
@@ -1352,6 +1353,7 @@ export default {
       }
     }
     button {
+      cursor: pointer;
       width: 35%;
       background: var(--primary);
       color: #ffffff;
