@@ -495,7 +495,6 @@ export default {
       //   ["07/01/2020", 320, 320, 287, 362],
       //   ["06/19/2020", 190, 148, 126, 190],
       // ]);
-      const colors = ["#5793f3", "#d14a61", "#675bba"];
 
       this.chartOptionsCandle = {
         title: {
@@ -587,12 +586,6 @@ export default {
             name: "uGas",
             type: "candlestick",
             data: this.assetChartData.values,
-            markPoint: {
-              data: [
-                { name: "年最高", value: 0.04, xAxis: 7, yAxis: 15 },
-                { name: "年最低", value: 0.047, xAxis: 11, yAxis: 2 },
-              ],
-            },
             itemStyle: {
               color: greenColor,
               color0: redColor,
@@ -1355,8 +1348,8 @@ export default {
     button {
       cursor: pointer;
       width: 35%;
-      background: var(--primary);
-      color: #ffffff;
+      background: #e570671f;
+      color: #e57067;
       border: none;
       border-radius: 0px 8px 8px 0px;
       height: 30px;

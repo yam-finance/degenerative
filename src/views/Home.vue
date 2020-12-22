@@ -5,7 +5,7 @@
         <div class="getdegenerative">
           <h1>Get Degenerative</h1>
           <div class="side">
-            <p class="subtitle">Cutting Edge DeFi Derivatives</p>
+            <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
             <p class="subtitle sub2">
               Built by <b><a href="https://yam.finance/" target="_blank">Yam</a></b
               >. Built on <b><a href="https://umaproject.org/" target="_blank">UMA</a></b
