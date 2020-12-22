@@ -8,6 +8,7 @@
             <div class="label">Degenerative</div>
           </div>
         </router-link>
+        <!-- <div class="router-links"><span>(Alpha)</span></div> -->
         <SpacePush />
         <div class="router-links">
           <router-link to="/">Home</router-link>
@@ -15,6 +16,7 @@
           <router-link to="/faq">Learn More</router-link>
           <!-- <router-link to="/assets">Assets</router-link> -->
           <!-- <a href="https://yam.finance/" target="_blank">by Yam.finance</a> -->
+          <a href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a>
         </div>
         <div class="flex vert">
           <!-- <Swipe></Swipe> -->
@@ -63,8 +65,9 @@ header {
 .degenerative-logo {
   display: flex;
   .picture {
-    background: url("../assets/logo/templogo.svg") center -5px;
-    background-size: 60px 40px; // 32px 32px;
+    // background: url("../assets/logo/templogo.svg") center -5px;
+    background: url("../assets/logo/zombie.png") center 0px no-repeat;
+    background-size: 26px 30px; // 60px 40px; // 32px 32px;
     width: 32px;
     height: 32px;
   }

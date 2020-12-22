@@ -10,7 +10,11 @@
           <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Interact</button>
         </h1>
       </Card>
-
+      <span class="warning"
+        >Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
+        OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
+        Users should take time to understand the token and ask questions on the Yam Discord.</span
+      >
       <Space size="md" />
 
       <div v-if="navPage === 'interact'">
@@ -23,10 +27,46 @@
 
           <div id="thebox">
             <div class="tabs">
-              <button @click="toNavAct('mint')" :class="{ active: navAct === 'mint' }">Mint</button>
-              <button @click="toNavAct('deposit')" :class="{ active: navAct === 'deposit' }">Deposit</button>
-              <button @click="toNavAct('redeem')" :class="{ active: navAct === 'redeem' }">Redeem</button>
-              <button @click="toNavAct('withdraw')" :class="{ active: navAct === 'withdraw' }">Withdraw</button>
+              <button
+                @click="toNavAct('mint')"
+                :class="{ active: navAct === 'mint' }"
+                v-tooltip="{
+                  content: '<b>Mint</b>: Open a new position, or mint new uTokens.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Mint
+              </button>
+              <button
+                @click="toNavAct('deposit')"
+                :class="{ active: navAct === 'deposit' }"
+                v-tooltip="{
+                  content: '<b>Deposit</b>: Increase collateral for a position.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Deposit
+              </button>
+              <button
+                @click="toNavAct('redeem')"
+                :class="{ active: navAct === 'redeem' }"
+                v-tooltip="{
+                  content: '<b>Redeem</b>: Redeem uTokens, reducing a position\'s debt.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Redeem
+              </button>
+              <button
+                @click="toNavAct('withdraw')"
+                :class="{ active: navAct === 'withdraw' }"
+                v-tooltip="{
+                  content: '<b>Withdraw</b>: Withdraw collateral from a position.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Withdraw
+              </button>
               <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
             </div>
             <div id="inputbox">
@@ -103,7 +143,14 @@
                 </div>
               </div> -->
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
-                  {{ !isPending ? ($store.state.approvals[assetEMPs[tokenSelected]] === true ? actName : "Approve") : "" }}
+                  {{
+                    !isPending
+                      ? $store.state.approvals[assetEMPs[tokenSelected]] === true ||
+                        (navAct == "redeem" && $store.state.approvals[assetTokens[tokenSelected]] === true)
+                        ? actName
+                        : "Approve"
+                      : ""
+                  }}
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
@@ -395,7 +442,7 @@ import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourl
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { EMP, EMPFEB, EMPMAR, UGAS_JAN21, UGAS_FEB21, UGAS_MAR21 } from "@/utils/addresses";
+import { EMP, EMPFEB, EMPMAR, UGAS_JAN21, UGAS_FEB21, UGAS_MAR21, WETH } from "@/utils/addresses";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -451,7 +498,7 @@ export default {
     this.lastPrice();
     this.initChart();
     this.getWETHBalance();
-    this.checkTime();
+    // this.checkTime();
 
     this.assetTokens = {
       uGAS_JAN21: UGAS_JAN21,
@@ -464,13 +511,26 @@ export default {
       uGAS_FEB21: EMPFEB,
       uGAS_MAR21: EMPMAR,
     };
+
+    // $store.state.approvals[assetTokens[tokenSelected]]
   },
   watch: {
     tokenSelected: function(newVal, oldVal) {
       console.log("here", newVal, oldVal);
       this.initChart();
       this.getEMPState();
-      this.fetchAllowance();
+      if (this.navAct == "redeem") {
+        this.fetchAllowanceRedeem();
+      } else {
+        this.fetchAllowance();
+      }
+    },
+    navAct: function(newVal, oldVal) {
+      if (newVal == "redeem") {
+        this.fetchAllowanceRedeem();
+      } else {
+        this.fetchAllowance();
+      }
     },
   },
   components: {},
@@ -508,7 +568,7 @@ export default {
       this.displayBalanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
     },
     async getUGasBalance() {
-      this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr() });
+      this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr()[0] });
       this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
     },
     async initChart() {
@@ -912,21 +972,21 @@ export default {
     empAddr() {
       switch (this.tokenSelected) {
         case "uGAS_JAN21":
-          return EMP;
+          return [EMP, UGAS_JAN21];
         case "uGAS_FEB21":
-          return EMPFEB;
+          return [EMPFEB, UGAS_FEB21];
         case "uGAS_MAR21":
-          return EMPMAR;
+          return [EMPMAR, UGAS_MAR21];
         default:
           return "";
       }
     },
     async getPosition() {
-      const pos = await this.getPositionData(this.empAddr());
+      const pos = await this.getPositionData(this.empAddr()[0]);
       return pos;
     },
     async getEMPState() {
-      const contractAddr = this.empAddr();
+      const contractAddr = this.empAddr()[0];
       let k;
       let pos;
       if (this.price == 0) {
@@ -962,7 +1022,7 @@ export default {
       return this.price;
     },
     async act() {
-      if (!store.state.approvals[this.empAddr()]) {
+      if (!store.state.approvals[this.empAddr()[0]] && this.actName !== "Redeem") {
         this.isPending = true;
         this.getApproval()
           .then(async e => {
@@ -991,7 +1051,7 @@ export default {
             console.log("mint");
             this.isPending = true;
             this.mint({
-              contract: this.empAddr(),
+              contract: this.empAddr()[0],
               collat: new BigNumber(this.collatAmt).times(ethDecs).toString(),
               tokens: new BigNumber(this.tokenAmt).times(empDecs).toString(),
             })
@@ -1019,7 +1079,7 @@ export default {
           case "Deposit":
             console.log("deposit");
             this.isPending = true;
-            this.deposit({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+            this.deposit({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
               .then(async e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1042,7 +1102,7 @@ export default {
           case "Request Withdraw":
             console.log("req withdraw");
             this.isPending = true;
-            this.requestWithdrawal({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+            this.requestWithdrawal({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
               .then(async e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1065,7 +1125,7 @@ export default {
           case "Withdraw":
             console.log("withdraw");
             this.isPending = true;
-            this.withdrawRequestFinalize({ contract: this.empAddr() })
+            this.withdrawRequestFinalize({ contract: this.empAddr()[0] })
               .then(e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1086,28 +1146,7 @@ export default {
           case "Instant Withdraw":
             console.log("instant withdraw");
             this.isPending = true;
-            this.withdraw({ contract: this.empAddr(), collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
-              .then(e => {
-                this.isPending = false;
-                if (e[1] && e[1] != "") {
-                  this.hasError = true;
-                  this.currentError = "Transaction would fail. Check balances & approvals";
-                }
-                this.getWETHBalance();
-              })
-              .catch(e => {
-                this.isPending = false;
-                if (e[1] && e[1] != "") {
-                  this.hasError = true;
-                  this.currentError = "Transaction would fail. Check balances & approvals";
-                }
-                this.getWETHBalance();
-              });
-            break;
-          case "Redeem":
-            console.log("redeem");
-            this.isPending = true;
-            this.redeem({ contract: this.empAddr(), tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
+            this.withdraw({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
               .then(e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1126,6 +1165,50 @@ export default {
               });
             break;
         }
+      }
+      if (!store.state.approvals[this.empAddr()[1]] && this.actName === "Redeem") {
+        this.isPending = true;
+        this.getApprovalRedeem()
+          .then(async e => {
+            console.log("approve", e[1]);
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+            await this.getUGasBalance();
+          })
+          .catch(async e => {
+            console.log("error", e[1]);
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+            await this.getUGasBalance();
+          });
+      } else {
+        console.log("redeem");
+        this.isPending = true;
+        this.redeem({ contract: this.empAddr()[0], tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
+          .then(e => {
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+          })
+          .catch(e => {
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+            this.getWETHBalance();
+          });
       }
       this.getEMPState();
     },
@@ -1163,15 +1246,23 @@ export default {
       this.runChecks();
     },
     async getApproval() {
-      const addressEMP = this.empAddr();
-      if (addressEMP) {
-        await this.getApprovalEMP({ address: addressEMP });
+      if (this.empAddr()[0]) {
+        await this.getApprovalEMP({ spenderAddress: this.empAddr()[0], tokenAddress: WETH });
       }
     },
     async fetchAllowance() {
-      const addressEMP = this.empAddr();
-      if (addressEMP) {
-        await this.fetchAllowanceEMP({ address: addressEMP });
+      if (this.empAddr()[0]) {
+        await this.fetchAllowanceEMP({ spenderAddress: this.empAddr()[0], tokenAddress: WETH });
+      }
+    },
+    async getApprovalRedeem() {
+      if (this.empAddr()[0]) {
+        await this.getApprovalEMP({ spenderAddress: this.empAddr()[1], tokenAddress: this.empAddr()[0] });
+      }
+    },
+    async fetchAllowanceRedeem() {
+      if (this.empAddr()[0]) {
+        await this.fetchAllowanceEMP({ spenderAddress: this.empAddr()[1], tokenAddress: this.empAddr()[0] });
       }
     },
     toggleWrap() {
@@ -1262,7 +1353,7 @@ export default {
   }
 }
 .info {
-  font-size: 12px;
+  font-size: 16px;
   margin: 0px 8px 0px 8px;
   padding: 8px 10px 8px 10px;
   color: #00000080;
@@ -1361,7 +1452,7 @@ export default {
   color: #fff;
   background: var(--primary);
   border: none;
-  border-radius: 6px;
+  border-radius: 2px;
   padding: 0px 10px;
   font-size: 22px;
   font-weight: normal;
@@ -1378,7 +1469,7 @@ export default {
 }
 
 .wrapETH {
-  width: 90%;
+  width: 100%;
   margin: 10px auto;
   .toggle {
     cursor: pointer;
@@ -1423,9 +1514,14 @@ export default {
       border: none;
       border-radius: 0px 8px 8px 0px;
       height: 30px;
-      text-align: left;
+      text-align: center;
       float: right;
     }
   }
+}
+.warning {
+  font-size: 10px;
+  padding: 0px 30px;
+  color: #afafaf;
 }
 </style>

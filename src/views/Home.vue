@@ -63,7 +63,8 @@
               <img src="../assets/graphics/graphic_redeem.svg" />
               <h4>Redeem</h4>
               <div>
-                Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median and 2-hour TWAP of gas.
+                Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
+                transactions.
               </div>
             </div>
           </div>
