@@ -1,16 +1,20 @@
 import Vue from "vue";
 import Web3 from "web3";
+import BigNumber from "bignumber.js";
 import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
-import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve } from "@/utils";
+import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve, getTWAP, getAllowance } from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
-import { AbiItem } from "web3-utils";
+import { AbiItem, toHex } from "web3-utils";
 import { provider } from "web3-core";
 import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
+import EMPContract from "@/utils/abi/emp.json";
+import WETHContract from "@/utils/abi/weth.json";
+import { WETH, EMP } from "@/utils/addresses";
 
 Vue.use(Vuex);
 
@@ -21,19 +25,12 @@ const defaultState = () => {
     version: "A-0.1", // make dynamic
     theme: stateLoad("theme") || "light",
     account: stateLoad("account") || "0x0",
-    userType: "default", // seeker, provider, arbitrer
-    currentMetapool: [],
-    metapools: [],
-    quote: {
-      metapoolId: 0, // or
-      contractId: 0, // or
-      price: 0,
-    }, // populated with user choosing
+    currentEMP: "",
+    contractWETH: "",
     approvals: {
-      payToken: false,
+      tokenEMP: null,
     },
     canWithdraw: false,
-
     theNewKey: null,
     approved: {
       contractA: false,
@@ -45,6 +42,29 @@ const defaultState = () => {
       web3Instance: null,
       network: config.networks["1"],
     },
+    empState: {
+      expirationTimestamp: new BigNumber(0),
+      collateralCurrency: "",
+      priceIdentifier: "",
+      tokenCurrency: "",
+      collateralRequirement: new BigNumber(0),
+      disputeBondPct: new BigNumber(0),
+      disputerDisputeRewardPct: new BigNumber(0),
+      sponsorDisputeRewardPct: new BigNumber(0),
+      minSponsorTokens: new BigNumber(0),
+      timerAddress: "",
+      cumulativeFeeMultiplier: new BigNumber(0),
+      rawTotalPositionCollateral: new BigNumber(0),
+      totalTokensOutstanding: new BigNumber(0),
+      liquidationLiveness: new BigNumber(0),
+      withdrawalLiveness: new BigNumber(0),
+      currentTime: new BigNumber(0),
+      isExpired: false,
+      contractState: 0,
+      finderAddress: "",
+      expiryPrice: new BigNumber(0),
+    },
+    currPos: {},
     provider: {},
     connector: {},
   };
@@ -89,7 +109,7 @@ export default new Vuex.Store({
       console.debug("ON_PROVIDER_SUCCESS", data);
     },
     ON_PROVIDER_FAILURE(state, data) {
-      state.account = null;
+      // state.account = null;
       console.debug("ON_PROVIDER_FAILURE", data);
     },
     ON_CHAIN_CHANGED(state, data) {
@@ -107,6 +127,22 @@ export default new Vuex.Store({
     ON_ACCOUNT_CHANGED(state, data) {
       state.account = data.account;
       console.debug("ON_ACCOUNT_CHANGED", data);
+    },
+    EMP_STATE(state, data) {
+      state.empState = data;
+      console.debug("EMP_STATE", data);
+    },
+    CURR_POS(state, data) {
+      state.currPos = data;
+      console.debug("CURR_POS", data);
+    },
+    GET_EMP(state, data) {
+      state.currentEMP = data.currentEMP;
+      console.debug("GET_EMP", data);
+    },
+    GET_WETH(state, data) {
+      state.contractWETH = data.contractWETH;
+      console.debug("GET_WETH", data);
     },
 
     // to sort all once finished (-camelcase reminder)
@@ -127,6 +163,7 @@ export default new Vuex.Store({
           }
         }, 500);
       }
+
       // setTimeout(async () => {
       //   const connector = await Vue.prototype.$auth.getConnector();
       //   if (connector) {
@@ -157,7 +194,7 @@ export default new Vuex.Store({
         Vue.prototype.$web3 = auth.web3;
         Vue.prototype.$provider = auth.web3.provider;
         await dispatch("loadProvider");
-        console.log("Vue.prototype.$web3", Vue.prototype.$web3);
+        // console.log("Vue.prototype.$web3", Vue.prototype.$web3);
       }
     },
     disconnect: async ({ commit }) => {
@@ -191,6 +228,7 @@ export default new Vuex.Store({
         commit("ON_CHAIN_CHANGED", { chainId: network.chainId });
         const account = accounts.length > 0 ? accounts[0] : null;
         commit("ON_PROVIDER_SUCCESS", { account });
+        await dispatch("fetchAllowanceEMP", { account });
         stateSave("account", account);
       } catch (e) {
         commit("ON_PROVIDER_FAILURE", { e });
@@ -211,16 +249,522 @@ export default new Vuex.Store({
       return balance;
     },
 
-    // getMetapools: async ({ commit }) => {
-    //   let metapools;
-    //   commit('UPDATE', { metapools });
-    //   return metapools;
-    // },
-    // getMetapoolContract: async ({ commit }, { metapoolId }) => {
-    //   let contract;
-    //   commit('UPDATE', { selectedContract });
-    //   return contract;
-    // },
+    getEMP: ({ commit, dispatch }, payload: { address: string }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.address);
+      commit("GET_EMP", { currentEMP: empContract });
+      return empContract;
+    },
+
+    getWETH: ({ commit, dispatch }, payload: { address: string }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const contractWETH = new web3.eth.Contract((WETHContract.abi as unknown) as AbiItem, payload.address);
+      commit("GET_WETH", { contractWETH: contractWETH });
+      return contractWETH;
+    },
+
+    getPositionData: async ({ commit, dispatch }, contract: string) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: contract });
+      try {
+        const pos = await emp.methods.positions(store.state.account).call();
+        commit("CURR_POS", pos);
+        return pos;
+      } catch (e) {
+        console.log("couldnt get position for: ", contract, " for user: ", store.state.account);
+      }
+    },
+
+    setEMPState: async ({ commit, dispatch }, contract: string) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: contract });
+      try {
+        const res = await Promise.all([
+          emp.methods.expirationTimestamp().call(),
+          emp.methods.collateralCurrency().call(),
+          emp.methods.priceIdentifier().call(),
+          emp.methods.tokenCurrency().call(),
+          emp.methods.collateralRequirement().call(),
+          emp.methods.disputeBondPct().call(),
+          emp.methods.disputerDisputeRewardPct().call(),
+          emp.methods.sponsorDisputeRewardPct().call(),
+          emp.methods.minSponsorTokens().call(),
+          emp.methods.timerAddress().call(),
+          emp.methods.cumulativeFeeMultiplier().call(),
+          emp.methods.rawTotalPositionCollateral().call(),
+          emp.methods.totalTokensOutstanding().call(),
+          emp.methods.liquidationLiveness().call(),
+          emp.methods.withdrawalLiveness().call(),
+          emp.methods.getCurrentTime().call(),
+          emp.methods.contractState().call(),
+          emp.methods.finder().call(),
+          emp.methods.expiryPrice().call(),
+        ]);
+        const dat = {
+          expirationTimestamp: new BigNumber(res[0]),
+          collateralCurrency: res[1], // address
+          priceIdentifier: res[2],
+          tokenCurrency: res[3], // address
+          collateralRequirement: new BigNumber(res[4]),
+          disputeBondPct: new BigNumber(res[5]),
+          disputerDisputeRewardPct: new BigNumber(res[6]),
+          sponsorDisputeRewardPct: new BigNumber(res[7]),
+          minSponsorTokens: new BigNumber(res[8]),
+          timerAddress: res[9], // address
+          cumulativeFeeMultiplier: new BigNumber(res[10]),
+          rawTotalPositionCollateral: new BigNumber(res[11]),
+          totalTokensOutstanding: new BigNumber(res[12]),
+          liquidationLiveness: new BigNumber(res[13]),
+          withdrawalLiveness: new BigNumber(res[14]),
+          currentTime: new BigNumber(res[15]),
+          isExpired: Number(res[15]) >= Number(res[0]),
+          contractState: Number(res[16]),
+          finderAddress: res[17], // address
+          expiryPrice: new BigNumber(res[18]),
+        };
+        commit("EMP_STATE", dat);
+        return dat;
+      } catch (e) {
+        console.log("error getting emp state", e);
+        return "bad";
+      }
+    },
+
+    mint: async ({ commit, dispatch }, payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const web3 = new Web3(web3Provider);
+        let data = emp.methods.create([payload.collat], [payload.tokens]).encodeABI();
+        data = data.concat(web3.utils.toHex("0x97990b693835da58a281636296d2bf02787dea17").slice(2));
+        const ge = await web3.eth.estimateGas(
+          {
+            from: store.state.account,
+            to: emp.options.address,
+            data: data,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return [false, error];
+          }
+        );
+        return web3.eth.sendTransaction(
+          {
+            from: store.state.account,
+            to: emp.options.address,
+            data: data,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not mint tokens", error);
+              payload.onTxHash && payload.onTxHash("");
+              return [false, error];
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Mint transaction failed.");
+              return [false, "Mint transaction failed."];
+            }
+            return [true, ""];
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return [false, e];
+      }
+    },
+
+    deposit: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const ge = await emp.methods.deposit([payload.collat]).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        return emp.methods.deposit([payload.collat]).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not deposit collateral", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Deposit transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return false;
+      }
+    },
+
+    requestWithdrawal: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const ge = await emp.methods.requestWithdrawal([payload.collat]).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        return emp.methods.requestWithdrawal([payload.collat]).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not request withdraw", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Withdrawal request transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return false;
+      }
+    },
+
+    withdrawRequestFinalize: async ({ commit, dispatch }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const ge = await emp.methods.withdrawPassedRequest().estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        return emp.methods.withdrawPassedRequest().send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not withdraw", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Withdrawal transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return false;
+      }
+    },
+
+    withdraw: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const ge = await emp.methods.withdraw([payload.collat]).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        return emp.methods.withdraw([payload.collat]).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not instant withdraw", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Instant withdrawal transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return false;
+      }
+    },
+
+    redeem: async ({ commit, dispatch }, payload: { contract: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const ge = await emp.methods.redeem([payload.tokens]).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        return emp.methods.redeem([payload.tokens]).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("EMP could not redeem", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Redeem transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+      } catch (e) {
+        console.error("error", e);
+        return false;
+      }
+    },
+
+    getUserUGasBalance: async ({ commit, dispatch }, payload: { contract: string }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        console.log("getting ugas bal", emp);
+        const synth = await emp.methods.tokenCurrency().call();
+        const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
+        console.log("bal", balance);
+        return balance;
+      } catch (e) {
+        console.log("here");
+        return 0;
+      }
+    },
+
+    getUserWETHBalance: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
+      return balance;
+    },
+
+    getApprovalEMP: async ({ commit, dispatch }, payload: { address: string }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      if (!store.state.approvals[payload.address]) {
+        await approve(store.state.account, payload.address, WETH, Vue.prototype.$provider);
+        return -1;
+      } else {
+        commit("UPDATE", { approvals: { [payload.address]: true } });
+        return 1;
+      }
+    },
+
+    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { address: string }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const result = await getAllowance(store.state.account, payload.address, WETH, Vue.prototype.$provider);
+      console.log("result", result);
+      if (Number(result) > 0) {
+        commit("UPDATE", { approvals: { [payload.address]: true } });
+      } else {
+        commit("UPDATE", { approvals: { [payload.address]: false } });
+      }
+      return result;
+    },
+
+    wrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const weth = await dispatch("getWETH", { address: WETH });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
+        const ge = await weth.methods.deposit().estimateGas(
+          {
+            from: store.state.account,
+            vale: amount,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        const wrap = await weth.methods.deposit().send(
+          {
+            from: store.state.account,
+            value: amount,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("WETH could not wrap", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Wrap transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+        console.log("wrap", wrap);
+        return wrap;
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
+    },
+
+    unwrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const weth = await dispatch("getWETH", { address: WETH });
+      try {
+        const web3Provider = Vue.prototype.$provider;
+        const amount = new BigNumber(payload.amount).times(new BigNumber(10).pow(18)).toString();
+        const ge = await weth.methods.withdraw(amount).estimateGas(
+          {
+            from: store.state.account,
+            gas: 50000000,
+          },
+          async (error: any) => {
+            console.log("SimTx Failed, ", error);
+            return false;
+          }
+        );
+        const unwrap = await weth.methods.withdraw(amount).send(
+          {
+            from: store.state.account,
+            gas: ge,
+          },
+          async (error: any, txHash: string) => {
+            if (error) {
+              console.error("WETH could not wrap", error);
+              payload.onTxHash && payload.onTxHash("");
+              return false;
+            }
+            if (payload.onTxHash) {
+              payload.onTxHash(txHash);
+            }
+            const status = await waitTransaction(web3Provider, txHash);
+            if (!status) {
+              console.log("Wrap transaction failed.");
+              return false;
+            }
+            return true;
+          }
+        );
+        console.log("unwrap", unwrap);
+        return unwrap;
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
+    },
   },
   getters: {
     theme(state) {
@@ -237,6 +781,9 @@ export default new Vuex.Store({
       const auth = await Vue.prototype.$auth;
       const connector = await auth.getConnector();
       return connector; // move to state
+    },
+    empState(state) {
+      return state.empState;
     },
   },
 });

@@ -2,6 +2,7 @@
   <div id="app">
     <Header />
     <router-view />
+    <!-- <Footer /> -->
   </div>
 </template>
 
@@ -20,6 +21,5 @@ export default {
     titleTemplate: "%s - Degenerative",
   },
   methods: {},
-  // mounted() {},
 };
 </script>

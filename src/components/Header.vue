@@ -11,10 +11,10 @@
         <SpacePush />
         <div class="router-links">
           <router-link to="/">Home</router-link>
-          <!-- <router-link to="/assets">Assets</router-link> -->
           <router-link to="/assets/ugas">uGAS</router-link>
-          <a href="#" target="_blank">Learn More</a>
-          <a href="https://yam.finance/" target="_blank">by Yam.finance</a>
+          <router-link to="/faq">Learn More</router-link>
+          <!-- <router-link to="/assets">Assets</router-link> -->
+          <!-- <a href="https://yam.finance/" target="_blank">by Yam.finance</a> -->
         </div>
         <div class="flex vert">
           <!-- <Swipe></Swipe> -->
@@ -63,8 +63,8 @@ header {
 .degenerative-logo {
   display: flex;
   .picture {
-    background: url("../assets/logo/32.png?");
-    background-size: 32px 32px;
+    background: url("../assets/logo/templogo.svg") center -5px;
+    background-size: 60px 40px; // 32px 32px;
     width: 32px;
     height: 32px;
   }
@@ -96,7 +96,7 @@ header {
     box-shadow: 0px 2px 3px var(--back-wallet-hover);
   }
   &.connected {
-    background: #ff4a4a; //temp
+    background: var(--primary); //temp
     color: #fff; //temp
   }
 }
