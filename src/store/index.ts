@@ -228,8 +228,7 @@ export default new Vuex.Store({
         commit("ON_CHAIN_CHANGED", { chainId: network.chainId });
         const account = accounts.length > 0 ? accounts[0] : null;
         commit("ON_PROVIDER_SUCCESS", { account });
-
-        await dispatch("fetchAllowanceEMP");
+        await dispatch("fetchAllowanceEMP", { account });
         stateSave("account", account);
       } catch (e) {
         commit("ON_PROVIDER_FAILURE", { e });
