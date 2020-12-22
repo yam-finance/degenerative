@@ -283,7 +283,7 @@
         <Card>
           <div style="display: flex; justify-content: center">
             <img
-              src="https://lh6.googleusercontent.com/2oUnz2NYbdZBRCZcm-_LVhtQeB6nM09FjnV_eg6zce8eW7snQjR02spr9ZhDxNQtjaMY5_salgt1WeOQlS40OcglfqVGdhQGVZP35292"
+              src="https://lh4.googleusercontent.com/lcIV49d4j16mN5xrLN3XNTRR8TWJty4gnAuHhryWaGONwX1s3Brtvyk6HvGC328agHpvxXuY08Lsb2lU6dHVeOKce--cta2XJdm9Dgjb=s1600"
             />
           </div>
           <br />
