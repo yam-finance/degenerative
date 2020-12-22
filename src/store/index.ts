@@ -14,7 +14,7 @@ import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
 import WETHContract from "@/utils/abi/weth.json";
-import { WETH, EMP } from "@/utils/addresses";
+import { WETH } from "@/utils/addresses";
 
 Vue.use(Vuex);
 
@@ -27,11 +27,17 @@ const defaultState = () => {
     account: stateLoad("account") || "0x0",
     currentEMP: "",
     contractWETH: "",
-    approvals: {
-      tokenEMP: null,
-    },
     canWithdraw: false,
     theNewKey: null,
+    contracts: {},
+    approvals: {
+      EMPFEB_WETH: false,
+      EMPJAN_WETH: true,
+      EMPMAR_WETH: false,
+      EMPMAR_UGASMAR21: false,
+      EMPJAN_UGASJAN21: false,
+      EMPFEB_UGASFEB21: false,
+    },
 
     web3: {
       core: null,
@@ -140,6 +146,12 @@ export default new Vuex.Store({
     GET_WETH(state, data) {
       state.contractWETH = data.contractWETH;
       console.debug("GET_WETH", data);
+    },
+    UPDATE_APPROVAL(state, data) {
+      // state.contracts[data.address].approved = data.value;
+      // Vue.set(state, 'approvals.' + data.identifier, data.value);
+      state.approvals[data.identifier] = data.value;
+      console.debug("UPDATE_APPROVAL", data);
     },
 
     // to sort all once finished (-camelcase reminder)
@@ -614,10 +626,9 @@ export default new Vuex.Store({
       }
       const emp = await dispatch("getEMP", { address: payload.contract });
       try {
-        console.log("getting ugas bal", emp);
         const synth = await emp.methods.tokenCurrency().call();
         const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
-        console.log("bal", balance);
+        console.log("balance", balance);
         return balance;
       } catch (e) {
         console.log("here");
@@ -634,7 +645,7 @@ export default new Vuex.Store({
       return balance;
     },
 
-    getApprovalEMP: async ({ commit, dispatch }, payload: { spenderAddress: string; tokenAddress: string }) => {
+    getContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
@@ -643,22 +654,22 @@ export default new Vuex.Store({
         await approve(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
         return -1;
       } else {
-        commit("UPDATE", { approvals: { [payload.spenderAddress]: true } });
+        commit("UPDATE_APPROVAL", { identifier: payload.identifier, value: true });
         return 1;
       }
     },
 
-    fetchAllowanceEMP: async ({ commit, dispatch }, payload: { spenderAddress: string; tokenAddress: string }) => {
+    fetchContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
       const result = await getAllowance(store.state.account, payload.spenderAddress, payload.tokenAddress, Vue.prototype.$provider);
-      console.log("result", result);
+      console.debug("allowance", payload.spenderAddress, payload.tokenAddress, result);
       if (Number(result) > 0) {
-        commit("UPDATE", { approvals: { [payload.spenderAddress]: true } });
+        commit("UPDATE_APPROVAL", { identifier: payload.identifier, value: true });
       } else {
-        commit("UPDATE", { approvals: { [payload.spenderAddress]: false } });
+        commit("UPDATE_APPROVAL", { identifier: payload.identifier, value: false });
       }
       return result;
     },
