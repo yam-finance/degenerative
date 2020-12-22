@@ -521,6 +521,11 @@ export default {
     await this.getWETHBalance();
     await this.updateApprovals();
   },
+  computed: {
+    account() {
+      return store.state.account;
+    },
+  },
   watch: {
     tokenSelected: function(newVal, oldVal) {
       if (!this.tokenSelected) {
@@ -543,6 +548,9 @@ export default {
       } else {
         this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
       }
+    },
+    account(newAccount, oldAccount) {
+      this.updateUserInfo();
     },
   },
   components: {},
