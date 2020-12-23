@@ -115,7 +115,7 @@ h1 {
       font-size: 54px;
     }
     @media (max-width: 420px) {
-      font-size: 42px;
+      font-size: 38px;
     }
   }
   .subtitle {
