@@ -19,7 +19,11 @@ body {
 }
 
 body {
-  padding-bottom: 40px;
+  // padding-bottom: 40px;
+}
+
+body.navresp {
+  overflow: hidden;
 }
 
 a {
@@ -90,6 +94,10 @@ button {
     &:hover {
       box-shadow: none;
 
+    }
+
+    @media (max-width: 420px) {
+      display: block;
     }
   }
 }
