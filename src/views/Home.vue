@@ -11,14 +11,16 @@
               >. Built on <b><a href="https://umaproject.org/" target="_blank">UMA</a></b
               >. Built for Degens.
             </p>
-            <p>
+            <p class="justify">
               Degenerative Finance is a collaboration between Yam Finance and the UMA Project to develop a suite of innovative DeFi derivatives, starting with
               the inaugural launch of uGAS, which tracks and hedges the cost of gas on the Ethereum blockchain, and with many more exciting synthetics to come.
             </p>
             <router-link class="grph" to="/assets/ugas">Launch</router-link>
           </div>
         </div>
+      </Container>
 
+      <Container :size="1000" class="tempsp">
         <div>
           <h1>How to use Degenerative</h1>
           <Space size="sm" />
@@ -27,9 +29,9 @@
             <div class="item">
               <img src="../assets/graphics/graphic_create.svg" />
               <h4>Create</h4>
-              <div>
+              <div class="text justify">
                 Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the following
-                month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained
+                month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained.
               </div>
             </div>
 
@@ -38,7 +40,7 @@
             <div class="item">
               <img src="../assets/graphics/graphic_trade.svg" />
               <h4>Trade</h4>
-              <div>
+              <div class="text justify">
                 Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
                 spot price as profit.
               </div>
@@ -51,7 +53,7 @@
             <div class="item">
               <img src="../assets/graphics/graphic_liqudity.svg" />
               <h4>Provide Liquidity</h4>
-              <div>
+              <div class="text justify">
                 Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
                 deposit their uGAS tokens. Tokens which are traded and then deposited will not qualify.
               </div>
@@ -62,7 +64,7 @@
             <div class="item">
               <img src="../assets/graphics/graphic_redeem.svg" />
               <h4>Redeem</h4>
-              <div>
+              <div class="text justify">
                 Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
                 transactions.
               </div>
@@ -79,6 +81,9 @@
   background: url("../assets/graphics/city.svg") no-repeat center -60px;
   background-size: 1420px 2254px; // 1360px 2164px;
   min-height: 900px;
+  @media (max-width: 420px) {
+    background-size: 1420px 2564px;
+  }
 }
 .home-content {
   z-index: 2;
@@ -90,18 +95,42 @@
   text-align: center;
 }
 
+h1 {
+  @media (max-width: 420px) {
+    font-size: 24px;
+    margin-top: 15px;
+  }
+}
+
 .getdegenerative {
   min-height: 980px;
+  @media (max-width: 420px) {
+    min-height: 620px;
+  }
+
   h1 {
-    font-size: 85px;
+    font-size: 65px;
+
+    @media (max-width: 690px) {
+      font-size: 54px;
+    }
+    @media (max-width: 420px) {
+      font-size: 42px;
+    }
   }
   .subtitle {
     font-size: 28px;
     font-weight: 100;
+    @media (max-width: 420px) {
+      font-size: 22px;
+    }
   }
   .sub2 {
     font-size: 26px;
     margin-bottom: 12px;
+    @media (max-width: 420px) {
+      font-size: 22px;
+    }
   }
   div {
     font-size: 18px;
@@ -112,15 +141,30 @@
   max-width: 560px;
 }
 
+// row
 .row {
   display: flex;
   width: 100%;
 
+  @media (max-width: 540px) {
+    flex-flow: column nowrap;
+    align-items: center;
+  }
   div.item {
     flex: 1 1 0%;
+
+    .text {
+      line-height: 28px;
+    }
   }
   img {
     margin: 0 auto;
+  }
+}
+
+.tempsp {
+  @media (max-width: 420px) {
+    background: #fff7f7;
   }
 }
 </style>
