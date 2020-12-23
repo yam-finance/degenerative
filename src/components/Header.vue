@@ -32,9 +32,8 @@
           <!-- <button id="wallet" @click="logout">Reset Instance</button> -->
         </div>
 
-        <Space class="resp-show" />
-
         <div @click="respNavOpen" class="resp-links-open">
+          <Space />
           <menu-icon />
         </div>
       </div>
