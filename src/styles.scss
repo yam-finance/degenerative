@@ -22,6 +22,10 @@ body {
   padding-bottom: 40px;
 }
 
+body.navresp {
+  overflow: hidden;
+}
+
 a {
   color: var(--text);
   font-family: "Shanti", sans-serif;
@@ -90,6 +94,10 @@ button {
     &:hover {
       box-shadow: none;
 
+    }
+
+    @media (max-width: 420px) {
+      display: block;
     }
   }
 }
