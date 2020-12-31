@@ -6,11 +6,11 @@
   --back-wallet: #ffeded;
   --text-wallet: #FF4A4A;
   --back-wallet-hover: #f6e6ffbf;
-  --back-gradient: linear-gradient(rgba(255, 255, 255, 0.11) 0%, #fffbff 100%);
-
+  --back-gradient: linear-gradient(rgb(245 173 173 / 11%) 0%, #fffaff 100%);
+  
   // temp
-  --back-act: #fff;
-  --back-act: #ffeded;
+  --back-act: #fff8f7;
+  --back-act: #fffdfd;
 }
 
 [data-theme="dark"] {
@@ -23,3 +23,5 @@
   --back-wallet-hover: #2d202f8f;
   --back-gradient: linear-gradient(#FF4A4A 0%, #c93b3b 100%);
 }
+
+// $primary: var(--primary);

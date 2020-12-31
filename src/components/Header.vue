@@ -2,7 +2,7 @@
   <header>
     <Container :size="1000">
       <div id="nav">
-        <router-link to="/">
+        <router-link class="logo" to="/">
           <div class="degenerative-logo">
             <div class="picture"></div>
             <div class="label">Degenerative</div>
@@ -10,14 +10,13 @@
         </router-link>
         <!-- <div class="router-links"><span>(Alpha)</span></div> -->
         <SpacePush />
-        <div @click="smallRouterClick" class="router-links">
+        <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
           <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
           <router-link @click.native="respNavClick" to="/faq">Learn More</router-link>
           <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
           <!-- <a @click.native="respNavClick" href="https://yam.finance/" target="_blank">by Yam.finance</a> -->
           <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a>
-
           <div @click="respNavClose" class="resp-links-close">Close</div>
           <Space />
         </div>
@@ -47,7 +46,6 @@
 header {
   display: flex;
   width: 100%;
-  background: var(--back);
   height: 65px;
   margin-bottom: 0px;
   position: relative;
@@ -59,6 +57,9 @@ header {
     font-size: 14px;
     color: var(--text);
     font-weight: bold;
+    &.logo {
+      margin: 0px 10px 0px 0px;
+    }
     &.router-link-exact-active {
       color: var(--primary);
     }
@@ -205,15 +206,7 @@ export default {
   components: {
     MenuIcon,
   },
-  watch: {
-    respNav: function(newVal, oldVal) {
-      // if(this.respNav) {
-      if (newVal) {
-        // body
-        // overflow: hidden;
-      }
-    },
-  },
+  watch: {},
   methods: {
     ...mapActions(["connect", "disconnect", "reset"]),
     async auth() {
@@ -244,7 +237,6 @@ export default {
       this.respNav = true;
       if (document.querySelector("body").classList.contains("navresp")) {
         document.querySelector("body").classList.remove("navresp");
-        // document.querySelector(".router-links").classList.add("hide");
         document.querySelector(".router-links").classList.remove("show");
       } else {
         document.querySelector("body").classList.add("navresp");
@@ -253,27 +245,10 @@ export default {
       }
     },
     respNavClick() {
-      // this.respNav = false;
-      console.log("remove(navresp)");
       document.querySelector("body").classList.remove("navresp");
-      // document.querySelector(".router-links").classList.add("hide");
       document.querySelector(".router-links").classList.remove("show");
     },
-    smallRouterClick() {
-      if (this.respNav) {
-        // document.querySelector(".router-links").classList.add("navresp");
-        // close router on small screens
-        // display none;
-      }
-    },
-    // send() {
-    //   this.sendit("sendit");
-    // },
-    // async auth("walletconnect") {
-    // },
   },
-  mounted() {
-    // this.send();
-  },
+  // mounted() {},
 };
 </script>

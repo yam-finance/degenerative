@@ -10,7 +10,7 @@
           <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Interact</button>
         </h1>
       </Card>
-      <span class="warning"
+      <span class="warning justify"
         >Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
         OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
         Users should take time to understand the token and ask questions on the Yam Discord.</span
@@ -24,7 +24,9 @@
               <chart :options="chartOptionsCandle" />
             </div>
           </div>
+        </Container>
 
+        <Container :size="440" class="maker">
           <div id="thebox">
             <div class="tabs">
               <button
@@ -90,7 +92,7 @@
                       delay: { show: 150, hide: 100 },
                     }"
                   >
-                    Request New Withdraw
+                    Request Withdraw
                   </button>
                   <button
                     @click="toWithdrawType('existing')"
@@ -119,10 +121,10 @@
                   name=""
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
-                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Token(s)'"
+                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="navAct != 'redeem' && navAct !== 'lptrade'"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
                   id=""
                   class="numeric setvalue"
                   type="number"
@@ -133,9 +135,6 @@
                   :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
                 <!-- to add max button -->
-                <div class="error" v-if="hasError && navAct !== 'lptrade'">
-                  {{ currentError }}
-                </div>
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
                 Info ▼
                 <div :class="{ hideDropdown: !showDropdown }">
@@ -170,22 +169,33 @@
               </div>
             </div>
           </div>
+          <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">
+            {{ currentError }}
+          </div>
 
           <div class="wrapETH">
             <button class="toggle" @click="toggleWrap">Wrap ETH</button>
             <div v-if="showWrapETH">
               <div class="wraprow">
                 <input type="number" placeholder="Amount" v-model="amountToWrap" />
-                <button class="wrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
+                <button class="wrap" :disabled="!amountToWrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
               </div>
               <div class="wraprow">
                 <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
-                <button class="unwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+                <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
               </div>
             </div>
           </div>
 
           <div class="info" v-if="info">
+            <label
+              v-tooltip="{
+                content: 'Synthetic selected',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+              ><b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b></label
+            >
             <label
               v-tooltip="{
                 content: 'Price at which your position can be liquidated',
@@ -200,7 +210,7 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Post-Tx): <b>{{ pricedCR }}</b></label
+              >Collateral Ratio (Post-Tx): <b>{{ numeral("0.0000a", pricedCR) }}</b></label
             >
             <label
               v-tooltip="{
@@ -216,16 +226,9 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Tx): <b>{{ pricedTxCR }}</b></label
+              >Collateral Ratio (Tx): <b>{{ numeral("0.0000a", pricedTxCR) }}</b></label
             >
-            <label
-              v-tooltip="{
-                content: 'Synthetic selected',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-              >Selected: <b>{{ tokenSelected ? tokenSelected : "None" }}</b></label
-            >
+
             <br />
             <label
               >Your WETH: <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b></label
@@ -844,12 +847,12 @@ export default {
           totalCollat = this.collatAmt ? col - Number(this.collatAmt) : col;
         }
         if (this.tokenAmt && this.collatAmt) {
-          this.pricedTxCR = this.collatAmt / this.tokenAmt / this.price;
+          this.pricedTxCR = Number(this.collatAmt / this.tokenAmt / this.price) || 0;
         }
-        this.pricedCR = (totalCollat / totalTokens / this.price).toFixed(4);
+        this.pricedCR = Number(totalCollat / totalTokens / this.price) || 0;
       } else {
         if (this.tokenAmt && this.collatAmt) {
-          this.pricedTxCR = (this.collatAmt / this.tokenAmt / this.price).toFixed(4);
+          this.pricedTxCR = Number(this.collatAmt / this.tokenAmt / this.price) || 0;
         }
       }
     },
@@ -944,7 +947,6 @@ export default {
           this.currentError = "Not enough WETH. Please wrap ETH below";
           return;
         }
-        console.log(this.display);
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
           if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
@@ -1007,14 +1009,16 @@ export default {
         pos = res[1];
       }
       this.currPos = pos;
-      this.currTokens = new BigNumber(this.currPos.tokensOutstanding)
-        .div(empDecs)
-        .toFixed(4)
-        .toString();
-      this.currCollat = new BigNumber(this.currPos.rawCollateral)
-        .div(ethDecs)
-        .toFixed(4)
-        .toString();
+      if (this.currPos) {
+        this.currTokens = new BigNumber(this.currPos.tokensOutstanding)
+          .div(empDecs)
+          .toFixed(4)
+          .toString();
+        this.currCollat = new BigNumber(this.currPos.rawCollateral)
+          .div(ethDecs)
+          .toFixed(4)
+          .toString();
+      }
       this.currEMP = k;
       const totalColl = k.cumulativeFeeMultiplier.div(ethDecs).times(k.rawTotalPositionCollateral.dividedBy(ethDecs));
       const totalTokens = k.totalTokensOutstanding.div(empDecs);
@@ -1213,7 +1217,6 @@ export default {
             break;
         }
       }
-
       this.getEMPState();
     },
     async updateUserInfo() {
@@ -1224,6 +1227,7 @@ export default {
       console.log("toNavPage", on);
     },
     toNavAct(on) {
+      this.closeWrap();
       this.hasError = false;
       this.currentError = "";
       this.navAct = on;
@@ -1270,6 +1274,9 @@ export default {
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;
     },
+    closeWrap() {
+      this.showWrapETH = false;
+    },
     async makeWrapETH(amount) {
       const wrap = await this.wrapETH({ amount: amount });
       console.log("wrapETH", wrap);
@@ -1288,10 +1295,16 @@ export default {
 .hideDropdown {
   display: none;
 }
-.error {
+div.error {
   color: var(--primary);
   background: var(--back-act);
   text-align: center;
+  font-size: 16px;
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 0px 0px 10px 10px;
+  padding: 5px 0px 5px 0px;
+  z-index: 0;
 }
 #inputbox {
 }
@@ -1303,7 +1316,6 @@ export default {
   button {
     cursor: pointer;
     width: calc(100% / 4.99);
-    // border-radius: 10px;
     border: none;
     height: 50px;
     font-size: 14px;
@@ -1313,12 +1325,10 @@ export default {
     background: var(--back-act);
     border-bottom: 2px solid #00000017;
 
-    &.active,
-    &:hover {
+    &.active {
       color: #fff;
       background: var(--primary);
     }
-
     span {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1331,7 +1341,7 @@ export default {
   white-space: nowrap;
   button {
     cursor: pointer;
-    width: calc(100% / 2.9);
+    width: calc(100% / 3);
     border: none;
     height: 33px;
     font-size: 12px;
@@ -1339,10 +1349,8 @@ export default {
     transition: all 0.1s linear;
     color: var(--primary);
     background: var(--back-act);
-    border-bottom: 2px solid #00000017;
 
-    &.active,
-    &:hover {
+    &.active {
       color: #fff;
       background: var(--primary);
     }
@@ -1377,21 +1385,20 @@ export default {
   border: 0px;
   background: var(--back-act);
   color: var(--primary);
-  // font-weight: 800;
   height: 50px;
   padding: 10px;
   font-size: 22px;
   // font-family: "Share Tech Mono", monospace;
   font-family: "Inconsolata", monospace;
   &::placeholder {
-    color: rgba(255, 74, 74, 0.2);
+    color: #0000001c;
     opacity: 1;
   }
   &:-ms-input-placeholder {
-    color: rgba(255, 74, 74, 0.2);
+    color: #0000001c;
   }
   &::-ms-input-placeholder {
-    color: rgba(255, 74, 74, 0.2);
+    color: #0000001c;
   }
 }
 .dropdown {
@@ -1399,17 +1406,20 @@ export default {
 
   .select {
     font-family: "Inconsolata", monospace;
-    background: #ffeded;
+    // background: #ffeded;
   }
 }
 #thebox {
-  box-shadow: 0px 1px 6px -2px #5a131669;
+  box-shadow: 0px 4px 10px 2px #00000014;
+  box-shadow: 0px 4px 10px 2px #ca625a14; // #e5706714
   border-radius: 10px;
+  z-index: 1;
 }
 #act {
   cursor: pointer;
+  background: white;
+  background: var(--back-act);
   color: var(--primary);
-  background: #ffe7e7;
   height: 50px;
   font-size: 20px;
   font-weight: 600;
@@ -1423,11 +1433,12 @@ export default {
   // }
   &:active {
     background: #ffe1e1;
+    // background: darken($primary, 10%);
   }
-}
-#act.error {
-  cursor: not-allowed;
-  color: #888888 !important;
+  &.error {
+    cursor: not-allowed;
+    color: #0000001c !important;
+  }
 }
 
 .info-dropdown {
@@ -1438,7 +1449,7 @@ export default {
 }
 
 .uniswap-info {
-  background: #ffeded;
+  background: var(--back-act);
   border-radius: 0px 0px 10px 10px;
   padding: 2px 10px 5px 10px;
   min-height: 150px;
@@ -1471,12 +1482,12 @@ export default {
 }
 
 .wrapETH {
-  width: 100%;
+  width: 90%;
   margin: 10px auto;
   .toggle {
     cursor: pointer;
-    background: #e570671f;
-    color: #e57067;
+    color: #fff;
+    background: var(--primary);
     border: none;
     border-radius: 8px;
     padding: 2px 20px;
@@ -1498,14 +1509,14 @@ export default {
       float: left;
       font-size: 15px;
       &::placeholder {
-        color: rgba(255, 74, 74, 0.2);
+        color: #0000001c;
         opacity: 1;
       }
       &:-ms-input-placeholder {
-        color: rgba(255, 74, 74, 0.2);
+        color: #0000001c;
       }
       &::-ms-input-placeholder {
-        color: rgba(255, 74, 74, 0.2);
+        color: #0000001c;
       }
     }
     button {
@@ -1518,12 +1529,19 @@ export default {
       height: 30px;
       text-align: center;
       float: right;
+      &.wrap,
+      &.unwrap {
+        &:disabled {
+          cursor: not-allowed;
+          color: #0000001c !important;
+        }
+      }
     }
   }
 }
 .warning {
-  font-size: 10px;
-  padding: 0px 30px;
-  color: #afafaf;
+  font-size: 13px;
+  padding: 0px 20px;
+  color: #0000004a;
 }
 </style>

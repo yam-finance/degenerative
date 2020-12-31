@@ -4,10 +4,10 @@
 
   .tooltip-inner {
     background: #fff;
-    color: #a75751;
+    color: var(--primary);
     border-radius: 6px;
     padding: 5px 10px 4px;
-    border: 1px solid #a75751;
+    border: 1px solid var(--primary);
     font-size: 12px;
     max-width: 300px;
   }
