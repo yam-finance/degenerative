@@ -27,7 +27,7 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_create.svg" />
+              <img src="../assets/graphics/graphic_create.png" />
               <h4>Create</h4>
               <div class="text justify">
                 Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the following
@@ -38,7 +38,7 @@
             <Space size="32" />
 
             <div class="item">
-              <img src="../assets/graphics/graphic_trade.svg" />
+              <img src="../assets/graphics/graphic_trade.png" />
               <h4>Trade</h4>
               <div class="text justify">
                 Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
@@ -51,7 +51,7 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_liqudity.svg" />
+              <img src="../assets/graphics/graphic_liqudity.png" />
               <h4>Provide Liquidity</h4>
               <div class="text justify">
                 Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
@@ -62,7 +62,7 @@
             <Space size="32" />
 
             <div class="item">
-              <img src="../assets/graphics/graphic_redeem.svg" />
+              <img src="../assets/graphics/graphic_redeem.png" />
               <h4>Redeem</h4>
               <div class="text justify">
                 Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
