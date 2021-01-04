@@ -1042,6 +1042,9 @@ export default {
       this.updateUserInfo();
     },
     async getRewards() {
+      if (!this.$provider) {
+        return;
+      }
       // console.log("getContractInfo", await getContractInfo(UGASJAN21));
       // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
 
@@ -1064,14 +1067,16 @@ export default {
         decimals: getEmpInfo.decimals,
       });
 
-      const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
-      console.log("calculateEmpValue", calculateEmpValue);
+      setTimeout(async () => {
+        const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
+        console.log("calculateEmpValue", calculateEmpValue);
 
-      const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
-        totalRewards: 50000,
-        emplist,
-      });
-      console.log("estimateDevMiningRewards", estimateDevMiningRewards);
+        const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
+          totalRewards: 50000,
+          emplist,
+        });
+        console.log("estimateDevMiningRewards", estimateDevMiningRewards);
+      }, 500);
     },
     async lastPrice() {
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
