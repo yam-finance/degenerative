@@ -106,7 +106,7 @@
                   </button>
                 </div>
                 <div class="dropdown">
-                  <vue-picker class="select" v-model="tokenSelected" @change="getEMPState" placeholder="Select uGas Token" autofocus>
+                  <vue-picker class="select" v-model="tokenSelected" @change="getEmpState" placeholder="Select uGas Token" autofocus>
                     <vue-picker-option value="">Select uGas Token</vue-picker-option>
                     <vue-picker-option value="UGASJAN21">uGAS JAN21</vue-picker-option>
                     <vue-picker-option value="UGASFEB21">uGAS FEB21</vue-picker-option>
@@ -445,11 +445,23 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourly, getUniswapDataDaily, splitChartData } from "../utils";
+import {
+  approve,
+  decToBn,
+  getLiquidationPrice,
+  getTWAPData,
+  getUniswapDataHourly,
+  getUniswapDataDaily,
+  splitChartData,
+  getContractInfo,
+  getPriceByContract,
+  DevMiningCalculator,
+} from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
 import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21 } from "@/utils/addresses";
+import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -540,7 +552,8 @@ export default {
         this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
       }
       this.initChart();
-      this.getEMPState();
+      this.getEmpState();
+      this.getRewards();
     },
     navAct: function(newVal, oldVal) {
       if (!this.tokenSelected) {
@@ -994,7 +1007,7 @@ export default {
       const pos = await this.getPositionData(this.empAddr()[0]);
       return pos;
     },
-    async getEMPState() {
+    async getEmpState() {
       const contractAddr = this.empAddr()[0];
       let k;
       let pos;
@@ -1027,6 +1040,38 @@ export default {
       this.getUGasBalance();
       this.posUpdateHandler();
       this.updateUserInfo();
+    },
+    async getRewards() {
+      // console.log("getContractInfo", await getContractInfo(UGASJAN21));
+      // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
+
+      const emplist = [
+        "0x516f595978d87b67401dab7afd8555c3d28a3af4", // EMPJAN
+        "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282", // EMPFEB
+        "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669", // EMPMAR
+      ];
+
+      const devmining = await DevMiningCalculator({
+        provider: this.$provider,
+        getPrice: getPriceByContract,
+        empAbi: EMPContract.abi,
+      });
+
+      const getEmpInfo = await devmining.utils.getEmpInfo(this.assetEMP[this.tokenSelected][1]);
+      console.log("getEmpInfo", {
+        size: getEmpInfo.size,
+        price: getEmpInfo.price,
+        decimals: getEmpInfo.decimals,
+      });
+
+      const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
+      console.log("calculateEmpValue", calculateEmpValue);
+
+      const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
+        totalRewards: 50000,
+        emplist,
+      });
+      console.log("estimateDevMiningRewards", estimateDevMiningRewards);
     },
     async lastPrice() {
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
@@ -1217,7 +1262,7 @@ export default {
             break;
         }
       }
-      this.getEMPState();
+      this.getEmpState();
     },
     async updateUserInfo() {
       await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.updateApprovals()]);

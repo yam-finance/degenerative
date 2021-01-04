@@ -684,6 +684,10 @@ export default new Vuex.Store({
       return result;
     },
 
+    getDevMiningRewards: async ({ commit, dispatch }, payload: { address: string }) => {
+      // DevMiningCalculator
+    },
+
     wrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
@@ -734,7 +738,6 @@ export default new Vuex.Store({
         return 0;
       }
     },
-
     unwrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
