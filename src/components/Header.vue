@@ -13,10 +13,9 @@
         <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
           <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
-          <router-link @click.native="respNavClick" to="/faq">Learn More</router-link>
           <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
-          <!-- <a @click.native="respNavClick" href="https://yam.finance/" target="_blank">by Yam.finance</a> -->
           <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a>
+          <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Learn More</a>
           <div @click="respNavClose" class="resp-links-close">Close</div>
           <Space />
         </div>
