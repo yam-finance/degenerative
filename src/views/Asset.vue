@@ -460,7 +460,7 @@ import {
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21 } from "@/utils/addresses";
+import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, EMPLIST } from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -1049,11 +1049,7 @@ export default {
       // console.log("getContractInfo", await getContractInfo(UGASJAN21));
       // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
 
-      const emplist = [
-        "0x516f595978d87b67401dab7afd8555c3d28a3af4", // EMPJAN
-        "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282", // EMPFEB
-        "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669", // EMPMAR
-      ];
+      const emplist = EMPLIST;
 
       const devmining = await DevMiningCalculator({
         provider: this.$provider,
