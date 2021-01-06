@@ -31,7 +31,7 @@
             <div>
               <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }}
             </div>
-            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "?" }}</div>
+            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "+?" }}</div>
           </div>
           <div id="thebox">
             <div class="tabs">
@@ -1598,7 +1598,7 @@ div.error {
   }
 }
 .asset-info {
-  margin: 0px 10px 10px 20px;
+  margin: 0px 20px 10px 20px;
   display: flex;
   justify-content: space-between;
 }
