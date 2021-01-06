@@ -31,7 +31,7 @@
             <div>
               <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }}
             </div>
-            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "?" }}</div>
+            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "+?" }}</div>
           </div>
           <div id="thebox">
             <div class="tabs">
