@@ -1,13 +1,11 @@
-// @import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@200;300;400;500;600;700;800&display=swap");
-// @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;400;600;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Shanti&display=swap');
-@import "./colors.scss";
-@import "./resets.scss";
+@import "./style/resets.scss";
+// @import "./style/colors.scss";
 
 html,
 body {
-  background: var(--back);
+  background: var(--back-gradient);
   color: var(--text);
   font-family: "Shanti", sans-serif;
   line-height: 1.5;
@@ -19,11 +17,10 @@ body {
 }
 
 body {
-  // padding-bottom: 40px;
-}
-
-body.navresp {
-  overflow: hidden;
+  padding-bottom: 40px;
+  &.navresp {
+    overflow: hidden;
+  }
 }
 
 a {
@@ -68,10 +65,6 @@ a {
 .numeric {
   font-family: 'Consolas', Courier, monospace;
 }
-
-// .space {
-//   width: 24px;
-// }
 
 a,
 button {
@@ -130,24 +123,25 @@ h5 {}
   width: 100%;
 
   &:not(.vue-picker--has-val) > .vue-picker__opener {
-    color: rgba(255, 74, 74, 0.4) !important;
+        color: #0000001c !important;
   }
   .vue-picker__opener-txt {
     font-weight: bold;
   }
+  .vue-picker-option {
+    border-top: 1px solid #0000000f;
+    background: var(--back-act) !important;
+  }
   .vue-picker-option:hover:not(:disabled) {
-    background-color: #ffffffbf;
+    // background-color: #ffffffbf;
     cursor: pointer;
   }
-  .vue-picker-option:nth-child(2n) {
-    background: #0000000a;
-  }
   .vue-picker__dropdown {
-    background: #ffeded;
+    // background: #ffeded;
     border: none;
     padding: 0px;
     border-radius: 0px 0px 10px 10px;
-    box-shadow: 0px 10px 10px -7px #00000017;
+    box-shadow: 0px 5px 15px -5px #00000017;
   }
 }
 .vue-picker__opener {
@@ -163,14 +157,13 @@ h5 {}
   align-items: center;
   height: 46px;
   color: var(--primary) !important;
+  background: var(--back-act) !important;
   &:focus {
     outline: none;
     border-color: var(--col);
     box-shadow: unset !important;
   }
 }
-
-
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

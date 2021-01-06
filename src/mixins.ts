@@ -7,8 +7,12 @@ export default {
     sendit: () => {
       console.log("sendit");
     },
-    numeral: (format = "0.00a", ...texts) => {
-      return numeral(...texts).format(format);
+    numeral: (value, format = "0.00a") => {
+      if (typeof value === "number") {
+        return numeral(value).format(format);
+      } else {
+        return "0";
+      }
     },
     titleCase: str => {
       return str.replace(/\w\S*/g, function(txt) {

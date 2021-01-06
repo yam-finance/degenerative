@@ -9,6 +9,8 @@ import { AbiItem } from "web3-utils";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import erc20 from "@studydefi/money-legos/erc20";
+
 dayjs.extend(utc);
 
 export function stateSave(key, state) {
@@ -330,3 +332,74 @@ export const getUniswapDataHourly = async (token, fromTimestamp) => {
 export const getUniswapDataDaily = async (token, fromTimestamp) => {
   return await getIntervalTokenData(token, fromTimestamp, 86400);
 };
+
+export async function getContractInfo(address: string) {
+  const data: any = await requestHttp(`https://api.coingecko.com/api/v3/coins/ethereum/contract/${address}`);
+  return data;
+}
+
+export async function getPriceByContract(address: string, toCurrency?: string) {
+  const result = await getContractInfo(address);
+  return result && result.market_data && result.market_data.current_price[toCurrency || "usd"];
+}
+
+export function DevMiningCalculator({ provider, getPrice, empAbi }) {
+  const web3 = new Web3(provider);
+  const { utils, BigNumber, FixedNumber } = ethers;
+  const { parseEther } = utils;
+
+  async function getEmpInfo(address: string, toCurrency = "usd") {
+    try {
+      const emp = new web3.eth.Contract((empAbi as unknown) as AbiItem, address);
+      const collateralAddress = await emp.methods.collateralCurrency().call();
+      const erc20Contract = new web3.eth.Contract((erc20.abi as unknown) as AbiItem, collateralAddress);
+      const size = await emp.methods.rawTotalPositionCollateral().call();
+      const price = await getPrice(collateralAddress, toCurrency);
+      const decimals = await erc20Contract.methods.decimals().call();
+      return {
+        address,
+        toCurrency,
+        collateralAddress,
+        size,
+        price,
+        decimals,
+      };
+    } catch (e) {
+      console.log("error getting emp state", e);
+      return "bad";
+    }
+  }
+
+  function calculateEmpValue({ price, size, decimals }: { price: number; size: string; decimals: number }) {
+    const fixedPrice = FixedNumber.from(price.toString());
+    const fixedSize = FixedNumber.fromValue(BigNumber.from(size), decimals);
+    return fixedPrice.mulUnsafe(fixedSize);
+  }
+
+  async function estimateDevMiningRewards({ totalRewards, emplist }: { totalRewards: number; emplist: string[] }) {
+    const allInfo = await Promise.all(emplist.map(address => getEmpInfo(address)));
+    const values: any[] = [];
+    const totalValue = allInfo.reduce((totalValue: any, info: any) => {
+      const value = calculateEmpValue(info);
+      values.push(value);
+      return totalValue.addUnsafe(value);
+    }, FixedNumber.from("0"));
+    return allInfo.map((info: any, i: any): [string, string] => {
+      return [
+        info.address,
+        values[i]
+          .mulUnsafe(FixedNumber.from(totalRewards))
+          .divUnsafe(totalValue)
+          .toString(),
+      ];
+    });
+  }
+
+  return {
+    estimateDevMiningRewards,
+    utils: {
+      getEmpInfo,
+      calculateEmpValue,
+    },
+  };
+}
