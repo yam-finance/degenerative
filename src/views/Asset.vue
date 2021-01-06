@@ -1598,7 +1598,7 @@ div.error {
   }
 }
 .asset-info {
-  margin: 0px 10px 10px 20px;
+  margin: 0px 20px 10px 20px;
   display: flex;
   justify-content: space-between;
 }
