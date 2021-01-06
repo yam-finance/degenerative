@@ -27,6 +27,12 @@
         </Container>
 
         <Container :size="440" class="maker">
+          <div class="asset-info">
+            <div>
+              <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }}
+            </div>
+            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "?" }}</div>
+          </div>
           <div id="thebox">
             <div class="tabs">
               <button
@@ -210,7 +216,7 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Post-Tx): <b>{{ numeral("0.0000a", pricedCR) }}</b></label
+              >Collateral Ratio (Post-Tx): <b>{{ numeral(pricedCR, "0.0000a") }}</b></label
             >
             <label
               v-tooltip="{
@@ -226,7 +232,7 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Tx): <b>{{ numeral("0.0000a", pricedTxCR) }}</b></label
+              >Collateral Ratio (Tx): <b>{{ numeral(pricedTxCR, "0.0000a") }}</b></label
             >
 
             <br />
@@ -527,6 +533,8 @@ export default {
       currTokens: null,
       chartHourly: false,
       currLiquidationPrice: null,
+      periodicalChecks: null,
+      periodicalChecksTime: 60,
     };
   },
   async mounted() {
@@ -594,6 +602,11 @@ export default {
       if (this.tokenSelected) {
         this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH); // checks Approval
       }
+
+      // polling
+      this.periodicalChecks = setInterval(() => {
+        this.lastPrice();
+      }, this.periodicalChecksTime * 1000);
 
       // const from = 1606742010;
       // const hourly = await getUniswapDataHourly(UGASJAN21, from);
@@ -1583,6 +1596,11 @@ div.error {
       }
     }
   }
+}
+.asset-info {
+  margin: 0px 10px 10px 20px;
+  display: flex;
+  justify-content: space-between;
 }
 .warning {
   font-size: 13px;

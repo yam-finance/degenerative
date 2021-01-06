@@ -7,7 +7,7 @@ export default {
     sendit: () => {
       console.log("sendit");
     },
-    numeral: (format = "0.00a", value) => {
+    numeral: (value, format = "0.00a") => {
       if (typeof value === "number") {
         return numeral(value).format(format);
       } else {
