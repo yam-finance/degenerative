@@ -29,9 +29,9 @@
         <Container :size="440" class="maker">
           <div class="asset-info">
             <div>
-              <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }}
+              <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }} ETH
             </div>
-            <div><b>APR</b>: {{ tokenSelected ? "UPDATE%" : "+?" }}</div>
+            <div v-if="tokenSelected"><b>APR</b>: {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%</div>
           </div>
           <div id="thebox">
             <div class="tabs">
@@ -466,7 +466,7 @@ import {
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, EMPLIST } from "@/utils/addresses";
+import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, EMPLIST, UGASJAN21LP, UGASFEB21LP, UGASMAR21LP } from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -513,9 +513,9 @@ export default {
         UGASMAR21: UGASMAR21,
       },
       assetEMP: {
-        UGASJAN21: ["EMPJAN", EMPJAN],
-        UGASFEB21: ["EMPFEB", EMPFEB],
-        UGASMAR21: ["EMPMAR", EMPMAR],
+        UGASJAN21: ["EMPJAN", EMPJAN, UGASJAN21LP],
+        UGASFEB21: ["EMPFEB", EMPFEB, UGASFEB21LP],
+        UGASMAR21: ["EMPMAR", EMPMAR, UGASMAR21LP],
       },
       approvals: {
         EMPFEB_WETH: false,
@@ -535,6 +535,7 @@ export default {
       currLiquidationPrice: null,
       periodicalChecks: null,
       periodicalChecksTime: 60,
+      aprAssetValue: 0,
     };
   },
   async mounted() {
@@ -596,6 +597,7 @@ export default {
       "wrapETH",
       "unwrapETH",
       "checkContractApprovals",
+      "getMiningRewards",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -1055,40 +1057,16 @@ export default {
       this.updateUserInfo();
     },
     async getRewards() {
-      if (!this.$provider) {
-        return;
-      }
-
-      // console.log("getContractInfo", await getContractInfo(UGASJAN21));
-      // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
-
-      const emplist = EMPLIST;
-
-      const devmining = await DevMiningCalculator({
-        provider: this.$provider,
-        getPrice: getPriceByContract,
-        empAbi: EMPContract.abi,
-      });
-
-      const getEmpInfo = await devmining.utils.getEmpInfo(this.assetEMP[this.tokenSelected][1]);
-      console.log("getEmpInfo", {
-        size: getEmpInfo.size,
-        price: getEmpInfo.price,
-        decimals: getEmpInfo.decimals,
-      });
-
-      const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
-      console.log("calculateEmpValue", calculateEmpValue);
-
-      const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
-        totalRewards: 50000,
-        emplist,
-      });
-      console.log("estimateDevMiningRewards", estimateDevMiningRewards);
+      const asset = {
+        address: this.assetTokens[this.tokenSelected],
+        addressEMP: this.assetEMP[this.tokenSelected][1],
+        addressLP: this.assetEMP[this.tokenSelected][2],
+      };
+      this.aprAssetValue = await this.getMiningRewards(asset);
     },
     async lastPrice() {
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
-      console.log("uGas price", this.price);
+      console.debug("uGas price", this.price);
       return this.price;
     },
     async act() {
