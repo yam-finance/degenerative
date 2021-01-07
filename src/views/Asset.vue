@@ -31,7 +31,7 @@
             <div>
               <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }} ETH
             </div>
-            <div v-if="tokenSelected"><b>APR</b>: {{ aprAssetValue }}%</div>
+            <div v-if="tokenSelected"><b>APR</b>: {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%</div>
           </div>
           <div id="thebox">
             <div class="tabs">
