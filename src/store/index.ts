@@ -5,7 +5,19 @@ import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
-import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve, getTWAP, getAllowance } from "@/utils";
+import {
+  stateSave,
+  stateLoad,
+  stateDestroy,
+  getERC20Contract,
+  getBalance,
+  waitTransaction,
+  approve,
+  getTWAP,
+  getAllowance,
+  DevMiningCalculator,
+  getPriceByContract,
+} from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
 import { AbiItem, toHex } from "web3-utils";
 import { provider } from "web3-core";
@@ -14,7 +26,9 @@ import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
 import WETHContract from "@/utils/abi/weth.json";
-import { WETH } from "@/utils/addresses";
+import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
+import { EMPLIST, WETH } from "@/utils/addresses";
+import mixin from "./../mixins";
 
 Vue.use(Vuex);
 
@@ -684,8 +698,54 @@ export default new Vuex.Store({
       return result;
     },
 
-    getDevMiningRewards: async ({ commit, dispatch }, payload: { address: string }) => {
-      // DevMiningCalculator
+    getMiningRewards: async ({ commit, dispatch }, payload: { address: string; addressEMP: string; addressLP: string }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      try {
+        // console.log("getContractInfo", await getContractInfo(UGASJAN21));
+        // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
+        const emplist = EMPLIST;
+        const devmining = await DevMiningCalculator({
+          provider: Vue.prototype.$provider,
+          getPrice: getPriceByContract,
+          empAbi: EMPContract.abi,
+        });
+        const getEmpInfo: any = await devmining.utils.getEmpInfo(payload.addressEMP);
+        console.debug("getEmpInfo", {
+          size: getEmpInfo.size,
+          price: getEmpInfo.price,
+          decimals: getEmpInfo.decimals,
+        });
+        const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
+        console.debug("calculateEmpValue", calculateEmpValue);
+        const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
+          totalRewards: 50000,
+          emplist,
+        });
+        console.debug("estimateDevMiningRewards", estimateDevMiningRewards);
+        // assuming yearly rewards
+        const rewards = {};
+        for (let i = 0; i < estimateDevMiningRewards.length; i++) {
+          rewards[estimateDevMiningRewards[i][0]] = estimateDevMiningRewards[i][1];
+        }
+        const base = new BigNumber(10).pow(18);
+        const web3 = new Web3(Vue.prototype.$provider);
+        const contractLp = new web3.eth.Contract((UGASJAN21LPContract.abi as unknown) as AbiItem, payload.addressLP);
+        const contractLpCall = await contractLp.methods.getReserves().call();
+        const tokenPrice = await getPriceByContract(payload.address);
+        const ethPrice = await getPriceByContract(WETH);
+        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
+        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
+        const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
+        console.debug("assetReserveValue", assetReserveValue);
+        const aprCalculate = ((rewards[payload.addressEMP] * 52) / assetReserveValue) * 100;
+        console.debug("aprCalculate %", aprCalculate);
+        return mixin.methods.numeral(aprCalculate);
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
     },
 
     wrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
