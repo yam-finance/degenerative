@@ -740,7 +740,7 @@ export default new Vuex.Store({
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
         console.debug("assetReserveValue", assetReserveValue);
-        const aprCalculate = ((rewards[payload.addressEMP] * 52 * umaPrice) / assetReserveValue) * 100;
+        const aprCalculate = ((rewards[payload.addressEMP] * 52 * umaPrice) / 2 / assetReserveValue) * 100;
         console.debug("aprCalculate %", aprCalculate);
         return mixin.methods.numeral(aprCalculate);
       } catch (e) {
