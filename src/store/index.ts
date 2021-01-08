@@ -27,7 +27,7 @@ import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
-import { EMPLIST, WETH } from "@/utils/addresses";
+import { EMPLIST, UMA, WETH } from "@/utils/addresses";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -735,11 +735,12 @@ export default new Vuex.Store({
         const contractLpCall = await contractLp.methods.getReserves().call();
         const tokenPrice = await getPriceByContract(payload.address);
         const ethPrice = await getPriceByContract(WETH);
+        const umaPrice = await getPriceByContract(UMA);
         const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
         console.debug("assetReserveValue", assetReserveValue);
-        const aprCalculate = ((rewards[payload.addressEMP] * 52) / assetReserveValue) * 100;
+        const aprCalculate = ((rewards[payload.addressEMP] * 52 * umaPrice) / assetReserveValue) * 100;
         console.debug("aprCalculate %", aprCalculate);
         return mixin.methods.numeral(aprCalculate);
       } catch (e) {
