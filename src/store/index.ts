@@ -28,7 +28,7 @@ import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
-import { EMPLIST, UMA, WETH } from "@/utils/addresses";
+import { UMA, WETH } from "@/utils/addresses";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
