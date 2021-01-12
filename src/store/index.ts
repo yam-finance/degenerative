@@ -17,6 +17,7 @@ import {
   getAllowance,
   DevMiningCalculator,
   getPriceByContract,
+  getDevMiningEmps,
 } from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
 import { AbiItem, toHex } from "web3-utils";
@@ -705,7 +706,9 @@ export default new Vuex.Store({
       try {
         // console.log("getContractInfo", await getContractInfo(UGASJAN21));
         // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
-        const emplist = EMPLIST;
+
+        const emplist = await getDevMiningEmps();
+
         const devmining = await DevMiningCalculator({
           provider: Vue.prototype.$provider,
           getPrice: getPriceByContract,

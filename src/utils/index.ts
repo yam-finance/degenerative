@@ -377,7 +377,7 @@ export function DevMiningCalculator({ provider, getPrice, empAbi }) {
   }
 
   async function estimateDevMiningRewards({ totalRewards, emplist }: { totalRewards: number; emplist: string[] }) {
-    const allInfo = await Promise.all(emplist.map(address => getEmpInfo(address)));
+    const allInfo = await Promise.all(emplist.map(address => getEmpInfo(address.toLowerCase())));
     const values: any[] = [];
     const totalValue = allInfo.reduce((totalValue: any, info: any) => {
       const value = calculateEmpValue(info);
@@ -402,4 +402,24 @@ export function DevMiningCalculator({ provider, getPrice, empAbi }) {
       calculateEmpValue,
     },
   };
+}
+
+const dataBackup = {
+  empWhitelist: [
+    "0x3a93E863cb3adc5910E6cea4d51f132E8666654F",
+    "0x516f595978D87B67401DaB7AfD8555c3d28a3Af4",
+    "0x4AA79c00240a2094Ff3fa6CF7c67f521f32D84a2",
+    "0xf32219331A03D99C98Adf96D43cc312353003531",
+    "0x1c3f1A342c8D9591D9759220d114C685FD1cF6b8",
+    "0xE4256C47a3b27a969F25de8BEf44eCA5F2552bD5",
+    "0xeAddB6AD65dcA45aC3bB32f88324897270DA0387",
+    "0xf215778F3a5e7Ab6A832e71d87267Dd9a9aB0037",
+    "0x267D46e71764ABaa5a0dD45260f95D9c8d5b8195",
+  ],
+  totalReward: 50000,
+};
+
+export async function getDevMiningEmps() {
+  const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+  return data.empWhitelist;
 }
