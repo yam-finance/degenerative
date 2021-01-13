@@ -430,6 +430,7 @@ export default {
     await this.initChart();
     await this.getWETHBalance();
     await this.updateApprovals();
+    await this.getRandomUniPrice();
   },
   computed: {
     account() {
@@ -485,6 +486,7 @@ export default {
       "unwrapETH",
       "checkContractApprovals",
       "getMiningRewards",
+      "getUniPrice",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
@@ -507,6 +509,10 @@ export default {
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
       this.displayBalanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
+    },
+    async getRandomUniPrice() {
+      const price = await this.getUniPrice({ tokenA: "0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5", tokenB: "0x6b175474e89094c44da98b954eedeac495271d0f" });
+      console.log("uni price: ", price.toString());
     },
     async getUGasBalance() {
       this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr()[0] });

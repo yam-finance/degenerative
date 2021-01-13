@@ -26,6 +26,8 @@ import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
+import UNIContract from "@/utils/abi/uni.json";
+import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
 import { UMA, WETH } from "@/utils/addresses";
@@ -285,6 +287,43 @@ export default new Vuex.Store({
       const empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.address);
       commit("GET_EMP", { currentEMP: empContract });
       return empContract;
+    },
+
+    getUNI: ({ commit, dispatch }, payload: { address: string }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const uniContract = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.address);
+      return uniContract;
+    },
+
+    getUNIFact: ({ commit, dispatch }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const uniFactContract = new web3.eth.Contract((UNIFactContract.abi as unknown) as AbiItem, "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f");
+      return uniFactContract;
+    },
+
+    getUniPrice: async ({ commit, dispatch }, payload: { tokenA: string; tokenB: string }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      console.log("getting uni price");
+      const uniFact = await dispatch("getUNIFact");
+      try {
+        const pair = await uniFact.methods.getPair(payload.tokenA, payload.tokenB).call();
+        const uniPair = await dispatch("getUNI", { address: pair });
+        const token0 = await uniPair.methods.token0().call();
+        let reserves0 = 0;
+        let reserves1 = 0;
+        const res = await uniPair.methods.getReserves().call();
+        reserves0 = new BigNumber(res._reserve0);
+        reserves1 = new BigNumber(res._reserve1);
+        if (token0 == payload.tokenA) {
+          return reserves0.dividedBy(reserves1);
+        } else {
+          return reserves1.dividedBy(reserves0);
+        }
+      } catch (e) {
+        console.log("couldnt get uni price for: ", payload.tokenA, payload.tokenB, " for user: ", store.state.account, e);
+      }
     },
 
     getWETH: ({ commit, dispatch }, payload: { address: string }) => {
