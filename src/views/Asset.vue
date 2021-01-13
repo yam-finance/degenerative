@@ -1,23 +1,38 @@
 <template>
   <div class="assets">
-    <Container :size="800">
+    <Container :size="900">
       <Card>
-        <!-- <h1 class="">Asset: {{ $route.params.key.toUpperCase() }}</h1> -->
-        <h1 class="flex">
+        <!-- <h2 class="">Asset: {{ $route.params.key.toUpperCase() }}</h2> -->
+        <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <button class="infoswitch" v-if="navPage === 'interact'" @click="toNavPage('info')" :class="{ active: navPage === 'info' }">Info</button>
-          <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Interact</button>
-        </h1>
+          <a class="asset-detail-switch" href="https://docs.degenerative.finance/ugas" target="_blank">Info</a>
+          <!-- <button
+            class="asset-detail-switch"
+            v-if="navPage === 'interact'"
+            @click="toNavPage('info')"
+            :class="{ active: navPage === 'info' }"
+          >Info</button>
+          <button
+            class="asset-detail-switch"
+            v-if="navPage === 'info'"
+            @click="toNavPage('interact')"
+            :class="{ active: navPage === 'interact' }"
+          >Interact</button>-->
+        </h2>
       </Card>
-      <span class="warning justify"
-        >Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
-        OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
-        Users should take time to understand the token and ask questions on the Yam Discord.</span
-      >
+
       <Space size="md" />
 
       <div v-if="navPage === 'interact'">
+        <div class="warning bold justify">
+          Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
+          OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
+          Users should take time to understand the token and ask questions on the Yam Discord.
+        </div>
+
+        <Space size="md" />
+
         <Container :size="440" class="maker">
           <div v-if="assetChartData && tokenSelected">
             <div class="chart-asset">
@@ -29,9 +44,13 @@
         <Container :size="440" class="maker">
           <div class="asset-info">
             <div>
-              <b>{{ $route.params.key.toUpperCase() }} Price</b>: {{ numeral(price, "0.0000a") }} ETH
+              <b>{{ $route.params.key.toUpperCase() }} Price</b>
+              : {{ numeral(price, "0.0000a") }} ETH
             </div>
-            <div v-if="tokenSelected"><b>APR</b>: {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%</div>
+            <div v-if="tokenSelected">
+              <b>APR</b>
+              : {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%
+            </div>
           </div>
           <div id="thebox">
             <div class="tabs">
@@ -113,7 +132,7 @@
                 </div>
                 <div class="dropdown">
                   <vue-picker class="select" v-model="tokenSelected" @change="getEmpState" placeholder="Select uGas Token" autofocus>
-                    <vue-picker-option value="">Select uGas Token</vue-picker-option>
+                    <vue-picker-option value>Select uGas Token</vue-picker-option>
                     <vue-picker-option value="UGASJAN21">uGAS JAN21</vue-picker-option>
                     <vue-picker-option value="UGASFEB21">uGAS FEB21</vue-picker-option>
                     <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
@@ -121,20 +140,20 @@
                 </div>
                 <input
                   v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
-                  id=""
+                  id
                   class="numeric setvalue"
                   type="number"
-                  name=""
+                  name
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
                   :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
                 />
                 <input
                   v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
-                  id=""
+                  id
                   class="numeric setvalue"
                   type="number"
-                  name=""
+                  name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   placeholder="0.00 WETH"
@@ -146,7 +165,7 @@
                 <div :class="{ hideDropdown: !showDropdown }">
                   {{ currentInfo }}
                 </div>
-              </div> -->
+                </div>-->
                 <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
                   {{
                     !isPending
@@ -167,7 +186,9 @@
                 <div v-if="!tokenSelected">Select Token.</div>
                 <div v-if="tokenSelected">
                   <h2>Unsiwap</h2>
-                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
+                  <div>
+                    <a :href="'https://app.uniswap.org/#/add/ETH/' + assetTokens[tokenSelected]" target="_blank">Click here to LP</a>
+                  </div>
                   <div>
                     <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
                   </div>
@@ -175,9 +196,7 @@
               </div>
             </div>
           </div>
-          <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">
-            {{ currentError }}
-          </div>
+          <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div class="wrapETH">
             <button class="toggle" @click="toggleWrap">Wrap ETH</button>
@@ -200,48 +219,59 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              ><b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b></label
             >
+              <b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Price at which your position can be liquidated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Liquidation Price: <b>{{ liquidationPrice }}</b></label
             >
+              Liquidation Price:
+              <b>{{ liquidationPrice }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Collateral ratio of your position after the tx',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Post-Tx): <b>{{ numeral(pricedCR, "0.0000a") }}</b></label
             >
+              Collateral Ratio (Post-Tx):
+              <b>{{ numeral(pricedCR, "0.0000a") }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Global collateral ratio',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Global): <b>{{ gcr }}</b></label
             >
+              Collateral Ratio (Global):
+              <b>{{ gcr }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Collateral ratio of this particular tx',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Tx): <b>{{ numeral(pricedTxCR, "0.0000a") }}</b></label
             >
+              Collateral Ratio (Tx):
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+            </label>
 
             <br />
-            <label
-              >Your WETH: <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b></label
-            >
-            <label v-if="tokenSelected"
-              >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
-            >
+            <label>
+              Your WETH:
+              <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b>
+            </label>
+            <label v-if="tokenSelected">
+              Your {{ tokenSelected }}:
+              <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -249,8 +279,10 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Position Collateral (WETH): <b>{{ currCollat ? currCollat : "0" }}</b></label
             >
+              Position Collateral (WETH):
+              <b>{{ currCollat ? currCollat : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -258,8 +290,10 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Position Outstanding Tokens ({{ tokenSelected }}): <b>{{ currTokens ? currTokens : "0" }}</b></label
             >
+              Position Outstanding Tokens ({{ tokenSelected }}):
+              <b>{{ currTokens ? currTokens : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -267,182 +301,33 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Current Liquidation Price: <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b></label
             >
+              Current Liquidation Price:
+              <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b>
+            </label>
           </div>
         </Container>
       </div>
 
       <div v-if="navPage === 'info'">
-        <Container :size="800">
-          <!-- <div id="">
-            <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="800 - 60" :height="300 - 60">
-              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
-                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
-                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
-                    {{ props.value }}
-                  </text>
-                </g></la-line
-              >
-              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
-              <la-y-axis prop="value"></la-y-axis>
-            </la-cartesian>
-          </div> -->
-        </Container>
-        <Card>
-          <div style="display: flex; justify-content: center">
-            <img
-              src="https://lh4.googleusercontent.com/lcIV49d4j16mN5xrLN3XNTRR8TWJty4gnAuHhryWaGONwX1s3Brtvyk6HvGC328agHpvxXuY08Lsb2lU6dHVeOKce--cta2XJdm9Dgjb=s1600"
-            />
-          </div>
-          <br />
-          <b>
-            For a deeper dive into how synthetic assets work, please go here:
-            <u><router-link to="/faq">Learn More</router-link></u>
-          </b>
-          <br />
-          <br />
-          <h1>What is uGAS?</h1>
-          <br />
-          <p>uGAS is a Synthetic Gas Futures Token.</p>
-          <br />
-          <p>
-            Each uGAS token is named after the month that it’ll expire at the end of (for example, the uGAS-JAN21 token will expire at 0:00 UTC, Feb 1st 2021.)
-            Once the uGAS token expires, it will settle at the median gas price of all Ethereum transactions for the past 30 days.
-            <br />
-            <br />
-            <b
-              >NOTE: Expiry price is determined by 30-day median price, while liquidation and disputes are determined by 2 hour uniswap TWAP (time-weighted
-              average price).
-            </b>
-            <br />
-            <br />
-            Each uGAS token represents 1,000,000 GAS, so if the median gas price over the 30 days before expiry was 70 Gwei, the uGAS token would be worth 0.07
-            ETH.
-          </p>
-        </Card>
-        <Card>
-          <h1>Wait, what’s a Synthetic?</h1>
-          <br />
-          <p>Synthetic tokens are collateral-backed tokens whose value changes depending on the tokens’ <i>reference</i> index.</p>
-          <br />
-          <p>
-            In the example above, our uGAS’s reference index is the 30 day median gas price.
-            <br />
-            <br />
-            Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.
-          </p>
-        </Card>
-        <Card>
-          <h1>How do I get a uGAS token?</h1>
-          <br />
-          <p>
-            You can get a uGAS token by either creating them by depositing collateral or trading for them on a DEX like Uniswap. Both can be done via our
-            Degenerative.Finance site.
-          </p>
-          <br />
-          <h2>To Create uGAS:</h2>
-          <p>
-            Deposit ETH as collateral to mint uGAS tokens. Synthetics are priceless, so you will initially mint at the Global Collateralization Ratio (GCR.) The
-            GCR is calculated by dividing the total amount of collateral deposited by the total number of uGAS tokens outstanding.
-            <br />
-            <br />
-            You can withdraw collateral at any time as long as the Minimum Collateral Ratio of 1.25 is maintained (or else you will be liquidated.) Creating
-            uGAS or Withdrawing Collateral will increase or decrease your collateral ratio.
-          </p>
-        </Card>
-        <Card>
-          <h1>How do we use uGAS?</h1>
-          <br />
-          <p>Let’s walk through some examples!</p>
-          <br />
-          <h2>Zombie Rick the Trader</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh6.googleusercontent.com/ClpK8LmDgJU_k1xbRC8wrCREnoBkhJpaI9cFJinsmNt09TPG7BsnFnGzeSYN5ibubhA5QUu7Pw7mozRJMRhyZ4nWNY_VRKFFYlsLqx-W-qCVEnBp6oMFIMDZ1mlg0gw6WRCctZ-r"
-            />
-          </div>
-          <p>
-            Zombie Rick is a trader who believes ETH Gas prices will rise in January and decides to buy the uGAS-JAN21 token.
-            <br />
-            <br />
-            He connects his wallet to Uniswap and sees that the price shows 1 uGAS-JAN21 = 0.070 ETH. This effectively means Zombie Rick is longing ETH Gas
-            prices at 70 Gwei. He sells 7 ETH to buy 100 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            The ETH Gas prices rise in January for a 30-day median price of 100 Gwei. Zombie Rick’s uGAS-JAN21 tokens are now worth 0.100 ETH each. He sells his
-            100 uGAS-JAN21 tokens for 10 ETH in return for a profit of 3 ETH.
-          </p>
-          <br />
-          <br />
-          <h2>Zombie Glenn the Farmer</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh6.googleusercontent.com/SlXxbLpUENMQ1_3YjlModmczHDSstkuj0UOxyHp5_t9On1-ERyUuI5e6IDNd6_IMYwFCG_CSgtZySnpp0DOCxboS0isNdNnv5xdicCwjiaEOqg4mRijFHTBlx1JU-78LpnyITwb0"
-            />
-          </div>
-          <p>
-            Zombie Glenn is an active farmer who carries out many transactions to manage his crypto portfolio. It’s early December and he sees that the
-            uGAS-JAN21 token is trading at 70 Gwei. He wants to lock in that price for his gas usage in the month of January.
-            <br />
-            <br />
-            Zombie Glenn typically spends about 210,000,000 gas per month. Since each uGAS token is equivalent to 1,000,000 gas, Zombie Glenn needs to buy 210
-            uGAS-JAN21 tokens to fully hedge his usage. He sells 14.7 ETH to buy 210 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            Zombie Glenn continues his farming activity per usual in January and consumes 210,000,000 gas as expected. However, he paid on average 105 GWei on
-            the price of gas for all these transactions in January which is much higher than where he saw gas prices in early December.
-            <br />
-            <br />
-            Zombie Glenn held onto his 210 uGAS-JAN21 tokens through the token expiry at 00:00 UTC February 1, 2021.
-            <br />
-            <br />
-            Since the 30-day median ETH Gas Price was 110 Gwei, Zombie Glenn can now redeem each uGAS-JAN21 token for 0.110 ETH and receives a total of 23.1 ETH
-            — a profit of 8.4 ETH. This profit of 8.4 ETH is offset by the higher gas prices he paid in January.
-            <br />
-            <br />
-            Effectively, Zombie Glenn used the uGAS-JAN21 token as a hedge for rising ETH gas prices.
-          </p>
-          <br />
-          <br />
-          <h2>Zombie Carol the Miner</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh4.googleusercontent.com/cgMF3hpDPqV1Y25CusBJYw9Isgv1kuM4HDix7l9gardw4umisGK-A2svn_g_HDIU6B-ZWUuVty2A8vcFvW57yOxm72M-yPttqCLFBigOMl_jD42I56_z6bHdGkvUO02CRXe33Elo"
-            />
-          </div>
-          <p>
-            Zombie Carol runs an Ethereum mining operation. She believes that ETH gas prices will decline in the next two months and would like to use the token
-            as a hedge and secure her future revenues now.
-            <br />
-            <br />
-            Zombie Carol mines on average 1,050,000,000 gas per month. Since each uGAS is equivalent to 1,000,000 gas, to fully hedge her revenue, Zombie Carol
-            would need to mint and sell 1,050 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            Since the Global Collateralization Ratio is 2.5 when Zombie Carol attempts to mint, she needs to deposit 183.75 ETH in order to receive 1,050
-            uGAS-JAN21 tokens (2.5 x 1,050 tokens x 0.070 ETH per token.)
-            <br />
-            <br />
-            Zombie Carol then connects to Uniswap and sells her 1,050 uGAS-JAN21 tokens for 0.070 ETH each and receives 73.5 ETH. Notice that net Zombie Carol
-            is now committing 110.25 ETH (183.75 of WETH Collateral — 73.5 ETH received). And she could withdraw more collateral to be more capital efficient as
-            long as she maintains the 1.25 Minimum Collateral Ratio.
-            <br />
-            <br />
-            Unfortunately, ETH gas prices rise and the median price for the last 30 days of January is 110 Gwei — resulting in the uGAS-JAN21 token settling at
-            0.110. Zombie Carol takes a loss of 42 ETH (1,050 tokens x (0.070–0.110)).
-            <br />
-            <br />
-            However, the higher gas prices in January resulted in higher revenues for her mining operation which offset the loss from her tokens. In the end,
-            the uGAS token hedge resulted in Zombie Carol locking her mining revenues at 70 Gwei and provided her with certainty on her revenue amount.
-          </p>
-        </Card>
+        <!-- <div id>
+          <la-cartesian
+            narrow
+            :bound="[n => n - 40, n => n + 40]"
+            :data="chartOptionsMedianValues"
+            :width="800 - 60"
+            :height="300 - 60"
+          >
+            <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+              <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">{{ props.value }}</text>
+              </g>
+            </la-line>
+            <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
+            <la-y-axis prop="value"></la-y-axis>
+          </la-cartesian>
+        </div>-->
+        <CardLink title="Learn More about uGAS" link="https://docs.degenerative.finance/ugas" />
       </div>
     </Container>
   </div>
@@ -462,6 +347,7 @@ import {
   getContractInfo,
   getPriceByContract,
   DevMiningCalculator,
+  getTokenPrice,
 } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
@@ -577,6 +463,7 @@ export default {
     account(newAccount, oldAccount) {
       this.updateUserInfo();
     },
+    // navPage(newVal, oldVal) {},
   },
   components: {},
   methods: {
@@ -766,6 +653,8 @@ export default {
           },
         ],
       };
+    },
+    initInfoChart() {
       this.chartOptionsMedianValues = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       for (let i = 0; i < months.length; i++) {
@@ -1065,6 +954,8 @@ export default {
       this.aprAssetValue = await this.getMiningRewards(asset);
     },
     async lastPrice() {
+      // get onchain price prep
+      // this.price = await getTokenPrice(this.assetTokens[this.tokenSelected]);
       this.price = await getOffchainPriceFromTokenSymbol("uGAS");
       console.debug("uGas price", this.price);
       return this.price;
@@ -1260,6 +1151,9 @@ export default {
     },
     toNavPage(on) {
       this.navPage = on;
+      if (this.navPage === "info") {
+        this.initInfoChart();
+      }
       console.log("toNavPage", on);
     },
     toNavAct(on) {
@@ -1333,7 +1227,7 @@ export default {
 }
 div.error {
   color: var(--primary);
-  background: var(--back-act);
+  background: #0000000d;
   text-align: center;
   font-size: 16px;
   width: 90%;
@@ -1496,7 +1390,7 @@ div.error {
   height: 200px;
 }
 
-.infoswitch {
+.asset-detail-switch {
   cursor: pointer;
   color: #fff;
   background: var(--primary);
@@ -1506,7 +1400,6 @@ div.error {
   font-size: 22px;
   font-weight: normal;
   height: 36px;
-  margin: 6px 0px;
 }
 
 .echarts,
@@ -1582,7 +1475,7 @@ div.error {
 }
 .warning {
   font-size: 13px;
-  padding: 0px 20px;
+  padding: 0px 10px;
   color: #0000004a;
 }
 </style>

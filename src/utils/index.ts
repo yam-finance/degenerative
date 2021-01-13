@@ -10,6 +10,7 @@ import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import erc20 from "@studydefi/money-legos/erc20";
+import { WETH, USDC } from "./addresses";
 
 dayjs.extend(utc);
 
@@ -418,6 +419,17 @@ const dataBackup = {
   ],
   totalReward: 50000,
 };
+
+export async function getUniPrice(pairA, pairB) {
+  return 1;
+}
+
+export async function getTokenPrice(token) {
+  const ethUnitPrice: any = getUniPrice(WETH, USDC);
+  let tokenPrice: any = getUniPrice(token, WETH);
+  tokenPrice = tokenPrice * ethUnitPrice;
+  return tokenPrice;
+}
 
 export async function getDevMiningEmps() {
   const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);

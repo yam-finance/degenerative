@@ -19,13 +19,14 @@
 export default {
   props: {
     size: Number,
+    percent: Boolean,
   },
   computed: {
     style() {
       if (this.size) {
         return {
           // width: this.size + "px",
-          "max-width": this.size + "px",
+          "max-width": this.size + (this.percent ? "%" : "px"),
         };
       } else {
         return {
