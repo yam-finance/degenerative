@@ -10,7 +10,7 @@ import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import erc20 from "@studydefi/money-legos/erc20";
-import { WETH, USDC } from "./addresses";
+import { WETH, DAI } from "./addresses";
 
 dayjs.extend(utc);
 
@@ -372,13 +372,13 @@ export function DevMiningCalculator({ provider, getPrice, empAbi }) {
   }
 
   function calculateEmpValue({ price, size, decimals }: { price: number; size: string; decimals: number }) {
-    const fixedPrice = FixedNumber.from(price.toString());
+    const fixedPrice = FixedNumber.from(price.toString() || 0);
     const fixedSize = FixedNumber.fromValue(BigNumber.from(size), decimals);
     return fixedPrice.mulUnsafe(fixedSize);
   }
 
-  async function estimateDevMiningRewards({ totalRewards, emplist }: { totalRewards: number; emplist: string[] }) {
-    const allInfo = await Promise.all(emplist.map(address => getEmpInfo(address.toLowerCase())));
+  async function estimateDevMiningRewards({ totalRewards, empWhitelist }: { totalRewards: number; empWhitelist: string[] }) {
+    const allInfo = await Promise.all(empWhitelist.map(address => getEmpInfo(address.toLowerCase())));
     const values: any[] = [];
     const totalValue = allInfo.reduce((totalValue: any, info: any) => {
       const value = calculateEmpValue(info);
@@ -405,7 +405,7 @@ export function DevMiningCalculator({ provider, getPrice, empAbi }) {
   };
 }
 
-const dataBackup = {
+const emplistDataBackup = {
   empWhitelist: [
     "0x3a93E863cb3adc5910E6cea4d51f132E8666654F",
     "0x516f595978D87B67401DaB7AfD8555c3d28a3Af4",
@@ -416,22 +416,31 @@ const dataBackup = {
     "0xeAddB6AD65dcA45aC3bB32f88324897270DA0387",
     "0xf215778F3a5e7Ab6A832e71d87267Dd9a9aB0037",
     "0x267D46e71764ABaa5a0dD45260f95D9c8d5b8195",
+    "0x45c4DBD73294c5d8DDF6E5F949BE4C505E6E9495",
+    "0xda0943251079eB9f517668fdB372fC6AE299D898",
+    "0xd6fc1A7327210b7Fe33Ef2514B44979719424A1d",
+    "0x2862A798B3DeFc1C24b9c0d241BEaF044C45E585",
+    "0xd81028a6fbAAaf604316F330b20D24bFbFd14478",
+    "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+    "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
   ],
   totalReward: 50000,
 };
 
-export async function getUniPrice(pairA, pairB) {
-  return 1;
-}
+// export async function getUniPrice(pairA, pairB) {
+//   return 1;
+// }
 
-export async function getTokenPrice(token) {
-  const ethUnitPrice: any = getUniPrice(WETH, USDC);
-  let tokenPrice: any = getUniPrice(token, WETH);
-  tokenPrice = tokenPrice * ethUnitPrice;
-  return tokenPrice;
-}
+// to reinit
+// export async function getTokenPrice(token) {
+//   const ethUnitPrice: any = getUniPrice(WETH, DAI);
+//   let tokenPrice: any = getUniPrice(token, WETH);
+//   tokenPrice = tokenPrice * ethUnitPrice;
+//   return tokenPrice;
+// }
 
 export async function getDevMiningEmps() {
-  const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
-  return data.empWhitelist;
+  // const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+  // return data;
+  return emplistDataBackup;
 }

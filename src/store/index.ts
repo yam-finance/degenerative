@@ -305,14 +305,14 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      console.log("getting uni price");
+      console.debug("getting uni price");
       const uniFact = await dispatch("getUNIFact");
       try {
         const pair = await uniFact.methods.getPair(payload.tokenA, payload.tokenB).call();
         const uniPair = await dispatch("getUNI", { address: pair });
         const token0 = await uniPair.methods.token0().call();
-        let reserves0 = 0;
-        let reserves1 = 0;
+        let reserves0: any = 0;
+        let reserves1: any = 0;
         const res = await uniPair.methods.getReserves().call();
         reserves0 = new BigNumber(res._reserve0);
         reserves1 = new BigNumber(res._reserve1);
@@ -322,7 +322,8 @@ export default new Vuex.Store({
           return reserves1.dividedBy(reserves0);
         }
       } catch (e) {
-        console.log("couldnt get uni price for: ", payload.tokenA, payload.tokenB, " for user: ", store.state.account, e);
+        console.error("couldnt get uni price for:", payload.tokenA, payload.tokenB);
+        // console.log("user:", store.state.account, e);
       }
     },
 
@@ -343,7 +344,7 @@ export default new Vuex.Store({
         commit("CURR_POS", pos);
         return pos;
       } catch (e) {
-        console.log("couldnt get position for: ", contract, " for user: ", store.state.account);
+        console.debug("couldnt get position for: ", contract, " for user: ", store.state.account);
       }
     },
 
@@ -399,7 +400,7 @@ export default new Vuex.Store({
         commit("EMP_STATE", dat);
         return dat;
       } catch (e) {
-        console.log("error getting emp state", e);
+        console.error("error getting emp state", e);
         return "bad";
       }
     },
@@ -681,6 +682,22 @@ export default new Vuex.Store({
       }
     },
 
+    // settle prep
+    settle: async ({ commit, dispatch }, payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        // const web3Provider = Vue.prototype.$provider;
+        // const web3 = new Web3(web3Provider);
+      } catch (e) {
+        console.error("error", e);
+        return [false, e];
+      }
+    },
+    // settle prep
+
     getUserUGasBalance: async ({ commit, dispatch }, payload: { contract: string }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
@@ -738,7 +755,7 @@ export default new Vuex.Store({
       return result;
     },
 
-    getMiningRewards: async ({ commit, dispatch }, payload: { address: string; addressEMP: string; addressLP: string }) => {
+    getMiningRewards: async ({ commit, dispatch }, payload: { address: string; addressEMP: string; addressLP: string; addressPrice: number }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -746,8 +763,7 @@ export default new Vuex.Store({
         // console.log("getContractInfo", await getContractInfo(UGASJAN21));
         // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
 
-        const emplist = await getDevMiningEmps();
-
+        const emps = await getDevMiningEmps();
         const devmining = await DevMiningCalculator({
           provider: Vue.prototype.$provider,
           getPrice: getPriceByContract,
@@ -762,11 +778,10 @@ export default new Vuex.Store({
         const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
         console.debug("calculateEmpValue", calculateEmpValue);
         const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
-          totalRewards: 50000,
-          emplist,
+          totalRewards: emps.totalReward,
+          empWhitelist: emps.empWhitelist,
         });
         console.debug("estimateDevMiningRewards", estimateDevMiningRewards);
-        // assuming yearly rewards
         const rewards = {};
         for (let i = 0; i < estimateDevMiningRewards.length; i++) {
           rewards[estimateDevMiningRewards[i][0]] = estimateDevMiningRewards[i][1];
@@ -775,9 +790,15 @@ export default new Vuex.Store({
         const web3 = new Web3(Vue.prototype.$provider);
         const contractLp = new web3.eth.Contract((UGASJAN21LPContract.abi as unknown) as AbiItem, payload.addressLP);
         const contractLpCall = await contractLp.methods.getReserves().call();
-        const tokenPrice = await getPriceByContract(payload.address);
         const ethPrice = await getPriceByContract(WETH);
         const umaPrice = await getPriceByContract(UMA);
+        // const tokenPrice = await getPriceByContract(payload.address);
+
+        // temp
+        const tempFixPriceWithWETH = payload.addressPrice * ethPrice;
+        const tokenPrice = tempFixPriceWithWETH;
+        console.debug("tempFixPriceWithWETH", tempFixPriceWithWETH);
+
         const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;

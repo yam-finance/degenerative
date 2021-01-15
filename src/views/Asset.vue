@@ -34,24 +34,47 @@
         <Space size="md" />
 
         <Container :size="440" class="maker">
-          <div v-if="assetChartData && tokenSelected">
-            <div class="chart-asset">
-              <chart :options="chartOptionsCandle" />
-            </div>
-          </div>
-        </Container>
-
-        <Container :size="440" class="maker">
           <div class="asset-info">
-            <div>
-              <b>{{ $route.params.key.toUpperCase() }} Price</b>
-              : {{ numeral(price, "0.0000a") }} ETH
-            </div>
-            <div v-if="tokenSelected">
-              <b>APR</b>
-              : {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select token to continue',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                  >Asset Price</b
+                >
+              </span>
+              <span v-if="tokenSelected">
+                <b>{{ assets[tokenSelected].name }} Price:</b>
+                {{ numeral(price, "0.0000a") }} ETH
+              </span>
+            </span>
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select token to continue',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                  >APR</b
+                >
+              </span>
+              <span v-if="tokenSelected">
+                <b>APR:</b>
+                {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%
+              </span>
+            </span>
+          </div>
+
+          <div class="assetchart-wrapper">
+            <div v-if="assetChartData && tokenSelected">
+              <div class="assetchart">
+                <chart :options="chartOptionsCandle" />
+              </div>
             </div>
           </div>
+
           <div id="thebox">
             <div class="tabs">
               <button
@@ -171,8 +194,8 @@
                     !isPending
                       ? tokenSelected
                         ? approvals
-                          ? approvals[assetEMP[tokenSelected][0] + "_WETH"] === true ||
-                            (navAct == "redeem" && approvals[assetEMP[tokenSelected][0] + "_" + tokenSelected] === true)
+                          ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
+                            (navAct == "redeem" && approvals[assets[tokenSelected].name + "_" + tokenSelected] === true)
                             ? actName
                             : "Approve"
                           : "Select Token"
@@ -187,10 +210,10 @@
                 <div v-if="tokenSelected">
                   <h2>Unsiwap</h2>
                   <div>
-                    <a :href="'https://app.uniswap.org/#/add/ETH/' + assetTokens[tokenSelected]" target="_blank">Click here to LP</a>
+                    <a :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address" target="_blank">Click here to LP</a>
                   </div>
                   <div>
-                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
+                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assets[tokenSelected].address" target="_blank">Click here to Trade</a>
                   </div>
                 </div>
               </div>
@@ -198,16 +221,20 @@
           </div>
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
-          <div class="wrapETH">
-            <button class="toggle" @click="toggleWrap">Wrap ETH</button>
-            <div v-if="showWrapETH">
-              <div class="wraprow">
-                <input type="number" placeholder="Amount" v-model="amountToWrap" />
-                <button class="wrap" :disabled="!amountToWrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
-              </div>
-              <div class="wraprow">
-                <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
-                <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+          <div id="thebuttons">
+            <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button>
+
+            <div class="wrapETH">
+              <button class="button" @click="toggleWrap">Wrap ETH</button>
+              <div v-if="showWrapETH">
+                <div class="wraprow">
+                  <input type="number" placeholder="Amount" v-model="amountToWrap" />
+                  <button class="wrap" :disabled="!amountToWrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
+                </div>
+                <div class="wraprow">
+                  <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
+                  <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+                </div>
               </div>
             </div>
           </div>
@@ -266,7 +293,7 @@
             <br />
             <label>
               Your WETH:
-              <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b>
+              <b>{{ balanceWETH ? balanceWETH : "0" }}</b>
             </label>
             <label v-if="tokenSelected">
               Your {{ tokenSelected }}:
@@ -352,7 +379,7 @@ import {
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, UGASJAN21LP, UGASFEB21LP, UGASMAR21LP } from "@/utils/addresses";
+import { WETH, DAI, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, UGASJAN21LP, UGASFEB21LP, UGASMAR21LP, USDC, UMA } from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -389,19 +416,37 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       balanceWETH: 0,
-      displayBalanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
       isPending: false,
-      assetTokens: {
-        UGASJAN21: UGASJAN21,
-        UGASFEB21: UGASFEB21,
-        UGASMAR21: UGASMAR21,
-      },
-      assetEMP: {
-        UGASJAN21: ["EMPJAN", EMPJAN, UGASJAN21LP],
-        UGASFEB21: ["EMPFEB", EMPFEB, UGASFEB21LP],
-        UGASMAR21: ["EMPMAR", EMPMAR, UGASMAR21LP],
+      assets: {
+        UGASJAN21: {
+          name: "UGASJAN21",
+          address: UGASJAN21,
+          pool: UGASJAN21LP,
+          emp: {
+            name: "EMPJAN",
+            address: EMPJAN,
+          },
+        },
+        UGASFEB21: {
+          name: "UGASFEB21",
+          address: UGASFEB21,
+          pool: UGASFEB21LP,
+          emp: {
+            name: "EMPFEB",
+            address: EMPFEB,
+          },
+        },
+        UGASMAR21: {
+          name: "UGASMAR21",
+          address: UGASMAR21,
+          pool: UGASMAR21LP,
+          emp: {
+            name: "EMPMAR",
+            address: EMPMAR,
+          },
+        },
       },
       approvals: {
         EMPFEB_WETH: false,
@@ -411,7 +456,6 @@ export default {
         EMPJAN_UGASJAN21: false,
         EMPFEB_UGASFEB21: false,
       },
-      assetEMPName: {},
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
@@ -420,17 +464,18 @@ export default {
       chartHourly: false,
       currLiquidationPrice: null,
       periodicalChecks: null,
-      periodicalChecksTime: 60,
+      periodicalChecksTime: 10,
       aprAssetValue: 0,
+      settleTime: false,
     };
   },
   async mounted() {
+    this.settleTimeCheck();
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
     await this.getWETHBalance();
     await this.updateApprovals();
-    await this.getRandomUniPrice();
   },
   computed: {
     account() {
@@ -443,10 +488,11 @@ export default {
         return;
       }
       if (this.navAct == "redeem") {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
       } else {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
       }
+      this.lastPrice();
       this.initChart();
       this.getEmpState();
       this.getRewards();
@@ -456,9 +502,9 @@ export default {
         return;
       }
       if (newVal == "redeem") {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
       } else {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
       }
     },
     account(newAccount, oldAccount) {
@@ -478,6 +524,7 @@ export default {
       "withdrawRequestFinalize",
       "withdraw",
       "redeem",
+      "settle",
       "getUserWETHBalance",
       "getUserUGasBalance",
       "getContractApproval",
@@ -491,12 +538,13 @@ export default {
     ...mapGetters(["empState"]),
     async initAsset() {
       if (this.tokenSelected) {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH); // checks Approval
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH); // checks Approval
       }
 
       // polling
       this.periodicalChecks = setInterval(() => {
         this.lastPrice();
+        this.getRewards();
       }, this.periodicalChecksTime * 1000);
 
       // const from = 1606742010;
@@ -508,18 +556,14 @@ export default {
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
-      this.displayBalanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
-    },
-    async getRandomUniPrice() {
-      const price = await this.getUniPrice({ tokenA: "0x0ba45a8b5d5575935b8158a88c631e9f9c95a2e5", tokenB: "0x6b175474e89094c44da98b954eedeac495271d0f" });
-      console.log("uni price: ", price.toString());
+      this.balanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
     },
     async getUGasBalance() {
       this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr()[0] });
       this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
     },
     async initChart() {
-      if (!this.assetTokens[this.tokenSelected]) {
+      if (!this.tokenSelected || !this.assets[this.tokenSelected].address) {
         return;
       }
       const redColor = "#ad3c3c";
@@ -528,8 +572,8 @@ export default {
       const greenBorderColor = "#48ad3c";
       const twapLineColor = "#333";
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
-      // const assetChart = await getUniswapDataHourly(this.assetTokens[this.tokenSelected], from); // Hourly
-      const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
+      // const assetChart = await getUniswapDataHourly(this.assets[this.tokenSelected], from); // Hourly
+      const assetChart = await getUniswapDataDaily(this.assets[this.tokenSelected].address, from); // Daily
       // console.log("UGASJAN21 assetChart", assetChart);
 
       const tempChartData = [];
@@ -702,6 +746,25 @@ export default {
         }
       }
     },
+    settleTimeCheck() {
+      const settleDayAfter = 20; // after every xth day of the month enable settle
+      // we can have this set custom by asset, see assets in data()
+      const current = this.moment().format("DD");
+      console.log("settleTimeCheck", current);
+      if (current < settleDayAfter) {
+        console.log("settleTime is not due yet");
+        this.settleTime = false;
+      } else {
+        console.log("settleTime due");
+        this.settleTime = true;
+      }
+    },
+    async settleAsset() {
+      console.log("settleAsset");
+      this.settle({});
+      // .then(async (e) => {})
+      // .catch(async (e) => {});
+    },
     checkWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos) {
@@ -817,6 +880,10 @@ export default {
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
+        // const pricedResultantCR = latestPrice !== 0 ? (resultantCR / latestPrice).toFixed(4) : "0";
+        // const resultantCRBelowRequirement = parseFloat(pricedResultantCR) >= 0 && parseFloat(pricedResultantCR) < collReqFromWei;
+        // const withdrawAboveBalance = collateralToWithdraw > posColl;
+
         this.currLiqPrice();
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
@@ -849,14 +916,14 @@ export default {
         } else if (this.currPos && this.currPos.rawCollateral == 0) {
           this.hasError = true;
           this.currentError = "No open position. Mint tokens first";
-        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError = "Not enough WETH. Please wrap ETH below";
         }
       } else if (this.navAct == "mint") {
         this.currLiqPrice();
         this.updateLiqPrice();
-        // if (this.collatAmt < this.displayBalanceWETH) {
+        // if (this.collatAmt < this.balanceWETH) {
         //   this.hasError = true;
         //   this.currentError = "Insufficient";
         //   return;
@@ -865,7 +932,7 @@ export default {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
           return;
-        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError = "Not enough WETH. Please wrap ETH below";
           return;
@@ -952,28 +1019,37 @@ export default {
       this.updateUserInfo();
     },
     async getRewards() {
-      const asset = {
-        address: this.assetTokens[this.tokenSelected],
-        addressEMP: this.assetEMP[this.tokenSelected][1],
-        addressLP: this.assetEMP[this.tokenSelected][2],
-      };
-      this.aprAssetValue = await this.getMiningRewards(asset);
+      if (this.tokenSelected && this.price) {
+        const asset = {
+          address: this.assets[this.tokenSelected].address,
+          addressEMP: this.assets[this.tokenSelected].emp.address,
+          addressLP: this.assets[this.tokenSelected].pool,
+          addressPrice: this.price,
+        };
+        this.aprAssetValue = await this.getMiningRewards(asset);
+      }
     },
     async lastPrice() {
-      // get onchain price prep
-      // this.price = await getTokenPrice(this.assetTokens[this.tokenSelected]);
-      this.price = await getOffchainPriceFromTokenSymbol("uGAS");
-      console.debug("uGas price", this.price);
-      return this.price;
+      if (this.tokenSelected) {
+        // this.price = await getOffchainPriceFromTokenSymbol("uGAS");
+        const price = Number((await this.getUniPrice({ tokenA: this.assets[this.tokenSelected].address, tokenB: WETH })).toString()) || 0;
+        // const price2 = Number((await this.getUniPrice({ tokenA: WETH, tokenB: USDC })).toString()) || 0;
+        // this.price = (new BigNumber(price).multipliedBy(price2)).toString();
+        // this.price = price * price2;
+        this.price = price;
+
+        console.log("token price", this.price);
+        return this.price;
+      }
     },
     async act() {
       if (!this.tokenSelected) {
         return;
       }
-      if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_WETH"] && this.actName !== "Redeem") {
+      if (!this.approvals[this.assets[this.tokenSelected].name + "_WETH"] && this.actName !== "Redeem") {
         this.isPending = true;
 
-        this.getApproval(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH)
+        this.getApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH)
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1106,9 +1182,9 @@ export default {
               });
             break;
           case "Redeem":
-            if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected]) {
+            if (!this.approvals[this.assets[this.tokenSelected].name + "_" + this.tokenSelected]) {
               this.isPending = true;
-              this.getApproval(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
+              this.getApproval(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
                 .then(async e => {
                   console.log("approve", e[1]);
                   this.isPending = false;
@@ -1351,6 +1427,25 @@ div.error {
   border-radius: 10px;
   z-index: 1;
 }
+#thebuttons {
+  width: 90%;
+  margin: 10px auto;
+
+  .button {
+    cursor: pointer;
+    color: #fff;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    padding: 2px 20px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .settle {
+    background: #e5ad67;
+  }
+}
+
 #act {
   cursor: pointer;
   background: white;
@@ -1409,30 +1504,23 @@ div.error {
 }
 
 .echarts,
-.chart-wrapper,
-.chart-asset {
+.assetchart {
   width: 100%;
   height: 160px;
   margin-bottom: 15px;
 }
+// .assetchart-wrapper {
+//   display: none;
+//   &.show {
+//     display: block;
+//   }
+// }
 
 .wrapETH {
-  width: 90%;
-  margin: 10px auto;
-  .toggle {
-    cursor: pointer;
-    color: #fff;
-    background: var(--primary);
-    border: none;
-    border-radius: 8px;
-    padding: 2px 20px;
-    width: 100%;
-    margin-bottom: 5px;
-  }
   .wraprow {
     float: left;
     width: 100%;
-    margin: 0px 0px 5px 0px;
+    margin: 5px 0px 0px 0px;
     input {
       width: 65%;
       border: none;
