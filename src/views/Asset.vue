@@ -192,19 +192,27 @@
                   {{ currentInfo }}
                 </div>
                 </div>-->
-                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
-                  {{
-                    !isPending
-                      ? tokenSelected
-                        ? approvals
-                          ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
-                            (navAct == "redeem" && approvals[assets[tokenSelected].name + "_" + tokenSelected] === true)
-                            ? actName
-                            : "Approve"
+                <button
+                  :disabled="hasError == true || !tokenSelected"
+                  id="act"
+                  @click="act"
+                  v-bind:class="{ error: hasError, notokenselected: !tokenSelected }"
+                  v-if="navAct !== 'lptrade'"
+                >
+                  <span v-bind:class="{ notokenselectedlabel: !tokenSelected }">
+                    {{
+                      !isPending
+                        ? tokenSelected
+                          ? approvals
+                            ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
+                              (navAct == "redeem" && approvals[assets[tokenSelected].name + "_" + tokenSelected] === true)
+                              ? actName
+                              : "Approve"
+                            : "Select Token"
                           : "Select Token"
-                        : "Select Token"
-                      : ""
-                  }}
+                        : ""
+                    }}
+                  </span>
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
@@ -1502,7 +1510,7 @@ div.error {
   background: var(--back-act);
   color: var(--primary);
   height: 50px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   border: 0px;
   border-radius: 0px 0px 10px 10px;
@@ -1520,6 +1528,26 @@ div.error {
     cursor: not-allowed;
     color: #0000001c !important;
   }
+  &.notokenselected {
+    color: #0000001c !important;
+    &:active {
+      background: var(--back-act);
+    }
+    .notokenselectedlabel {
+      border: 1.5px solid rgb(0 0 0 / 0.05);
+      width: 100%;
+      display: block;
+      border-radius: 7px;
+      padding: 3px 0px;
+      &:active {
+        background: #00000005;
+      }
+    }
+  }
+}
+
+.v-spinner {
+  margin-top: 5px;
 }
 
 .info-dropdown {
@@ -1614,6 +1642,6 @@ div.error {
 .warning {
   font-size: 13px;
   padding: 0px 10px;
-  color: #0000004a;
+  color: #0000005e;
 }
 </style>
