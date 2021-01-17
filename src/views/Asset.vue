@@ -46,8 +46,8 @@
                 >
               </span>
               <span v-if="tokenSelected">
-                <b>{{ assets[tokenSelected].name }} Price:</b>
-                {{ numeral(price, "0.0000a") }} ETH
+                <b>Asset Price:</b>
+                {{ price && price > 0 ? numeral(price, "0.0000a") : "..." }} ETH
               </span>
             </span>
             <span>
@@ -67,13 +67,16 @@
             </span>
           </div>
 
-          <div class="assetchart-wrapper">
-            <div v-if="assetChartData && tokenSelected">
-              <div class="assetchart">
-                <chart :options="chartOptionsCandle" />
+          <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
+          <transition name="fade" mode="out-in">
+            <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
+              <div v-if="assetChartData && tokenSelected">
+                <div class="assetchart">
+                  <chart :options="chartOptionsCandle" />
+                </div>
               </div>
             </div>
-          </div>
+          </transition>
 
           <div id="thebox">
             <div class="tabs">
@@ -222,7 +225,7 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button>
+            <!-- <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button> -->
 
             <div class="wrapETH">
               <button class="button" @click="toggleWrap">Wrap ETH</button>
@@ -467,6 +470,7 @@ export default {
       periodicalChecksTime: 10,
       aprAssetValue: 0,
       settleTime: false,
+      chartDisplay: false,
     };
   },
   async mounted() {
@@ -492,7 +496,7 @@ export default {
       } else {
         this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
       }
-      this.lastPrice();
+      this.resetNumbers();
       this.initChart();
       this.getEmpState();
       this.getRewards();
@@ -543,7 +547,6 @@ export default {
 
       // polling
       this.periodicalChecks = setInterval(() => {
-        this.lastPrice();
         this.getRewards();
       }, this.periodicalChecksTime * 1000);
 
@@ -746,25 +749,6 @@ export default {
         }
       }
     },
-    settleTimeCheck() {
-      const settleDayAfter = 20; // after every xth day of the month enable settle
-      // we can have this set custom by asset, see assets in data()
-      const current = this.moment().format("DD");
-      console.log("settleTimeCheck", current);
-      if (current < settleDayAfter) {
-        console.log("settleTime is not due yet");
-        this.settleTime = false;
-      } else {
-        console.log("settleTime due");
-        this.settleTime = true;
-      }
-    },
-    async settleAsset() {
-      console.log("settleAsset");
-      this.settle({});
-      // .then(async (e) => {})
-      // .catch(async (e) => {});
-    },
     checkWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos) {
@@ -815,6 +799,25 @@ export default {
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
+    },
+    settleTimeCheck() {
+      const settleDayAfter = 25; // after every xth day of the month enable settle
+      // we can have this set custom by asset, see assets in data()
+      const current = this.moment().format("DD");
+      console.log("settleTimeCheck", current);
+      if (current < settleDayAfter) {
+        console.log("settleTime is not due yet");
+        this.settleTime = false;
+      } else {
+        console.log("settleTime due");
+        this.settleTime = true;
+      }
+    },
+    async settleAsset() {
+      console.log("settleAsset");
+      this.settle({});
+      // .then(async (e) => {})
+      // .catch(async (e) => {});
     },
     updateCR(removeTokens = false, removeCollateral = false) {
       if (this.currPos) {
@@ -1019,15 +1022,20 @@ export default {
       this.updateUserInfo();
     },
     async getRewards() {
-      if (this.tokenSelected && this.price) {
+      if (this.tokenSelected) {
+        const price = await this.lastPrice();
         const asset = {
           address: this.assets[this.tokenSelected].address,
           addressEMP: this.assets[this.tokenSelected].emp.address,
           addressLP: this.assets[this.tokenSelected].pool,
-          addressPrice: this.price,
+          addressPrice: price,
         };
         this.aprAssetValue = await this.getMiningRewards(asset);
       }
+    },
+    async resetNumbers() {
+      this.price = 0;
+      this.aprAssetValue = 0;
     },
     async lastPrice() {
       if (this.tokenSelected) {
@@ -1439,12 +1447,54 @@ div.error {
     border-radius: 8px;
     padding: 2px 20px;
     width: 100%;
-    margin-bottom: 10px;
+    margin-top: 5px;
   }
   .settle {
     background: #e5ad67;
   }
 }
+.chart-button {
+  cursor: pointer;
+  background: #0000000d;
+  padding: 5px 0px 15px 0px;
+  margin: 0 auto;
+  border: none;
+  border-radius: 10px 10px 0px 0px;
+  margin-bottom: -10px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #e57067;
+  width: 100%;
+  // width: 98%;
+}
+.assetchart-wrapper {
+  width: 100%;
+  // width: 98%;
+  background: #f9f8f8;
+  border-right: 1px solid #f2edee;
+  border-left: 1px solid #f2edee;
+  padding-top: 20px;
+  margin: 0 auto;
+  margin-bottom: -10px;
+  // display: none;
+  // &.show {
+  //   display: block;
+  // }
+  // transform: perspective(10em) rotateX(-5deg);
+  // animation: animate-down 0.4s 1 ease-in;
+}
+
+// @keyframes animate-down {
+//   from {
+//     margin-bottom: -200px;
+//     // transform: perspective(0em) rotateX(0deg);
+//   }
+
+//   to {
+//     margin-bottom: -10px;
+//     // transform: perspective(10em) rotateX(-5deg);
+//   }
+// }
 
 #act {
   cursor: pointer;
@@ -1509,12 +1559,6 @@ div.error {
   height: 160px;
   margin-bottom: 15px;
 }
-// .assetchart-wrapper {
-//   display: none;
-//   &.show {
-//     display: block;
-//   }
-// }
 
 .wrapETH {
   .wraprow {
