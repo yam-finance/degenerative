@@ -219,7 +219,7 @@
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
                 <div v-if="!tokenSelected">Select Token.</div>
                 <div v-if="tokenSelected">
-                  <h2>Unsiwap</h2>
+                  <h2>Uniswap</h2>
                   <div>
                     <a :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address" target="_blank">Click here to LP</a>
                   </div>
