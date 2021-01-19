@@ -762,7 +762,6 @@ export default new Vuex.Store({
       try {
         // console.log("getContractInfo", await getContractInfo(UGASJAN21));
         // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
-
         const emps = await getDevMiningEmps();
         const devmining = await DevMiningCalculator({
           provider: Vue.prototype.$provider,
@@ -794,7 +793,7 @@ export default new Vuex.Store({
         const umaPrice = await getPriceByContract(UMA);
         // const tokenPrice = await getPriceByContract(payload.address);
 
-        // temp
+        // temp WETH
         const tempFixPriceWithWETH = payload.addressPrice * ethPrice;
         const tokenPrice = tempFixPriceWithWETH;
         console.debug("tempFixPriceWithWETH", tempFixPriceWithWETH);
@@ -803,6 +802,7 @@ export default new Vuex.Store({
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
         console.debug("assetReserveValue", assetReserveValue);
+        // the second division is for the mint and it should be changed later for full accuracy
         const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice) / 2 / assetReserveValue) * 100) / 2;
         console.debug("aprCalculate %", aprCalculate);
         return mixin.methods.numeral(aprCalculate);
