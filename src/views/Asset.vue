@@ -62,7 +62,7 @@
               </span>
               <span v-if="tokenSelected">
                 <b>APR:</b>
-                {{ aprAssetValue && aprAssetValue > 0 ? aprAssetValue : "..." }}%
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
               </span>
             </span>
           </div>
@@ -390,11 +390,35 @@ import {
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { WETH, DAI, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21, UGASJAN21LP, UGASFEB21LP, UGASMAR21LP, USDC, UMA } from "@/utils/addresses";
+import {
+  WETH,
+  DAI,
+  EMPJAN,
+  EMPFEB,
+  EMPMAR,
+  UGASJAN21,
+  UGASFEB21,
+  UGASMAR21,
+  UGASJAN21LP,
+  UGASFEB21LP,
+  UGASMAR21LP,
+  USDC,
+  UMA,
+  UGASAPR21,
+  UGASAPR21LP,
+  EMPAPR,
+} from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
+
+const aprFrozenData = {
+  UGASJAN21: [34.29, 11.43],
+  UGASFEB21: [0, 0],
+  UGASMAR21: [0, 0],
+  UGASAPR21: [0, 0],
+};
 
 export default {
   name: "Asset",
@@ -436,8 +460,12 @@ export default {
           name: "UGASJAN21",
           address: UGASJAN21,
           pool: UGASJAN21LP,
-          apr: 0,
-          aprExtra: 0,
+          apr: {
+            value: 0,
+            add: false,
+            extra: 0,
+            force: 0,
+          },
           emp: {
             name: "EMPJAN",
             address: EMPJAN,
@@ -447,8 +475,12 @@ export default {
           name: "UGASFEB21",
           address: UGASFEB21,
           pool: UGASFEB21LP,
-          apr: 0,
-          aprExtra: 0,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASJAN21"][0],
+            force: -1,
+          },
           emp: {
             name: "EMPFEB",
             address: EMPFEB,
@@ -458,11 +490,30 @@ export default {
           name: "UGASMAR21",
           address: UGASMAR21,
           pool: UGASMAR21LP,
-          apr: 0,
-          aprExtra: 0,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASJAN21"][1] + aprFrozenData["UGASFEB21"][0],
+            force: -1,
+          },
           emp: {
             name: "EMPMAR",
             address: EMPMAR,
+          },
+        },
+        UGASAPR21: {
+          name: "UGASAPR21",
+          address: UGASAPR21,
+          pool: UGASAPR21LP,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASFEB21"][1] + aprFrozenData["UGASMAR21"][0],
+            force: -1,
+          },
+          emp: {
+            name: "EMPAPR",
+            address: EMPAPR,
           },
         },
       },
@@ -1076,8 +1127,8 @@ export default {
         addressPrice: price,
       };
       const resultBase = await this.getMiningRewards(asset);
-      this.assets[actualMonthAsset].apr = resultBase;
-      // const aprExtra = this.assets[actualMonthAsset].aprExtra;
+      this.assets[actualMonthAsset].apr.value = resultBase;
+      // const aprExtra = this.assets[actualMonthAsset].apr.extra;
       const result = this.numeral(Number(resultBase), "0.00a");
       return { actualMonthAsset: actualMonthAsset, actualMonthAPR: result };
     },
@@ -1090,10 +1141,15 @@ export default {
         addressPrice: price,
       };
       const resultBase = await this.getMiningRewards(asset);
-      this.assets[this.tokenSelected].apr = resultBase;
-      const aprExtra = this.assets[this.tokenSelected].aprExtra;
-      const result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
-      this.aprAssetValue = result;
+      let result;
+      if (this.assets[this.tokenSelected].apr.force >= 0) {
+        result = Number(this.assets[this.tokenSelected].apr.force);
+      } else {
+        this.assets[this.tokenSelected].apr.value = resultBase;
+        const aprExtra = this.assets[this.tokenSelected].apr.extra;
+        result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
+      }
+      this.aprAssetValue = result && result !== 0 ? result : -1;
       console.debug("aprAssetValue", this.aprAssetValue);
       return result;
     },
@@ -1111,12 +1167,14 @@ export default {
         console.log("1 firstNext", firstNext);
         console.log("1 secondNext", secondNext);
         console.debug("asset", this.assets[this.tokenSelected].name);
-        const currentAPR = this.assets[this.tokenSelected].apr;
-        if (this.assets[firstNext] && !this.assets[firstNext].aprExtra) {
-          this.assets[firstNext].aprExtra = currentAPR * this.aprAssetValueB;
+        const currentAPR = this.assets[this.tokenSelected].apr.value;
+        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
+          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + currentAPR * this.aprAssetValueB;
+          this.assets[firstNext].apr.add = true;
         }
-        if (this.assets[secondNext] && !this.assets[secondNext].aprExtra) {
-          this.assets[secondNext].aprExtra = currentAPR * this.aprAssetValueC;
+        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
+          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + currentAPR * this.aprAssetValueC;
+          this.assets[secondNext].apr.add = true;
         }
         // console.debug("rate moved 1", firstNext, currentAPR * this.aprAssetValueB);
       } else {
@@ -1125,16 +1183,18 @@ export default {
         const secondNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 2);
         console.log("2 firstNext", firstNext);
         console.log("2 secondNext", secondNext);
-        const currentAPR = this.assets[this.tokenSelected].apr;
+        const currentAPR = this.assets[this.tokenSelected].apr.value;
         const current = this.moment()
           .format("MMM")
           .toUpperCase();
         // this.assets[this.assetName.toUpperCase() + current + "21"].apr = xxxx;
-        if (this.assets[firstNext] && !this.assets[firstNext].aprExtra) {
-          this.assets[firstNext].aprExtra = actualMonthAPR * this.aprAssetValueB;
+        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
+          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + actualMonthAPR * this.aprAssetValueB;
+          this.assets[firstNext].apr.add = true;
         }
-        if (this.assets[secondNext] && !this.assets[secondNext].aprExtra) {
-          this.assets[secondNext].aprExtra = actualMonthAPR * this.aprAssetValueC;
+        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
+          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + actualMonthAPR * this.aprAssetValueC;
+          this.assets[secondNext].apr.add = true;
         }
         // console.debug("rate moved 2", firstNext, currentAPR * this.aprAssetValueB);
       }
