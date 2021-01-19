@@ -9,10 +9,12 @@ import { AbiItem } from "web3-utils";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import duration from "dayjs/plugin/duration";
 import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI } from "./addresses";
 
 dayjs.extend(utc);
+dayjs.extend(duration);
 
 export function stateSave(key, state) {
   window.localStorage.setItem(key, JSON.stringify(state));
@@ -259,24 +261,27 @@ export async function getBlocksFromTimestamps(timestamps, skipCount = 500) {
 }
 
 export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3600) => {
-  const latestBlock = Vue.prototype.eth.latestBlock;
-  // const latestBlock = "11491189";
+  let latestBlock = Vue.prototype.eth.latestBlock;
+  // latestBlock = "11491189";
   const utcEndTime = dayjs.utc();
+  const nowUnix = utcEndTime.add(20, "d").unix();
+
   let time = startTime;
   if (!latestBlock) {
-    await getLatestBlock();
+    latestBlock = await getLatestBlock()[0];
   }
   const timestamps: any = [];
-  while (time < utcEndTime.unix()) {
+  while (time < nowUnix) {
     timestamps.push(time);
     time += interval;
   }
   if (timestamps.length === 0) {
     return [];
   }
+
   let blocks;
   try {
-    blocks = await getBlocksFromTimestamps(timestamps, 100);
+    blocks = await getBlocksFromTimestamps(timestamps);
     if (!blocks || blocks.length === 0) {
       return [];
     }
@@ -286,7 +291,9 @@ export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3
         return parseFloat(b.number) <= parseFloat(latestBlock);
       });
     }
-    const result = await splitQuery(GET_PRICES_BY_BLOCK, Vue.prototype.gql.client, [tokenAddress], blocks, 50);
+    blocks.push({ timestamp: blocks[blocks.length - 1].timestamp, number: (blocks[blocks.length - 1].number - 100).toString() });
+
+    const result = await splitQuery(GET_PRICES_BY_BLOCK, Vue.prototype.gql.client, [tokenAddress], blocks, 60);
     const values: any = [];
     for (const row in result) {
       const timestamp = row.split("t")[1];
@@ -306,17 +313,21 @@ export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3
         index += 1;
       }
     }
+    const shortNumber = function(number) {
+      return +parseFloat(number).toFixed(4);
+    };
     const formattedHistory: any = [];
-    for (let i = 0; i < values.length - 1; i++) {
+    for (let i = 0; i < values.length; i++) {
+      const lastIndex = values.length - 1;
       formattedHistory.push({
-        open: parseFloat(values[i].priceUSD),
-        close: parseFloat(values[i + 1].priceUSD),
-        openETH: values[i].derivedETH,
-        closeETH: values[i + 1].derivedETH,
-        twap: (parseFloat(values[i].priceUSD) + parseFloat(values[i + 1].priceUSD)) / 2,
-        twapETH: (values[i].derivedETH + values[i + 1].derivedETH) / 2,
         timestamp: values[i].timestamp,
         timestampDate: dayjs(values[i].timestamp * 1000).format("MMM, D"), // DD/MM/YYYY
+        open: parseFloat(values[i].priceUSD),
+        close: parseFloat(values[i === lastIndex ? lastIndex : i + 1].priceUSD),
+        openETH: shortNumber(values[i].derivedETH),
+        closeETH: shortNumber(values[i === lastIndex ? lastIndex : i + 1].derivedETH),
+        twap: (parseFloat(values[i].priceUSD) + parseFloat(values[i === lastIndex ? lastIndex : i + 1].priceUSD)) / 2,
+        twapETH: shortNumber((values[i].derivedETH + values[i === lastIndex ? lastIndex : i + 1].derivedETH) / 2),
       });
     }
     return formattedHistory;
@@ -423,8 +434,9 @@ const emplistDataBackup = {
     "0xd81028a6fbAAaf604316F330b20D24bFbFd14478",
     "0x94C7cab26c04B76D9Ab6277a0960781b90f74294",
     "0x7c4090170aeADD54B1a0DbAC2C8D08719220A435",
-    // "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
-    // "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
+
+    "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+    "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
   ],
   totalReward: 50000,
 };

@@ -404,6 +404,7 @@ export default {
   },
   data() {
     return {
+      assetName: "UGAS", // move to dynamic ref object
       navPage: "interact",
       actName: "Mint",
       withdrawType: "new",
@@ -435,6 +436,8 @@ export default {
           name: "UGASJAN21",
           address: UGASJAN21,
           pool: UGASJAN21LP,
+          apr: 0,
+          aprExtra: 0,
           emp: {
             name: "EMPJAN",
             address: EMPJAN,
@@ -444,6 +447,8 @@ export default {
           name: "UGASFEB21",
           address: UGASFEB21,
           pool: UGASFEB21LP,
+          apr: 0,
+          aprExtra: 0,
           emp: {
             name: "EMPFEB",
             address: EMPFEB,
@@ -453,6 +458,8 @@ export default {
           name: "UGASMAR21",
           address: UGASMAR21,
           pool: UGASMAR21LP,
+          apr: 0,
+          aprExtra: 0,
           emp: {
             name: "EMPMAR",
             address: EMPMAR,
@@ -475,8 +482,10 @@ export default {
       chartHourly: false,
       currLiquidationPrice: null,
       periodicalChecks: null,
-      periodicalChecksTime: 10,
+      periodicalChecksTime: 100,
       aprAssetValue: 0,
+      aprAssetValueB: 0.75,
+      aprAssetValueC: 0.25,
       settleTime: false,
       chartDisplay: false,
     };
@@ -603,17 +612,27 @@ export default {
 
       this.chartOptionsCandle = {
         title: {
-          // text: "Price in ETH",
-          left: 0,
+          text: this.assets[this.tokenSelected].name,
+          top: 5,
+          left: 45,
+          textStyle: {
+            color: "rgb(45 45 45 / 55%)",
+            fontSize: 14,
+          },
         },
         // legend: {
         //   data: ["uGAS"],
         // },
         tooltip: {
-          show: false,
-          trigger: "item",
+          show: true,
+          trigger: "item", // axis
           axisPointer: {
             type: "cross",
+            label: {
+              color: "#fff",
+              backgroundColor: "rgb(45 45 45 / 45%)",
+              fontSize: 9,
+            },
           },
         },
         grid: {
@@ -1031,24 +1050,104 @@ export default {
     },
     async getRewards() {
       if (this.tokenSelected) {
-        const price = await this.lastPrice();
-        const asset = {
-          address: this.assets[this.tokenSelected].address,
-          addressEMP: this.assets[this.tokenSelected].emp.address,
-          addressLP: this.assets[this.tokenSelected].pool,
-          addressPrice: price,
-        };
-        this.aprAssetValue = await this.getMiningRewards(asset);
+        const dayAfter = 7;
+        const current = this.moment().format("DD");
+        if (current > dayAfter) {
+          console.debug("Coming Month");
+          const currentMonth = await this.getCurrentMonthRewards();
+          this.getComingMonthRewards(currentMonth);
+        } else {
+          console.debug("Now");
+          const currentMonth = await this.getCurrentMonthRewards();
+        }
+      }
+    },
+    async getActualMonthRewards() {
+      const current = this.moment()
+        .format("MMM")
+        .toUpperCase();
+      const actualMonthAsset = this.assets[this.assetName.toUpperCase() + current + "21"].name;
+      console.log("-------------------", actualMonthAsset);
+      const price = await this.lastPrice(actualMonthAsset);
+      const asset = {
+        address: this.assets[actualMonthAsset].address,
+        addressEMP: this.assets[actualMonthAsset].emp.address,
+        addressLP: this.assets[actualMonthAsset].pool,
+        addressPrice: price,
+      };
+      const resultBase = await this.getMiningRewards(asset);
+      this.assets[actualMonthAsset].apr = resultBase;
+      // const aprExtra = this.assets[actualMonthAsset].aprExtra;
+      const result = this.numeral(Number(resultBase), "0.00a");
+      return { actualMonthAsset: actualMonthAsset, actualMonthAPR: result };
+    },
+    async getCurrentMonthRewards() {
+      const price = await this.lastPrice(this.tokenSelected);
+      const asset = {
+        address: this.assets[this.tokenSelected].address,
+        addressEMP: this.assets[this.tokenSelected].emp.address,
+        addressLP: this.assets[this.tokenSelected].pool,
+        addressPrice: price,
+      };
+      const resultBase = await this.getMiningRewards(asset);
+      this.assets[this.tokenSelected].apr = resultBase;
+      const aprExtra = this.assets[this.tokenSelected].aprExtra;
+      const result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
+      this.aprAssetValue = result;
+      console.debug("aprAssetValue", this.aprAssetValue);
+      return result;
+    },
+    async getComingMonthRewards() {
+      const current = this.moment()
+        .format("MMM")
+        .toLowerCase();
+      console.debug("current", current);
+      const indexNav = (obj, currentKey, direction) => {
+        return Object.keys(obj)[Object.keys(obj).indexOf(currentKey) + direction];
+      };
+      if (this.assets[this.tokenSelected].name.toLowerCase().includes(current.toLowerCase())) {
+        const firstNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 1);
+        const secondNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 2);
+        console.log("1 firstNext", firstNext);
+        console.log("1 secondNext", secondNext);
+        console.debug("asset", this.assets[this.tokenSelected].name);
+        const currentAPR = this.assets[this.tokenSelected].apr;
+        if (this.assets[firstNext] && !this.assets[firstNext].aprExtra) {
+          this.assets[firstNext].aprExtra = currentAPR * this.aprAssetValueB;
+        }
+        if (this.assets[secondNext] && !this.assets[secondNext].aprExtra) {
+          this.assets[secondNext].aprExtra = currentAPR * this.aprAssetValueC;
+        }
+        // console.debug("rate moved 1", firstNext, currentAPR * this.aprAssetValueB);
+      } else {
+        const { actualMonthAsset, actualMonthAPR } = await this.getActualMonthRewards();
+        const firstNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 1);
+        const secondNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 2);
+        console.log("2 firstNext", firstNext);
+        console.log("2 secondNext", secondNext);
+        const currentAPR = this.assets[this.tokenSelected].apr;
+        const current = this.moment()
+          .format("MMM")
+          .toUpperCase();
+        // this.assets[this.assetName.toUpperCase() + current + "21"].apr = xxxx;
+        if (this.assets[firstNext] && !this.assets[firstNext].aprExtra) {
+          this.assets[firstNext].aprExtra = actualMonthAPR * this.aprAssetValueB;
+        }
+        if (this.assets[secondNext] && !this.assets[secondNext].aprExtra) {
+          this.assets[secondNext].aprExtra = actualMonthAPR * this.aprAssetValueC;
+        }
+        // console.debug("rate moved 2", firstNext, currentAPR * this.aprAssetValueB);
       }
     },
     async resetNumbers() {
       this.price = 0;
       this.aprAssetValue = 0;
     },
-    async lastPrice() {
-      if (this.tokenSelected) {
+    async lastPrice(specificToken) {
+      const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
+      if (specificTokenSelected) {
         // this.price = await getOffchainPriceFromTokenSymbol("uGAS");
-        const price = Number((await this.getUniPrice({ tokenA: this.assets[this.tokenSelected].address, tokenB: WETH })).toString()) || 0;
+        const price = Number((await this.getUniPrice({ tokenA: this.assets[specificTokenSelected].address, tokenB: WETH })).toString()) || 0;
         // const price2 = Number((await this.getUniPrice({ tokenA: WETH, tokenB: USDC })).toString()) || 0;
         // this.price = (new BigNumber(price).multipliedBy(price2)).toString();
         // this.price = price * price2;
