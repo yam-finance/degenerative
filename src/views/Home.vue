@@ -1,15 +1,15 @@
 <template>
   <div class="home">
     <div class="home-content">
-      <Container :size="1000">
+      <Container :size="900">
         <div class="getdegenerative">
-          <h1>Get Degenerative</h1>
+          <div class="large-title">Get Degenerative</div>
           <div class="side">
             <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
             <p class="subtitle sub2">
-              Built by <b><a href="https://yam.finance/" target="_blank">Yam</a></b
-              >. Built on <b><a href="https://umaproject.org/" target="_blank">UMA</a></b
-              >. Built for Degens.
+              Built by
+              <b> <a href="https://yam.finance/" target="_blank">Yam</a> </b>. Built on <b> <a href="https://umaproject.org/" target="_blank">UMA</a> </b>.
+              Built for Degens.
             </p>
             <p class="justify">
               Degenerative Finance is a collaboration between Yam Finance and the UMA Project to develop a suite of innovative DeFi derivatives, starting with
@@ -20,58 +20,60 @@
         </div>
       </Container>
 
-      <Container :size="1000" class="tempsp">
-        <div>
-          <h1>How to use Degenerative</h1>
-          <Space size="sm" />
+      <div class="home-details">
+        <Container :size="900">
+          <div>
+            <h2>How to use Degenerative</h2>
+            <Space size="sm" />
 
-          <div class="row">
-            <div class="item">
-              <img src="../assets/graphics/graphic_create.png" />
-              <h4>Create</h4>
-              <div class="text justify">
-                Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the following
-                month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained.
+            <div class="row">
+              <div class="item">
+                <img src="../assets/graphics/graphic_create.png" />
+                <h3>Create</h3>
+                <div class="text justify">
+                  Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the
+                  following month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained.
+                </div>
+              </div>
+
+              <Space size="64" />
+
+              <div class="item">
+                <img src="../assets/graphics/graphic_trade.png" />
+                <h3>Trade</h3>
+                <div class="text justify">
+                  Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
+                  spot price as profit.
+                </div>
               </div>
             </div>
 
             <Space size="32" />
 
-            <div class="item">
-              <img src="../assets/graphics/graphic_trade.png" />
-              <h4>Trade</h4>
-              <div class="text justify">
-                Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
-                spot price as profit.
+            <div class="row">
+              <div class="item">
+                <img src="../assets/graphics/graphic_liqudity.png" />
+                <h3>Provide Liquidity</h3>
+                <div class="text justify">
+                  Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
+                  deposit their uGAS tokens. Tokens which are traded and then deposited will not qualify.
+                </div>
+              </div>
+
+              <Space size="64" />
+
+              <div class="item">
+                <img src="../assets/graphics/graphic_redeem.png" />
+                <h3>Redeem</h3>
+                <div class="text justify">
+                  Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
+                  transactions.
+                </div>
               </div>
             </div>
           </div>
-
-          <Space size="32" />
-
-          <div class="row">
-            <div class="item">
-              <img src="../assets/graphics/graphic_liqudity.png" />
-              <h4>Provide Liquidity</h4>
-              <div class="text justify">
-                Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
-                deposit their uGAS tokens. Tokens which are traded and then deposited will not qualify.
-              </div>
-            </div>
-
-            <Space size="32" />
-
-            <div class="item">
-              <img src="../assets/graphics/graphic_redeem.png" />
-              <h4>Redeem</h4>
-              <div class="text justify">
-                Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
-                transactions.
-              </div>
-            </div>
-          </div>
-        </div>
-      </Container>
+        </Container>
+      </div>
     </div>
   </div>
 </template>
@@ -95,20 +97,19 @@
   text-align: center;
 }
 
-h1 {
+.large-title {
   @media (max-width: 420px) {
     font-size: 24px;
-    margin-top: 15px;
   }
 }
 
 .getdegenerative {
-  min-height: 980px;
+  min-height: 540px;
   @media (max-width: 420px) {
     min-height: 620px;
   }
 
-  h1 {
+  .large-title {
     font-size: 65px;
 
     @media (max-width: 690px) {
@@ -162,7 +163,13 @@ h1 {
   }
 }
 
-.tempsp {
+.home-details {
+  background: linear-gradient(var(--back-act-tran) 0%, #ffffff 100%);
+  border-top: 4px solid var(--back-act-tran);
+  // background: linear-gradient(#e4afabba 0%, #ffffff 100%);
+  // border-top: 4px solid #e57067;
+  padding-bottom: 20px;
+
   @media (max-width: 420px) {
     background: #fff7f7;
   }

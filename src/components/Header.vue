@@ -1,6 +1,6 @@
 <template>
   <header>
-    <Container :size="1000">
+    <Container :size="900">
       <div id="nav">
         <router-link class="logo" to="/">
           <div class="degenerative-logo">
@@ -14,8 +14,8 @@
           <router-link @click.native="respNavClick" to="/">Home</router-link>
           <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
           <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
-          <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a>
-          <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Learn More</a>
+          <!-- <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a> -->
+          <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Docs</a>
           <div @click="respNavClose" class="resp-links-close">Close</div>
           <Space />
         </div>
@@ -38,6 +38,69 @@
     </Container>
   </header>
 </template>
+
+<script>
+import store from "@/store";
+import { mapActions } from "vuex";
+import MenuIcon from "vue-material-design-icons/Menu.vue";
+
+export default {
+  name: "Header",
+  data() {
+    return {
+      account: store.state.account,
+      respNav: false,
+    };
+  },
+  components: {
+    MenuIcon,
+  },
+  watch: {},
+  methods: {
+    ...mapActions(["connect", "disconnect", "reset"]),
+    async auth() {
+      const connected = await store.getters.connected;
+      if (connected) {
+        console.log("open user mini popup");
+      } else {
+        await this.connect({ connector: "injected", organic: true });
+      }
+    },
+    async logout() {
+      await this.disconnect();
+      await this.reset();
+    },
+    respNavOpen() {
+      this.respNav = true;
+      if (document.querySelector("body").classList.contains("navresp")) {
+        document.querySelector("body").classList.remove("navresp");
+        document.querySelector(".router-links").classList.add("hide");
+        document.querySelector(".router-links").classList.remove("show");
+      } else {
+        document.querySelector("body").classList.add("navresp");
+        document.querySelector(".router-links").classList.add("show");
+        document.querySelector(".router-links").classList.remove("hide");
+      }
+    },
+    respNavClose() {
+      this.respNav = true;
+      if (document.querySelector("body").classList.contains("navresp")) {
+        document.querySelector("body").classList.remove("navresp");
+        document.querySelector(".router-links").classList.remove("show");
+      } else {
+        document.querySelector("body").classList.add("navresp");
+        document.querySelector(".router-links").classList.add("show");
+        document.querySelector(".router-links").classList.remove("hide");
+      }
+    },
+    respNavClick() {
+      document.querySelector("body").classList.remove("navresp");
+      document.querySelector(".router-links").classList.remove("show");
+    },
+  },
+  // mounted() {},
+};
+</script>
 
 <style lang="scss" scoped>
 // 690
@@ -103,7 +166,7 @@ header {
 
     background: #ffffffeb;
     background: #000000d4;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -188,66 +251,3 @@ header {
   }
 }
 </style>
-
-<script>
-import store from "@/store";
-import { mapActions } from "vuex";
-import MenuIcon from "vue-material-design-icons/Menu.vue";
-
-export default {
-  name: "Header",
-  data() {
-    return {
-      account: store.state.account,
-      respNav: false,
-    };
-  },
-  components: {
-    MenuIcon,
-  },
-  watch: {},
-  methods: {
-    ...mapActions(["connect", "disconnect", "reset"]),
-    async auth() {
-      const connected = await store.getters.connected;
-      if (connected) {
-        console.log("open user mini popup");
-      } else {
-        await this.connect({ connector: "injected", organic: true });
-      }
-    },
-    async logout() {
-      await this.disconnect();
-      await this.reset();
-    },
-    respNavOpen() {
-      this.respNav = true;
-      if (document.querySelector("body").classList.contains("navresp")) {
-        document.querySelector("body").classList.remove("navresp");
-        document.querySelector(".router-links").classList.add("hide");
-        document.querySelector(".router-links").classList.remove("show");
-      } else {
-        document.querySelector("body").classList.add("navresp");
-        document.querySelector(".router-links").classList.add("show");
-        document.querySelector(".router-links").classList.remove("hide");
-      }
-    },
-    respNavClose() {
-      this.respNav = true;
-      if (document.querySelector("body").classList.contains("navresp")) {
-        document.querySelector("body").classList.remove("navresp");
-        document.querySelector(".router-links").classList.remove("show");
-      } else {
-        document.querySelector("body").classList.add("navresp");
-        document.querySelector(".router-links").classList.add("show");
-        document.querySelector(".router-links").classList.remove("hide");
-      }
-    },
-    respNavClick() {
-      document.querySelector("body").classList.remove("navresp");
-      document.querySelector(".router-links").classList.remove("show");
-    },
-  },
-  // mounted() {},
-};
-</script>

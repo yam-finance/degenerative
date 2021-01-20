@@ -5,7 +5,20 @@ import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
-import { stateSave, stateLoad, stateDestroy, getERC20Contract, getBalance, waitTransaction, approve, getTWAP, getAllowance } from "@/utils";
+import {
+  stateSave,
+  stateLoad,
+  stateDestroy,
+  getERC20Contract,
+  getBalance,
+  waitTransaction,
+  approve,
+  getTWAP,
+  getAllowance,
+  DevMiningCalculator,
+  getPriceByContract,
+  getDevMiningEmps,
+} from "@/utils";
 import { sleep, checkConnection } from "./../utils/index";
 import { AbiItem, toHex } from "web3-utils";
 import { provider } from "web3-core";
@@ -13,8 +26,12 @@ import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
 import EMPContract from "@/utils/abi/emp.json";
+import UNIContract from "@/utils/abi/uni.json";
+import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
-import { WETH } from "@/utils/addresses";
+import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
+import { UMA, WETH } from "@/utils/addresses";
+import mixin from "./../mixins";
 
 Vue.use(Vuex);
 
@@ -272,6 +289,44 @@ export default new Vuex.Store({
       return empContract;
     },
 
+    getUNI: ({ commit, dispatch }, payload: { address: string }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const uniContract = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.address);
+      return uniContract;
+    },
+
+    getUNIFact: ({ commit, dispatch }) => {
+      const web3 = new Web3(Vue.prototype.$provider);
+      const uniFactContract = new web3.eth.Contract((UNIFactContract.abi as unknown) as AbiItem, "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f");
+      return uniFactContract;
+    },
+
+    getUniPrice: async ({ commit, dispatch }, payload: { tokenA: string; tokenB: string }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      console.debug("getting uni price");
+      const uniFact = await dispatch("getUNIFact");
+      try {
+        const pair = await uniFact.methods.getPair(payload.tokenA, payload.tokenB).call();
+        const uniPair = await dispatch("getUNI", { address: pair });
+        const token0 = await uniPair.methods.token0().call();
+        let reserves0: any = 0;
+        let reserves1: any = 0;
+        const res = await uniPair.methods.getReserves().call();
+        reserves0 = new BigNumber(res._reserve0);
+        reserves1 = new BigNumber(res._reserve1);
+        if (token0 == payload.tokenA) {
+          return reserves0.dividedBy(reserves1);
+        } else {
+          return reserves1.dividedBy(reserves0);
+        }
+      } catch (e) {
+        console.error("couldnt get uni price for:", payload.tokenA, payload.tokenB);
+        // console.log("user:", store.state.account, e);
+      }
+    },
+
     getWETH: ({ commit, dispatch }, payload: { address: string }) => {
       const web3 = new Web3(Vue.prototype.$provider);
       const contractWETH = new web3.eth.Contract((WETHContract.abi as unknown) as AbiItem, payload.address);
@@ -289,7 +344,7 @@ export default new Vuex.Store({
         commit("CURR_POS", pos);
         return pos;
       } catch (e) {
-        console.log("couldnt get position for: ", contract, " for user: ", store.state.account);
+        console.debug("couldnt get position for: ", contract, " for user: ", store.state.account);
       }
     },
 
@@ -345,7 +400,7 @@ export default new Vuex.Store({
         commit("EMP_STATE", dat);
         return dat;
       } catch (e) {
-        console.log("error getting emp state", e);
+        console.error("error getting emp state", e);
         return "bad";
       }
     },
@@ -627,6 +682,22 @@ export default new Vuex.Store({
       }
     },
 
+    // settle prep
+    settle: async ({ commit, dispatch }, payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const emp = await dispatch("getEMP", { address: payload.contract });
+      try {
+        // const web3Provider = Vue.prototype.$provider;
+        // const web3 = new Web3(web3Provider);
+      } catch (e) {
+        console.error("error", e);
+        return [false, e];
+      }
+    },
+    // settle prep
+
     getUserUGasBalance: async ({ commit, dispatch }, payload: { contract: string }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
@@ -684,6 +755,63 @@ export default new Vuex.Store({
       return result;
     },
 
+    getMiningRewards: async ({ commit, dispatch }, payload: { address: string; addressEMP: string; addressLP: string; addressPrice: number }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      try {
+        // console.log("getContractInfo", await getContractInfo(UGASJAN21));
+        // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
+        const emps = await getDevMiningEmps();
+        const devmining = await DevMiningCalculator({
+          provider: Vue.prototype.$provider,
+          getPrice: getPriceByContract,
+          empAbi: EMPContract.abi,
+        });
+        const getEmpInfo: any = await devmining.utils.getEmpInfo(payload.addressEMP);
+        console.debug("getEmpInfo", {
+          size: getEmpInfo.size,
+          price: getEmpInfo.price,
+          decimals: getEmpInfo.decimals,
+        });
+        const calculateEmpValue = await devmining.utils.calculateEmpValue(getEmpInfo);
+        console.debug("calculateEmpValue", calculateEmpValue);
+        const estimateDevMiningRewards = await devmining.estimateDevMiningRewards({
+          totalRewards: emps.totalReward,
+          empWhitelist: emps.empWhitelist,
+        });
+        console.debug("estimateDevMiningRewards", estimateDevMiningRewards);
+        const rewards = {};
+        for (let i = 0; i < estimateDevMiningRewards.length; i++) {
+          rewards[estimateDevMiningRewards[i][0]] = estimateDevMiningRewards[i][1];
+        }
+        const base = new BigNumber(10).pow(18);
+        const web3 = new Web3(Vue.prototype.$provider);
+        const contractLp = new web3.eth.Contract((UGASJAN21LPContract.abi as unknown) as AbiItem, payload.addressLP);
+        const contractLpCall = await contractLp.methods.getReserves().call();
+        const ethPrice = await getPriceByContract(WETH);
+        const umaPrice = await getPriceByContract(UMA);
+        // const tokenPrice = await getPriceByContract(payload.address);
+
+        // temp WETH
+        const tempFixPriceWithWETH = payload.addressPrice * ethPrice;
+        const tokenPrice = tempFixPriceWithWETH;
+        console.debug("tempFixPriceWithWETH", tempFixPriceWithWETH);
+
+        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
+        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
+        const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
+        console.debug("assetReserveValue", assetReserveValue);
+        // the second division is for the mint and it should be changed later for full accuracy
+        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice) / 2 / assetReserveValue) * 100) / 2;
+        console.debug("aprCalculate %", aprCalculate);
+        return mixin.methods.numeral(aprCalculate);
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
+    },
+
     wrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
@@ -734,7 +862,6 @@ export default new Vuex.Store({
         return 0;
       }
     },
-
     unwrapETH: async ({ commit, dispatch }, payload: { amount: any; onTxHash?: (txHash: string) => void }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {

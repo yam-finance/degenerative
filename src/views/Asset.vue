@@ -1,32 +1,83 @@
 <template>
   <div class="assets">
-    <Container :size="800">
+    <Container :size="900">
       <Card>
-        <!-- <h1 class="">Asset: {{ $route.params.key.toUpperCase() }}</h1> -->
-        <h1 class="flex">
+        <!-- <h2 class="">Asset: {{ $route.params.key.toUpperCase() }}</h2> -->
+        <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <button class="infoswitch" v-if="navPage === 'interact'" @click="toNavPage('info')" :class="{ active: navPage === 'info' }">Info</button>
-          <button class="infoswitch" v-if="navPage === 'info'" @click="toNavPage('interact')" :class="{ active: navPage === 'interact' }">Interact</button>
-        </h1>
+          <a class="asset-detail-switch" href="https://docs.degenerative.finance/ugas" target="_blank">Info</a>
+          <!-- <button
+            class="asset-detail-switch"
+            v-if="navPage === 'interact'"
+            @click="toNavPage('info')"
+            :class="{ active: navPage === 'info' }"
+          >Info</button>
+          <button
+            class="asset-detail-switch"
+            v-if="navPage === 'info'"
+            @click="toNavPage('interact')"
+            :class="{ active: navPage === 'interact' }"
+          >Interact</button>-->
+        </h2>
       </Card>
-      <span class="warning justify"
-        >Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
-        OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
-        Users should take time to understand the token and ask questions on the Yam Discord.</span
-      >
+
       <Space size="md" />
 
       <div v-if="navPage === 'interact'">
-        <Container :size="440" class="maker">
-          <div v-if="assetChartData && tokenSelected">
-            <div class="chart-asset">
-              <chart :options="chartOptionsCandle" />
-            </div>
-          </div>
-        </Container>
+        <div class="warning bold justify">
+          Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
+          OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
+          Users should take time to understand the token and ask questions on the Yam Discord.
+        </div>
+
+        <Space size="md" />
 
         <Container :size="440" class="maker">
+          <div class="asset-info">
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select token to continue',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                  >Asset Price</b
+                >
+              </span>
+              <span v-if="tokenSelected">
+                <b>Asset Price:</b>
+                {{ price && price > 0 ? numeral(price, "0.0000a") : "..." }} ETH
+              </span>
+            </span>
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select token to continue',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                  >APR</b
+                >
+              </span>
+              <span v-if="tokenSelected">
+                <b>APR:</b>
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
+              </span>
+            </span>
+          </div>
+
+          <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
+          <transition name="fade" mode="out-in">
+            <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
+              <div v-if="assetChartData && tokenSelected">
+                <div class="assetchart">
+                  <chart :options="chartOptionsCandle" />
+                </div>
+              </div>
+            </div>
+          </transition>
+
           <div id="thebox">
             <div class="tabs">
               <button
@@ -106,8 +157,8 @@
                   </button>
                 </div>
                 <div class="dropdown">
-                  <vue-picker class="select" v-model="tokenSelected" @change="getEMPState" placeholder="Select uGas Token" autofocus>
-                    <vue-picker-option value="">Select uGas Token</vue-picker-option>
+                  <vue-picker class="select" v-model="tokenSelected" @change="getEmpState" placeholder="Select uGas Token" autofocus>
+                    <vue-picker-option value>Select uGas Token</vue-picker-option>
                     <vue-picker-option value="UGASJAN21">uGAS JAN21</vue-picker-option>
                     <vue-picker-option value="UGASFEB21">uGAS FEB21</vue-picker-option>
                     <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
@@ -115,20 +166,20 @@
                 </div>
                 <input
                   v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
-                  id=""
+                  id
                   class="numeric setvalue"
                   type="number"
-                  name=""
+                  name
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
                   :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
                 />
                 <input
                   v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
-                  id=""
+                  id
                   class="numeric setvalue"
                   type="number"
-                  name=""
+                  name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   placeholder="0.00 WETH"
@@ -140,49 +191,61 @@
                 <div :class="{ hideDropdown: !showDropdown }">
                   {{ currentInfo }}
                 </div>
-              </div> -->
-                <button :disabled="hasError == true" id="act" @click="act" v-bind:class="{ error: hasError }" v-if="navAct !== 'lptrade'">
-                  {{
-                    !isPending
-                      ? tokenSelected
-                        ? approvals
-                          ? approvals[assetEMP[tokenSelected][0] + "_WETH"] === true ||
-                            (navAct == "redeem" && approvals[assetEMP[tokenSelected][0] + "_" + tokenSelected] === true)
-                            ? actName
-                            : "Approve"
+                </div>-->
+                <button
+                  :disabled="hasError == true || !tokenSelected"
+                  id="act"
+                  @click="act"
+                  v-bind:class="{ error: hasError, notokenselected: !tokenSelected }"
+                  v-if="navAct !== 'lptrade'"
+                >
+                  <span v-bind:class="{ notokenselectedlabel: !tokenSelected }">
+                    {{
+                      !isPending
+                        ? tokenSelected
+                          ? approvals
+                            ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
+                              (navAct == "redeem" && approvals[assets[tokenSelected].name + "_" + tokenSelected] === true)
+                              ? actName
+                              : "Approve"
+                            : "Select Token"
                           : "Select Token"
-                        : "Select Token"
-                      : ""
-                  }}
+                        : ""
+                    }}
+                  </span>
                   <beat-loader v-if="isPending" color="#FF4A4A"></beat-loader>
                 </button>
               </div>
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
                 <div v-if="!tokenSelected">Select Token.</div>
                 <div v-if="tokenSelected">
-                  <h2>Unsiwap</h2>
-                  <div><a :href="'https://app.uniswap.org/#/add/ETH/' + assetTokens[tokenSelected]" target="_blank">Click here to LP</a></div>
+                  <h2>Uniswap</h2>
                   <div>
-                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assetTokens[tokenSelected]" target="_blank">Click here to Trade</a>
+                    <a :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address" target="_blank">Click here to LP</a>
+                  </div>
+                  <div>
+                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assets[tokenSelected].address" target="_blank">Click here to Trade</a>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">
-            {{ currentError }}
-          </div>
+          <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
-          <div class="wrapETH">
-            <button class="toggle" @click="toggleWrap">Wrap ETH</button>
-            <div v-if="showWrapETH">
-              <div class="wraprow">
-                <input type="number" placeholder="Amount" v-model="amountToWrap" />
-                <button class="wrap" :disabled="!amountToWrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
-              </div>
-              <div class="wraprow">
-                <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
-                <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+          <div id="thebuttons">
+            <!-- <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button> -->
+
+            <div class="wrapETH">
+              <button class="button" @click="toggleWrap">Wrap ETH</button>
+              <div v-if="showWrapETH">
+                <div class="wraprow">
+                  <input type="number" placeholder="Amount" v-model="amountToWrap" />
+                  <button class="wrap" :disabled="!amountToWrap" @click="makeWrapETH(amountToWrap)">Wrap</button>
+                </div>
+                <div class="wraprow">
+                  <input type="number" placeholder="Amount" v-model="amountToUnwrap" />
+                  <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
+                </div>
               </div>
             </div>
           </div>
@@ -194,48 +257,59 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              ><b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b></label
             >
+              <b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Price at which your position can be liquidated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Liquidation Price: <b>{{ liquidationPrice }}</b></label
             >
+              Liquidation Price:
+              <b>{{ liquidationPrice }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Collateral ratio of your position after the tx',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Post-Tx): <b>{{ numeral("0.0000a", pricedCR) }}</b></label
             >
+              Collateral Ratio (Post-Tx):
+              <b>{{ numeral(pricedCR, "0.0000a") }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Global collateral ratio',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Global): <b>{{ gcr }}</b></label
             >
+              Collateral Ratio (Global):
+              <b>{{ gcr }}</b>
+            </label>
             <label
               v-tooltip="{
                 content: 'Collateral ratio of this particular tx',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Collateral Ratio (Tx): <b>{{ numeral("0.0000a", pricedTxCR) }}</b></label
             >
+              Collateral Ratio (Tx):
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+            </label>
 
             <br />
-            <label
-              >Your WETH: <b>{{ displayBalanceWETH ? displayBalanceWETH : "0" }}</b></label
-            >
-            <label v-if="tokenSelected"
-              >Your {{ tokenSelected }}: <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b></label
-            >
+            <label>
+              Your WETH:
+              <b>{{ balanceWETH ? balanceWETH : "0" }}</b>
+            </label>
+            <label v-if="tokenSelected">
+              Your {{ tokenSelected }}:
+              <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -243,8 +317,10 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Position Collateral (WETH): <b>{{ currCollat ? currCollat : "0" }}</b></label
             >
+              Position Collateral (WETH):
+              <b>{{ currCollat ? currCollat : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -252,8 +328,10 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Position Outstanding Tokens ({{ tokenSelected }}): <b>{{ currTokens ? currTokens : "0" }}</b></label
             >
+              Position Outstanding Tokens ({{ tokenSelected }}):
+              <b>{{ currTokens ? currTokens : "0" }}</b>
+            </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
@@ -261,182 +339,33 @@
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
-              >Current Liquidation Price: <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b></label
             >
+              Current Liquidation Price:
+              <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b>
+            </label>
           </div>
         </Container>
       </div>
 
       <div v-if="navPage === 'info'">
-        <Container :size="800">
-          <!-- <div id="">
-            <la-cartesian narrow :bound="[n => n - 40, n => n + 40]" :data="chartOptionsMedianValues" :width="800 - 60" :height="300 - 60">
-              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
-                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
-                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">
-                    {{ props.value }}
-                  </text>
-                </g></la-line
-              >
-              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
-              <la-y-axis prop="value"></la-y-axis>
-            </la-cartesian>
-          </div> -->
-        </Container>
-        <Card>
-          <div style="display: flex; justify-content: center">
-            <img
-              src="https://lh4.googleusercontent.com/lcIV49d4j16mN5xrLN3XNTRR8TWJty4gnAuHhryWaGONwX1s3Brtvyk6HvGC328agHpvxXuY08Lsb2lU6dHVeOKce--cta2XJdm9Dgjb=s1600"
-            />
-          </div>
-          <br />
-          <b>
-            For a deeper dive into how synthetic assets work, please go here:
-            <u><router-link to="/faq">Learn More</router-link></u>
-          </b>
-          <br />
-          <br />
-          <h1>What is uGAS?</h1>
-          <br />
-          <p>uGAS is a Synthetic Gas Futures Token.</p>
-          <br />
-          <p>
-            Each uGAS token is named after the month that it’ll expire at the end of (for example, the uGAS-JAN21 token will expire at 0:00 UTC, Feb 1st 2021.)
-            Once the uGAS token expires, it will settle at the median gas price of all Ethereum transactions for the past 30 days.
-            <br />
-            <br />
-            <b
-              >NOTE: Expiry price is determined by 30-day median price, while liquidation and disputes are determined by 2 hour uniswap TWAP (time-weighted
-              average price).
-            </b>
-            <br />
-            <br />
-            Each uGAS token represents 1,000,000 GAS, so if the median gas price over the 30 days before expiry was 70 Gwei, the uGAS token would be worth 0.07
-            ETH.
-          </p>
-        </Card>
-        <Card>
-          <h1>Wait, what’s a Synthetic?</h1>
-          <br />
-          <p>Synthetic tokens are collateral-backed tokens whose value changes depending on the tokens’ <i>reference</i> index.</p>
-          <br />
-          <p>
-            In the example above, our uGAS’s reference index is the 30 day median gas price.
-            <br />
-            <br />
-            Synthetics are created by depositing collateral into a smart contract and minting tokens backed by that collateral.
-          </p>
-        </Card>
-        <Card>
-          <h1>How do I get a uGAS token?</h1>
-          <br />
-          <p>
-            You can get a uGAS token by either creating them by depositing collateral or trading for them on a DEX like Uniswap. Both can be done via our
-            Degenerative.Finance site.
-          </p>
-          <br />
-          <h2>To Create uGAS:</h2>
-          <p>
-            Deposit ETH as collateral to mint uGAS tokens. Synthetics are priceless, so you will initially mint at the Global Collateralization Ratio (GCR.) The
-            GCR is calculated by dividing the total amount of collateral deposited by the total number of uGAS tokens outstanding.
-            <br />
-            <br />
-            You can withdraw collateral at any time as long as the Minimum Collateral Ratio of 1.25 is maintained (or else you will be liquidated.) Creating
-            uGAS or Withdrawing Collateral will increase or decrease your collateral ratio.
-          </p>
-        </Card>
-        <Card>
-          <h1>How do we use uGAS?</h1>
-          <br />
-          <p>Let’s walk through some examples!</p>
-          <br />
-          <h2>Zombie Rick the Trader</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh6.googleusercontent.com/ClpK8LmDgJU_k1xbRC8wrCREnoBkhJpaI9cFJinsmNt09TPG7BsnFnGzeSYN5ibubhA5QUu7Pw7mozRJMRhyZ4nWNY_VRKFFYlsLqx-W-qCVEnBp6oMFIMDZ1mlg0gw6WRCctZ-r"
-            />
-          </div>
-          <p>
-            Zombie Rick is a trader who believes ETH Gas prices will rise in January and decides to buy the uGAS-JAN21 token.
-            <br />
-            <br />
-            He connects his wallet to Uniswap and sees that the price shows 1 uGAS-JAN21 = 0.070 ETH. This effectively means Zombie Rick is longing ETH Gas
-            prices at 70 Gwei. He sells 7 ETH to buy 100 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            The ETH Gas prices rise in January for a 30-day median price of 100 Gwei. Zombie Rick’s uGAS-JAN21 tokens are now worth 0.100 ETH each. He sells his
-            100 uGAS-JAN21 tokens for 10 ETH in return for a profit of 3 ETH.
-          </p>
-          <br />
-          <br />
-          <h2>Zombie Glenn the Farmer</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh6.googleusercontent.com/SlXxbLpUENMQ1_3YjlModmczHDSstkuj0UOxyHp5_t9On1-ERyUuI5e6IDNd6_IMYwFCG_CSgtZySnpp0DOCxboS0isNdNnv5xdicCwjiaEOqg4mRijFHTBlx1JU-78LpnyITwb0"
-            />
-          </div>
-          <p>
-            Zombie Glenn is an active farmer who carries out many transactions to manage his crypto portfolio. It’s early December and he sees that the
-            uGAS-JAN21 token is trading at 70 Gwei. He wants to lock in that price for his gas usage in the month of January.
-            <br />
-            <br />
-            Zombie Glenn typically spends about 210,000,000 gas per month. Since each uGAS token is equivalent to 1,000,000 gas, Zombie Glenn needs to buy 210
-            uGAS-JAN21 tokens to fully hedge his usage. He sells 14.7 ETH to buy 210 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            Zombie Glenn continues his farming activity per usual in January and consumes 210,000,000 gas as expected. However, he paid on average 105 GWei on
-            the price of gas for all these transactions in January which is much higher than where he saw gas prices in early December.
-            <br />
-            <br />
-            Zombie Glenn held onto his 210 uGAS-JAN21 tokens through the token expiry at 00:00 UTC February 1, 2021.
-            <br />
-            <br />
-            Since the 30-day median ETH Gas Price was 110 Gwei, Zombie Glenn can now redeem each uGAS-JAN21 token for 0.110 ETH and receives a total of 23.1 ETH
-            — a profit of 8.4 ETH. This profit of 8.4 ETH is offset by the higher gas prices he paid in January.
-            <br />
-            <br />
-            Effectively, Zombie Glenn used the uGAS-JAN21 token as a hedge for rising ETH gas prices.
-          </p>
-          <br />
-          <br />
-          <h2>Zombie Carol the Miner</h2>
-          <br />
-          <div style="display: flex; justify-content: center">
-            <img
-              style="max-width: 300px"
-              src="https://lh4.googleusercontent.com/cgMF3hpDPqV1Y25CusBJYw9Isgv1kuM4HDix7l9gardw4umisGK-A2svn_g_HDIU6B-ZWUuVty2A8vcFvW57yOxm72M-yPttqCLFBigOMl_jD42I56_z6bHdGkvUO02CRXe33Elo"
-            />
-          </div>
-          <p>
-            Zombie Carol runs an Ethereum mining operation. She believes that ETH gas prices will decline in the next two months and would like to use the token
-            as a hedge and secure her future revenues now.
-            <br />
-            <br />
-            Zombie Carol mines on average 1,050,000,000 gas per month. Since each uGAS is equivalent to 1,000,000 gas, to fully hedge her revenue, Zombie Carol
-            would need to mint and sell 1,050 uGAS-JAN21 tokens.
-            <br />
-            <br />
-            Since the Global Collateralization Ratio is 2.5 when Zombie Carol attempts to mint, she needs to deposit 183.75 ETH in order to receive 1,050
-            uGAS-JAN21 tokens (2.5 x 1,050 tokens x 0.070 ETH per token.)
-            <br />
-            <br />
-            Zombie Carol then connects to Uniswap and sells her 1,050 uGAS-JAN21 tokens for 0.070 ETH each and receives 73.5 ETH. Notice that net Zombie Carol
-            is now committing 110.25 ETH (183.75 of WETH Collateral — 73.5 ETH received). And she could withdraw more collateral to be more capital efficient as
-            long as she maintains the 1.25 Minimum Collateral Ratio.
-            <br />
-            <br />
-            Unfortunately, ETH gas prices rise and the median price for the last 30 days of January is 110 Gwei — resulting in the uGAS-JAN21 token settling at
-            0.110. Zombie Carol takes a loss of 42 ETH (1,050 tokens x (0.070–0.110)).
-            <br />
-            <br />
-            However, the higher gas prices in January resulted in higher revenues for her mining operation which offset the loss from her tokens. In the end,
-            the uGAS token hedge resulted in Zombie Carol locking her mining revenues at 70 Gwei and provided her with certainty on her revenue amount.
-          </p>
-        </Card>
+        <!-- <div id>
+          <la-cartesian
+            narrow
+            :bound="[n => n - 40, n => n + 40]"
+            :data="chartOptionsMedianValues"
+            :width="800 - 60"
+            :height="300 - 60"
+          >
+            <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+              <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">{{ props.value }}</text>
+              </g>
+            </la-line>
+            <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
+            <la-y-axis prop="value"></la-y-axis>
+          </la-cartesian>
+        </div>-->
+        <CardLink title="Learn More about uGAS" link="https://docs.degenerative.finance/ugas" />
       </div>
     </Container>
   </div>
@@ -445,14 +374,51 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { approve, decToBn, getLiquidationPrice, getTWAPData, getUniswapDataHourly, getUniswapDataDaily, splitChartData } from "../utils";
+import {
+  approve,
+  decToBn,
+  getLiquidationPrice,
+  getTWAPData,
+  getUniswapDataHourly,
+  getUniswapDataDaily,
+  splitChartData,
+  getContractInfo,
+  getPriceByContract,
+  DevMiningCalculator,
+  getTokenPrice,
+} from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import { WETH, EMPJAN, EMPFEB, EMPMAR, UGASJAN21, UGASFEB21, UGASMAR21 } from "@/utils/addresses";
+import {
+  WETH,
+  DAI,
+  EMPJAN,
+  EMPFEB,
+  EMPMAR,
+  UGASJAN21,
+  UGASFEB21,
+  UGASMAR21,
+  UGASJAN21LP,
+  UGASFEB21LP,
+  UGASMAR21LP,
+  USDC,
+  UMA,
+  UGASAPR21,
+  UGASAPR21LP,
+  EMPAPR,
+} from "@/utils/addresses";
+import EMPContract from "@/utils/abi/emp.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
+
+const aprFrozenData = {
+  UGASJAN21: [34.29, 11.43],
+  UGASFEB21: [0, 0],
+  UGASMAR21: [0, 0],
+  UGASAPR21: [0, 0],
+};
 
 export default {
   name: "Asset",
@@ -462,6 +428,7 @@ export default {
   },
   data() {
     return {
+      assetName: "UGAS", // move to dynamic ref object
       navPage: "interact",
       actName: "Mint",
       withdrawType: "new",
@@ -485,19 +452,70 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       balanceWETH: 0,
-      displayBalanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
       isPending: false,
-      assetTokens: {
-        UGASJAN21: UGASJAN21,
-        UGASFEB21: UGASFEB21,
-        UGASMAR21: UGASMAR21,
-      },
-      assetEMP: {
-        UGASJAN21: ["EMPJAN", EMPJAN],
-        UGASFEB21: ["EMPFEB", EMPFEB],
-        UGASMAR21: ["EMPMAR", EMPMAR],
+      assets: {
+        UGASJAN21: {
+          name: "UGASJAN21",
+          address: UGASJAN21,
+          pool: UGASJAN21LP,
+          apr: {
+            value: 0,
+            add: false,
+            extra: 0,
+            force: 0,
+          },
+          emp: {
+            name: "EMPJAN",
+            address: EMPJAN,
+          },
+        },
+        UGASFEB21: {
+          name: "UGASFEB21",
+          address: UGASFEB21,
+          pool: UGASFEB21LP,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASJAN21"][0],
+            force: -1,
+          },
+          emp: {
+            name: "EMPFEB",
+            address: EMPFEB,
+          },
+        },
+        UGASMAR21: {
+          name: "UGASMAR21",
+          address: UGASMAR21,
+          pool: UGASMAR21LP,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASJAN21"][1] + aprFrozenData["UGASFEB21"][0],
+            force: -1,
+          },
+          emp: {
+            name: "EMPMAR",
+            address: EMPMAR,
+          },
+        },
+        UGASAPR21: {
+          name: "UGASAPR21",
+          address: UGASAPR21,
+          pool: UGASAPR21LP,
+          apr: {
+            value: 0,
+            add: false,
+            extra: aprFrozenData["UGASFEB21"][1] + aprFrozenData["UGASMAR21"][0],
+            force: -1,
+          },
+          emp: {
+            name: "EMPAPR",
+            address: EMPAPR,
+          },
+        },
       },
       approvals: {
         EMPFEB_WETH: false,
@@ -507,7 +525,6 @@ export default {
         EMPJAN_UGASJAN21: false,
         EMPFEB_UGASFEB21: false,
       },
-      assetEMPName: {},
       showWrapETH: false,
       amountToWrap: 0,
       amountToUnwrap: 0,
@@ -515,9 +532,17 @@ export default {
       currTokens: null,
       chartHourly: false,
       currLiquidationPrice: null,
+      periodicalChecks: null,
+      periodicalChecksTime: 100,
+      aprAssetValue: 0,
+      aprAssetValueB: 0.75,
+      aprAssetValueC: 0.25,
+      settleTime: false,
+      chartDisplay: false,
     };
   },
   async mounted() {
+    this.settleTimeCheck();
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
@@ -535,26 +560,29 @@ export default {
         return;
       }
       if (this.navAct == "redeem") {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
       } else {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
       }
+      this.resetNumbers();
       this.initChart();
-      this.getEMPState();
+      this.getEmpState();
+      this.getRewards();
     },
     navAct: function(newVal, oldVal) {
       if (!this.tokenSelected) {
         return;
       }
       if (newVal == "redeem") {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
       } else {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH);
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
       }
     },
     account(newAccount, oldAccount) {
       this.updateUserInfo();
     },
+    // navPage(newVal, oldVal) {},
   },
   components: {},
   methods: {
@@ -568,6 +596,7 @@ export default {
       "withdrawRequestFinalize",
       "withdraw",
       "redeem",
+      "settle",
       "getUserWETHBalance",
       "getUserUGasBalance",
       "getContractApproval",
@@ -575,12 +604,19 @@ export default {
       "wrapETH",
       "unwrapETH",
       "checkContractApprovals",
+      "getMiningRewards",
+      "getUniPrice",
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
       if (this.tokenSelected) {
-        this.fetchAllowance(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH); // checks Approval
+        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH); // checks Approval
       }
+
+      // polling
+      this.periodicalChecks = setInterval(() => {
+        this.getRewards();
+      }, this.periodicalChecksTime * 1000);
 
       // const from = 1606742010;
       // const hourly = await getUniswapDataHourly(UGASJAN21, from);
@@ -591,14 +627,14 @@ export default {
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
-      this.displayBalanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
+      this.balanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
     },
     async getUGasBalance() {
       this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr()[0] });
       this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
     },
     async initChart() {
-      if (!this.assetTokens[this.tokenSelected]) {
+      if (!this.tokenSelected || !this.assets[this.tokenSelected].address) {
         return;
       }
       const redColor = "#ad3c3c";
@@ -607,8 +643,8 @@ export default {
       const greenBorderColor = "#48ad3c";
       const twapLineColor = "#333";
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
-      // const assetChart = await getUniswapDataHourly(this.assetTokens[this.tokenSelected], from); // Hourly
-      const assetChart = await getUniswapDataDaily(this.assetTokens[this.tokenSelected], from); // Daily
+      // const assetChart = await getUniswapDataHourly(this.assets[this.tokenSelected], from); // Hourly
+      const assetChart = await getUniswapDataDaily(this.assets[this.tokenSelected].address, from); // Daily
       // console.log("UGASJAN21 assetChart", assetChart);
 
       const tempChartData = [];
@@ -627,17 +663,27 @@ export default {
 
       this.chartOptionsCandle = {
         title: {
-          // text: "Price in ETH",
-          left: 0,
+          text: this.assets[this.tokenSelected].name,
+          top: 5,
+          left: 45,
+          textStyle: {
+            color: "rgb(45 45 45 / 55%)",
+            fontSize: 14,
+          },
         },
         // legend: {
         //   data: ["uGAS"],
         // },
         tooltip: {
-          show: false,
-          trigger: "item",
+          show: true,
+          trigger: "item", // axis
           axisPointer: {
             type: "cross",
+            label: {
+              color: "#fff",
+              backgroundColor: "rgb(45 45 45 / 45%)",
+              fontSize: 9,
+            },
           },
         },
         grid: {
@@ -738,6 +784,8 @@ export default {
           },
         ],
       };
+    },
+    initInfoChart() {
       this.chartOptionsMedianValues = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       for (let i = 0; i < months.length; i++) {
@@ -830,6 +878,25 @@ export default {
         }
       }
     },
+    settleTimeCheck() {
+      const settleDayAfter = 25; // after every xth day of the month enable settle
+      // we can have this set custom by asset, see assets in data()
+      const current = this.moment().format("DD");
+      console.log("settleTimeCheck", current);
+      if (current < settleDayAfter) {
+        console.log("settleTime is not due yet");
+        this.settleTime = false;
+      } else {
+        console.log("settleTime due");
+        this.settleTime = true;
+      }
+    },
+    async settleAsset() {
+      console.log("settleAsset");
+      this.settle({});
+      // .then(async (e) => {})
+      // .catch(async (e) => {});
+    },
     updateCR(removeTokens = false, removeCollateral = false) {
       if (this.currPos) {
         const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
@@ -894,6 +961,10 @@ export default {
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
+        // const pricedResultantCR = latestPrice !== 0 ? (resultantCR / latestPrice).toFixed(4) : "0";
+        // const resultantCRBelowRequirement = parseFloat(pricedResultantCR) >= 0 && parseFloat(pricedResultantCR) < collReqFromWei;
+        // const withdrawAboveBalance = collateralToWithdraw > posColl;
+
         this.currLiqPrice();
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
@@ -926,14 +997,14 @@ export default {
         } else if (this.currPos && this.currPos.rawCollateral == 0) {
           this.hasError = true;
           this.currentError = "No open position. Mint tokens first";
-        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError = "Not enough WETH. Please wrap ETH below";
         }
       } else if (this.navAct == "mint") {
         this.currLiqPrice();
         this.updateLiqPrice();
-        // if (this.collatAmt < this.displayBalanceWETH) {
+        // if (this.collatAmt < this.balanceWETH) {
         //   this.hasError = true;
         //   this.currentError = "Insufficient";
         //   return;
@@ -942,7 +1013,7 @@ export default {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
           return;
-        } else if (Number(this.displayBalanceWETH) < Number(this.collatAmt)) {
+        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError = "Not enough WETH. Please wrap ETH below";
           return;
@@ -994,7 +1065,7 @@ export default {
       const pos = await this.getPositionData(this.empAddr()[0]);
       return pos;
     },
-    async getEMPState() {
+    async getEmpState() {
       const contractAddr = this.empAddr()[0];
       let k;
       let pos;
@@ -1028,19 +1099,132 @@ export default {
       this.posUpdateHandler();
       this.updateUserInfo();
     },
-    async lastPrice() {
-      this.price = await getOffchainPriceFromTokenSymbol("uGAS");
-      console.log("uGas price", this.price);
-      return this.price;
+    async getRewards() {
+      if (this.tokenSelected) {
+        const dayAfter = 7;
+        const current = this.moment().format("DD");
+        if (current > dayAfter) {
+          console.debug("Coming Month");
+          const currentMonth = await this.getCurrentMonthRewards();
+          this.getComingMonthRewards(currentMonth);
+        } else {
+          console.debug("Now");
+          const currentMonth = await this.getCurrentMonthRewards();
+        }
+      }
+    },
+    async getActualMonthRewards() {
+      const current = this.moment()
+        .format("MMM")
+        .toUpperCase();
+      const actualMonthAsset = this.assets[this.assetName.toUpperCase() + current + "21"].name;
+      console.log("-------------------", actualMonthAsset);
+      const price = await this.lastPrice(actualMonthAsset);
+      const asset = {
+        address: this.assets[actualMonthAsset].address,
+        addressEMP: this.assets[actualMonthAsset].emp.address,
+        addressLP: this.assets[actualMonthAsset].pool,
+        addressPrice: price,
+      };
+      const resultBase = await this.getMiningRewards(asset);
+      this.assets[actualMonthAsset].apr.value = resultBase;
+      // const aprExtra = this.assets[actualMonthAsset].apr.extra;
+      const result = this.numeral(Number(resultBase), "0.00a");
+      return { actualMonthAsset: actualMonthAsset, actualMonthAPR: result };
+    },
+    async getCurrentMonthRewards() {
+      const price = await this.lastPrice(this.tokenSelected);
+      const asset = {
+        address: this.assets[this.tokenSelected].address,
+        addressEMP: this.assets[this.tokenSelected].emp.address,
+        addressLP: this.assets[this.tokenSelected].pool,
+        addressPrice: price,
+      };
+      const resultBase = await this.getMiningRewards(asset);
+      let result;
+      if (this.assets[this.tokenSelected].apr.force >= 0) {
+        result = Number(this.assets[this.tokenSelected].apr.force);
+      } else {
+        this.assets[this.tokenSelected].apr.value = resultBase;
+        const aprExtra = this.assets[this.tokenSelected].apr.extra;
+        result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
+      }
+      this.aprAssetValue = result && result !== 0 ? result : -1;
+      console.debug("aprAssetValue", this.aprAssetValue);
+      return result;
+    },
+    async getComingMonthRewards() {
+      const current = this.moment()
+        .format("MMM")
+        .toLowerCase();
+      console.debug("current", current);
+      const indexNav = (obj, currentKey, direction) => {
+        return Object.keys(obj)[Object.keys(obj).indexOf(currentKey) + direction];
+      };
+      if (this.assets[this.tokenSelected].name.toLowerCase().includes(current.toLowerCase())) {
+        const firstNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 1);
+        const secondNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 2);
+        console.log("1 firstNext", firstNext);
+        console.log("1 secondNext", secondNext);
+        console.debug("asset", this.assets[this.tokenSelected].name);
+        const currentAPR = this.assets[this.tokenSelected].apr.value;
+        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
+          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + currentAPR * this.aprAssetValueB;
+          this.assets[firstNext].apr.add = true;
+        }
+        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
+          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + currentAPR * this.aprAssetValueC;
+          this.assets[secondNext].apr.add = true;
+        }
+        // console.debug("rate moved 1", firstNext, currentAPR * this.aprAssetValueB);
+      } else {
+        const { actualMonthAsset, actualMonthAPR } = await this.getActualMonthRewards();
+        const firstNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 1);
+        const secondNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 2);
+        console.log("2 firstNext", firstNext);
+        console.log("2 secondNext", secondNext);
+        const currentAPR = this.assets[this.tokenSelected].apr.value;
+        const current = this.moment()
+          .format("MMM")
+          .toUpperCase();
+        // this.assets[this.assetName.toUpperCase() + current + "21"].apr = xxxx;
+        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
+          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + actualMonthAPR * this.aprAssetValueB;
+          this.assets[firstNext].apr.add = true;
+        }
+        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
+          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + actualMonthAPR * this.aprAssetValueC;
+          this.assets[secondNext].apr.add = true;
+        }
+        // console.debug("rate moved 2", firstNext, currentAPR * this.aprAssetValueB);
+      }
+    },
+    async resetNumbers() {
+      this.price = 0;
+      this.aprAssetValue = 0;
+    },
+    async lastPrice(specificToken) {
+      const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
+      if (specificTokenSelected) {
+        // this.price = await getOffchainPriceFromTokenSymbol("uGAS");
+        const price = Number((await this.getUniPrice({ tokenA: this.assets[specificTokenSelected].address, tokenB: WETH })).toString()) || 0;
+        // const price2 = Number((await this.getUniPrice({ tokenA: WETH, tokenB: USDC })).toString()) || 0;
+        // this.price = (new BigNumber(price).multipliedBy(price2)).toString();
+        // this.price = price * price2;
+        this.price = price;
+
+        console.log("token price", this.price);
+        return this.price;
+      }
     },
     async act() {
       if (!this.tokenSelected) {
         return;
       }
-      if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_WETH"] && this.actName !== "Redeem") {
+      if (!this.approvals[this.assets[this.tokenSelected].name + "_WETH"] && this.actName !== "Redeem") {
         this.isPending = true;
 
-        this.getApproval(this.assetEMP[this.tokenSelected][0] + "_WETH", this.empAddr()[0], WETH)
+        this.getApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH)
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1173,9 +1357,9 @@ export default {
               });
             break;
           case "Redeem":
-            if (!this.approvals[this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected]) {
+            if (!this.approvals[this.assets[this.tokenSelected].name + "_" + this.tokenSelected]) {
               this.isPending = true;
-              this.getApproval(this.assetEMP[this.tokenSelected][0] + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
+              this.getApproval(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
                 .then(async e => {
                   console.log("approve", e[1]);
                   this.isPending = false;
@@ -1217,13 +1401,16 @@ export default {
             break;
         }
       }
-      this.getEMPState();
+      this.getEmpState();
     },
     async updateUserInfo() {
       await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.updateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
+      if (this.navPage === "info") {
+        this.initInfoChart();
+      }
       console.log("toNavPage", on);
     },
     toNavAct(on) {
@@ -1297,7 +1484,7 @@ export default {
 }
 div.error {
   color: var(--primary);
-  background: var(--back-act);
+  background: #0000000d;
   text-align: center;
   font-size: 16px;
   width: 90%;
@@ -1415,13 +1602,74 @@ div.error {
   border-radius: 10px;
   z-index: 1;
 }
+#thebuttons {
+  width: 90%;
+  margin: 10px auto;
+
+  .button {
+    cursor: pointer;
+    color: #fff;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    padding: 2px 20px;
+    width: 100%;
+    margin-top: 5px;
+  }
+  .settle {
+    background: #e5ad67;
+  }
+}
+.chart-button {
+  cursor: pointer;
+  background: #0000000d;
+  padding: 5px 0px 15px 0px;
+  margin: 0 auto;
+  border: none;
+  border-radius: 10px 10px 0px 0px;
+  margin-bottom: -10px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #e57067;
+  width: 100%;
+  // width: 98%;
+}
+.assetchart-wrapper {
+  width: 100%;
+  // width: 98%;
+  background: #f9f8f8;
+  border-right: 1px solid #f2edee;
+  border-left: 1px solid #f2edee;
+  padding-top: 20px;
+  margin: 0 auto;
+  margin-bottom: -10px;
+  // display: none;
+  // &.show {
+  //   display: block;
+  // }
+  // transform: perspective(10em) rotateX(-5deg);
+  // animation: animate-down 0.4s 1 ease-in;
+}
+
+// @keyframes animate-down {
+//   from {
+//     margin-bottom: -200px;
+//     // transform: perspective(0em) rotateX(0deg);
+//   }
+
+//   to {
+//     margin-bottom: -10px;
+//     // transform: perspective(10em) rotateX(-5deg);
+//   }
+// }
+
 #act {
   cursor: pointer;
   background: white;
   background: var(--back-act);
   color: var(--primary);
   height: 50px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   border: 0px;
   border-radius: 0px 0px 10px 10px;
@@ -1439,6 +1687,26 @@ div.error {
     cursor: not-allowed;
     color: #0000001c !important;
   }
+  &.notokenselected {
+    color: #0000001c !important;
+    &:active {
+      background: var(--back-act);
+    }
+    .notokenselectedlabel {
+      border: 1.5px solid rgb(0 0 0 / 0.05);
+      width: 100%;
+      display: block;
+      border-radius: 7px;
+      padding: 3px 0px;
+      &:active {
+        background: #00000005;
+      }
+    }
+  }
+}
+
+.v-spinner {
+  margin-top: 5px;
 }
 
 .info-dropdown {
@@ -1460,7 +1728,7 @@ div.error {
   height: 200px;
 }
 
-.infoswitch {
+.asset-detail-switch {
   cursor: pointer;
   color: #fff;
   background: var(--primary);
@@ -1470,34 +1738,20 @@ div.error {
   font-size: 22px;
   font-weight: normal;
   height: 36px;
-  margin: 6px 0px;
 }
 
 .echarts,
-.chart-wrapper,
-.chart-asset {
+.assetchart {
   width: 100%;
   height: 160px;
   margin-bottom: 15px;
 }
 
 .wrapETH {
-  width: 90%;
-  margin: 10px auto;
-  .toggle {
-    cursor: pointer;
-    color: #fff;
-    background: var(--primary);
-    border: none;
-    border-radius: 8px;
-    padding: 2px 20px;
-    width: 100%;
-    margin-bottom: 5px;
-  }
   .wraprow {
     float: left;
     width: 100%;
-    margin: 0px 0px 5px 0px;
+    margin: 5px 0px 0px 0px;
     input {
       width: 65%;
       border: none;
@@ -1539,9 +1793,14 @@ div.error {
     }
   }
 }
+.asset-info {
+  margin: 0px 20px 10px 20px;
+  display: flex;
+  justify-content: space-between;
+}
 .warning {
   font-size: 13px;
-  padding: 0px 20px;
-  color: #0000004a;
+  padding: 0px 10px;
+  color: #0000005e;
 }
 </style>

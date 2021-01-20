@@ -6,9 +6,13 @@
 export default {
   props: {
     size: String,
+    mobile: Boolean,
   },
   computed: {
     style() {
+      if (this.mobile) {
+        return;
+      }
       if (this.size === "sm") {
         return {
           width: "16px",

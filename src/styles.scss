@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;400;600;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Shanti&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;400;600;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Shanti&display=swap");
 @import "./style/resets.scss";
 // @import "./style/colors.scss";
 
@@ -17,7 +17,6 @@ body {
 }
 
 body {
-  padding-bottom: 40px;
   &.navresp {
     overflow: hidden;
   }
@@ -63,7 +62,7 @@ a {
 }
 
 .numeric {
-  font-family: 'Consolas', Courier, monospace;
+  font-family: "Consolas", Courier, monospace;
 }
 
 a,
@@ -86,7 +85,6 @@ button {
     transition: all 0.1s linear;
     &:hover {
       box-shadow: none;
-
     }
 
     @media (max-width: 420px) {
@@ -95,13 +93,56 @@ button {
   }
 }
 
-h1 {}
-h2 {}
-h3 {}
-h4 {
-  font-size: 24px;
+h1 {
+  font-size: 42px;
+  line-height: 84px;
+  @media (max-width: 420px) {
+    font-size: 32px;
+    line-height: 64px;
+  }
 }
-h5 {}
+
+h2 {
+  font-size: 32px;
+  line-height: 64px;
+  @media (max-width: 420px) {
+    font-size: 24px;
+    line-height: 48px;
+  }
+}
+
+h3 {
+  font-size: 24px;
+  line-height: 48px;
+  @media (max-width: 420px) {
+    font-size: 18px;
+    line-height: 36px;
+  }
+}
+
+h4 {
+  font-size: 18px;
+  line-height: 36px;
+  @media (max-width: 420px) {
+    font-size: 18px;
+    line-height: 36px;
+  }
+}
+
+.card {
+  h1 {
+    font-size: 42px;
+    line-height: 46px;
+  }
+  h2 {
+    font-size: 32px;
+    line-height: 36px;
+  }
+  h3 {
+    font-size: 22px;
+    line-height: 26px;
+  }
+}
 
 @media only screen and (max-width: 1400px) {
   body {
@@ -123,7 +164,7 @@ h5 {}
   width: 100%;
 
   &:not(.vue-picker--has-val) > .vue-picker__opener {
-        color: #0000001c !important;
+    color: #0000001c !important;
   }
   .vue-picker__opener-txt {
     font-weight: bold;
@@ -170,6 +211,6 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }

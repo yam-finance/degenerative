@@ -9,7 +9,12 @@ import { AbiItem } from "web3-utils";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import duration from "dayjs/plugin/duration";
+import erc20 from "@studydefi/money-legos/erc20";
+import { WETH, DAI } from "./addresses";
+
 dayjs.extend(utc);
+dayjs.extend(duration);
 
 export function stateSave(key, state) {
   window.localStorage.setItem(key, JSON.stringify(state));
@@ -256,24 +261,27 @@ export async function getBlocksFromTimestamps(timestamps, skipCount = 500) {
 }
 
 export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3600) => {
-  const latestBlock = Vue.prototype.eth.latestBlock;
-  // const latestBlock = "11491189";
+  let latestBlock = Vue.prototype.eth.latestBlock;
+  // latestBlock = "11491189";
   const utcEndTime = dayjs.utc();
+  const nowUnix = utcEndTime.add(20, "d").unix();
+
   let time = startTime;
   if (!latestBlock) {
-    await getLatestBlock();
+    latestBlock = await getLatestBlock()[0];
   }
   const timestamps: any = [];
-  while (time < utcEndTime.unix()) {
+  while (time < nowUnix) {
     timestamps.push(time);
     time += interval;
   }
   if (timestamps.length === 0) {
     return [];
   }
+
   let blocks;
   try {
-    blocks = await getBlocksFromTimestamps(timestamps, 100);
+    blocks = await getBlocksFromTimestamps(timestamps);
     if (!blocks || blocks.length === 0) {
       return [];
     }
@@ -283,7 +291,9 @@ export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3
         return parseFloat(b.number) <= parseFloat(latestBlock);
       });
     }
-    const result = await splitQuery(GET_PRICES_BY_BLOCK, Vue.prototype.gql.client, [tokenAddress], blocks, 50);
+    blocks.push({ timestamp: blocks[blocks.length - 1].timestamp, number: (blocks[blocks.length - 1].number - 100).toString() });
+
+    const result = await splitQuery(GET_PRICES_BY_BLOCK, Vue.prototype.gql.client, [tokenAddress], blocks, 60);
     const values: any = [];
     for (const row in result) {
       const timestamp = row.split("t")[1];
@@ -303,17 +313,21 @@ export const getIntervalTokenData = async (tokenAddress, startTime, interval = 3
         index += 1;
       }
     }
+    const shortNumber = function(number) {
+      return +parseFloat(number).toFixed(4);
+    };
     const formattedHistory: any = [];
-    for (let i = 0; i < values.length - 1; i++) {
+    for (let i = 0; i < values.length; i++) {
+      const lastIndex = values.length - 1;
       formattedHistory.push({
-        open: parseFloat(values[i].priceUSD),
-        close: parseFloat(values[i + 1].priceUSD),
-        openETH: values[i].derivedETH,
-        closeETH: values[i + 1].derivedETH,
-        twap: (parseFloat(values[i].priceUSD) + parseFloat(values[i + 1].priceUSD)) / 2,
-        twapETH: (values[i].derivedETH + values[i + 1].derivedETH) / 2,
         timestamp: values[i].timestamp,
         timestampDate: dayjs(values[i].timestamp * 1000).format("MMM, D"), // DD/MM/YYYY
+        open: parseFloat(values[i].priceUSD),
+        close: parseFloat(values[i === lastIndex ? lastIndex : i + 1].priceUSD),
+        openETH: shortNumber(values[i].derivedETH),
+        closeETH: shortNumber(values[i === lastIndex ? lastIndex : i + 1].derivedETH),
+        twap: (parseFloat(values[i].priceUSD) + parseFloat(values[i === lastIndex ? lastIndex : i + 1].priceUSD)) / 2,
+        twapETH: shortNumber((values[i].derivedETH + values[i === lastIndex ? lastIndex : i + 1].derivedETH) / 2),
       });
     }
     return formattedHistory;
@@ -330,3 +344,117 @@ export const getUniswapDataHourly = async (token, fromTimestamp) => {
 export const getUniswapDataDaily = async (token, fromTimestamp) => {
   return await getIntervalTokenData(token, fromTimestamp, 86400);
 };
+
+export async function getContractInfo(address: string) {
+  const data: any = await requestHttp(`https://api.coingecko.com/api/v3/coins/ethereum/contract/${address}`);
+  return data;
+}
+
+export async function getPriceByContract(address: string, toCurrency?: string) {
+  const result = await getContractInfo(address);
+  return result && result.market_data && result.market_data.current_price[toCurrency || "usd"];
+}
+
+export function DevMiningCalculator({ provider, getPrice, empAbi }) {
+  const web3 = new Web3(provider);
+  const { utils, BigNumber, FixedNumber } = ethers;
+  const { parseEther } = utils;
+
+  async function getEmpInfo(address: string, toCurrency = "usd") {
+    try {
+      const emp = new web3.eth.Contract((empAbi as unknown) as AbiItem, address);
+      const collateralAddress = await emp.methods.collateralCurrency().call();
+      const erc20Contract = new web3.eth.Contract((erc20.abi as unknown) as AbiItem, collateralAddress);
+      const size = await emp.methods.rawTotalPositionCollateral().call();
+      const price = await getPrice(collateralAddress, toCurrency);
+      const decimals = await erc20Contract.methods.decimals().call();
+      return {
+        address,
+        toCurrency,
+        collateralAddress,
+        size,
+        price,
+        decimals,
+      };
+    } catch (e) {
+      console.log("error getting emp state", e);
+      return "bad";
+    }
+  }
+
+  function calculateEmpValue({ price, size, decimals }: { price: number; size: string; decimals: number }) {
+    const fixedPrice = FixedNumber.from(price.toString() || 0);
+    const fixedSize = FixedNumber.fromValue(BigNumber.from(size), decimals);
+    return fixedPrice.mulUnsafe(fixedSize);
+  }
+
+  async function estimateDevMiningRewards({ totalRewards, empWhitelist }: { totalRewards: number; empWhitelist: string[] }) {
+    const allInfo = await Promise.all(empWhitelist.map(address => getEmpInfo(address.toLowerCase())));
+    const values: any[] = [];
+    const totalValue = allInfo.reduce((totalValue: any, info: any) => {
+      const value = calculateEmpValue(info);
+      values.push(value);
+      return totalValue.addUnsafe(value);
+    }, FixedNumber.from("0"));
+    return allInfo.map((info: any, i: any): [string, string] => {
+      return [
+        info.address,
+        values[i]
+          .mulUnsafe(FixedNumber.from(totalRewards))
+          .divUnsafe(totalValue)
+          .toString(),
+      ];
+    });
+  }
+
+  return {
+    estimateDevMiningRewards,
+    utils: {
+      getEmpInfo,
+      calculateEmpValue,
+    },
+  };
+}
+
+const emplistDataBackup = {
+  empWhitelist: [
+    "0x3a93E863cb3adc5910E6cea4d51f132E8666654F",
+    "0x516f595978D87B67401DaB7AfD8555c3d28a3Af4",
+    "0x4AA79c00240a2094Ff3fa6CF7c67f521f32D84a2",
+    "0xf32219331A03D99C98Adf96D43cc312353003531",
+    "0x1c3f1A342c8D9591D9759220d114C685FD1cF6b8",
+    "0xE4256C47a3b27a969F25de8BEf44eCA5F2552bD5",
+    "0xeAddB6AD65dcA45aC3bB32f88324897270DA0387",
+    "0xf215778F3a5e7Ab6A832e71d87267Dd9a9aB0037",
+    "0x267D46e71764ABaa5a0dD45260f95D9c8d5b8195",
+    "0x45c4DBD73294c5d8DDF6E5F949BE4C505E6E9495",
+    "0xda0943251079eB9f517668fdB372fC6AE299D898",
+    "0xd6fc1A7327210b7Fe33Ef2514B44979719424A1d",
+    "0x2862A798B3DeFc1C24b9c0d241BEaF044C45E585",
+    "0xd81028a6fbAAaf604316F330b20D24bFbFd14478",
+    "0x94C7cab26c04B76D9Ab6277a0960781b90f74294",
+    "0x7c4090170aeADD54B1a0DbAC2C8D08719220A435",
+
+    "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+    "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
+  ],
+  totalReward: 50000,
+};
+
+// export async function getUniPrice(pairA, pairB) {
+//   return 1;
+// }
+
+// to reinit
+// export async function getTokenPrice(token) {
+//   const ethUnitPrice: any = getUniPrice(WETH, DAI);
+//   let tokenPrice: any = getUniPrice(token, WETH);
+//   tokenPrice = tokenPrice * ethUnitPrice;
+//   return tokenPrice;
+// }
+
+export async function getDevMiningEmps() {
+  // const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+  // return data;
+  return emplistDataBackup;
+}
