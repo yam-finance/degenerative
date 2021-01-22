@@ -1250,8 +1250,8 @@ export default {
             this.isPending = true;
             this.mint({
               contract: this.empAddr()[0],
-              collat: new BigNumber(this.collatAmt).times(ethDecs).toString(),
-              tokens: new BigNumber(this.tokenAmt).times(empDecs).toString(),
+              collat: new BigNumber(this.collatAmt).times(ethDecs).toFixed(),
+              tokens: new BigNumber(this.tokenAmt).times(empDecs).toFixed(),
             })
               .then(async e => {
                 console.log("mint", e[1]);
