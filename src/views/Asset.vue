@@ -1104,14 +1104,14 @@ export default {
       if (this.tokenSelected) {
         const dayAfter = 7;
         const current = this.moment().format("DD");
-        if (current > dayAfter) {
-          console.debug("Coming Month");
-          const currentMonth = await this.getCurrentMonthRewards();
-          this.getComingMonthRewards(currentMonth);
-        } else {
-          console.debug("Now");
-          const currentMonth = await this.getCurrentMonthRewards();
-        }
+        // if (current > dayAfter) {
+        //   console.debug("Coming Month");
+        //   const currentMonth = await this.getCurrentMonthRewards();
+        //   this.getComingMonthRewards(currentMonth);
+        // } else {
+        console.debug("Now");
+        const currentMonth = await this.getCurrentMonthRewards();
+        // }
       }
     },
     async getActualMonthRewards() {
