@@ -414,7 +414,8 @@ const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
 
 const aprFrozenData = {
-  UGASJAN21: [34.29, 11.43],
+  // UGASJAN21: [34.29, 11.43],
+  UGASJAN21: [0, 0],
   UGASFEB21: [0, 0],
   UGASMAR21: [0, 0],
   UGASAPR21: [0, 0],
@@ -1103,14 +1104,14 @@ export default {
       if (this.tokenSelected) {
         const dayAfter = 7;
         const current = this.moment().format("DD");
-        if (current > dayAfter) {
-          console.debug("Coming Month");
-          const currentMonth = await this.getCurrentMonthRewards();
-          this.getComingMonthRewards(currentMonth);
-        } else {
-          console.debug("Now");
-          const currentMonth = await this.getCurrentMonthRewards();
-        }
+        // if (current > dayAfter) {
+        //   console.debug("Coming Month");
+        //   const currentMonth = await this.getCurrentMonthRewards();
+        //   this.getComingMonthRewards(currentMonth);
+        // } else {
+        console.debug("Now");
+        const currentMonth = await this.getCurrentMonthRewards();
+        // }
       }
     },
     async getActualMonthRewards() {
