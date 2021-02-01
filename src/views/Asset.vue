@@ -233,7 +233,7 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <!-- <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button> -->
+            <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button>
 
             <div class="wrapETH">
               <button class="button" @click="toggleWrap">Wrap ETH</button>
@@ -880,7 +880,7 @@ export default {
       }
     },
     settleTimeCheck() {
-      const settleDayAfter = 25; // after every xth day of the month enable settle
+      const settleDayAfter = 0; // after every xth day of the month enable settle
       // we can have this set custom by asset, see assets in data()
       const current = this.moment().format("DD");
       console.log("settleTimeCheck", current);
@@ -894,9 +894,28 @@ export default {
     },
     async settleAsset() {
       console.log("settleAsset");
-      this.settle({});
-      // .then(async (e) => {})
-      // .catch(async (e) => {});
+      this.isPending = true;
+      this.settle({
+        contract: this.empAddr()[0],
+      })
+        .then(async e => {
+          console.log("settle", e[1]);
+          this.isPending = false;
+          if (e[1] && e[1] != "") {
+            this.hasError = true;
+            this.currentError = "Transaction would fail. Check balances & approvals";
+          }
+          this.updateUserInfo();
+        })
+        .catch(async e => {
+          console.log("error", e[1]);
+          this.isPending = false;
+          if (e[1] && e[1] != "") {
+            this.hasError = true;
+            this.currentError = "Transaction would fail. Check balances & approvals";
+          }
+          this.updateUserInfo();
+        });
     },
     updateCR(removeTokens = false, removeCollateral = false) {
       if (this.currPos) {
