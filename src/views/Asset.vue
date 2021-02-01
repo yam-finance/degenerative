@@ -470,6 +470,7 @@ export default {
           emp: {
             name: "EMPJAN",
             address: EMPJAN,
+            settleTime: 0,
           },
         },
         UGASFEB21: {
@@ -485,6 +486,7 @@ export default {
           emp: {
             name: "EMPFEB",
             address: EMPFEB,
+            settleTime: 25,
           },
         },
         UGASMAR21: {
@@ -500,6 +502,7 @@ export default {
           emp: {
             name: "EMPMAR",
             address: EMPMAR,
+            settleTime: 25,
           },
         },
         UGASAPR21: {
@@ -515,6 +518,7 @@ export default {
           emp: {
             name: "EMPAPR",
             address: EMPAPR,
+            settleTime: 25,
           },
         },
       },
@@ -568,6 +572,7 @@ export default {
       this.resetNumbers();
       this.initChart();
       this.getEmpState();
+      this.settleTimeCheck();
       this.getRewards();
     },
     navAct: function(newVal, oldVal) {
@@ -880,7 +885,7 @@ export default {
       }
     },
     settleTimeCheck() {
-      const settleDayAfter = 0; // after every xth day of the month enable settle
+      const settleDayAfter = this.assets[this.tokenSelected].emp.settleTime || 0; // after every xth day of the month enable settle
       // we can have this set custom by asset, see assets in data()
       const current = this.moment().format("DD");
       console.log("settleTimeCheck", current);
