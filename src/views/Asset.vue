@@ -547,7 +547,7 @@ export default {
     };
   },
   async mounted() {
-    this.settleTimeCheck();
+    // this.settleTimeCheck();
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
@@ -884,18 +884,27 @@ export default {
         }
       }
     },
-    settleTimeCheck() {
-      const settleDayAfter = this.assets[this.tokenSelected].emp.settleTime || 0; // after every xth day of the month enable settle
-      // we can have this set custom by asset, see assets in data()
-      const current = this.moment().format("DD");
-      console.log("settleTimeCheck", current);
-      if (current < settleDayAfter) {
-        console.log("settleTime is not due yet");
-        this.settleTime = false;
-      } else {
-        console.log("settleTime due");
-        this.settleTime = true;
+    async settleTimeCheck() {
+      if (this.tokenSelected) {
+        await this.getEmpState();
+        console.log("settleTimeCheck", store.state.empState);
+        if (store.state.empState && store.state.empState.isExpired) {
+          this.settleTime = true;
+        } else {
+          this.settleTime = false;
+        }
       }
+      // const settleDayAfter = this.assets[this.tokenSelected].emp.settleTime || 0; // after every xth day of the month enable settle
+      // // we can have this set custom by asset, see assets in data()
+      // const current = this.moment().format("DD");
+      // console.log("settleTimeCheck", current);
+      // if (current < settleDayAfter) {
+      //   console.log("settleTime is not due yet");
+      //   this.settleTime = false;
+      // } else {
+      //   console.log("settleTime due");
+      //   this.settleTime = true;
+      // }
     },
     async settleAsset() {
       console.log("settleAsset");
@@ -1092,6 +1101,8 @@ export default {
     },
     async getEmpState() {
       const contractAddr = this.empAddr()[0];
+      console.log("contractAddr", contractAddr);
+
       let k;
       let pos;
       if (this.price == 0) {
@@ -1227,6 +1238,7 @@ export default {
     async resetNumbers() {
       this.price = 0;
       this.aprAssetValue = 0;
+      this.settleTime = false;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
@@ -1481,7 +1493,6 @@ export default {
     async updateApprovals() {
       console.log("updating approvals");
       this.approvals = await this.checkContractApprovals();
-      console.log("approvals", this.approvals);
     },
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;

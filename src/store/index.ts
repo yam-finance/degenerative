@@ -723,42 +723,6 @@ export default new Vuex.Store({
           }
         );
       } catch (e) {
-        // try {
-        //   const web3Provider = Vue.prototype.$provider;
-        //   const web3 = new Web3(web3Provider);
-        //   const ge = await emp.methods.settleExpired().estimateGas(
-        //     {
-        //       from: store.state.account,
-        //       gas: 50000000,
-        //     },
-        //     async (error: any) => {
-        //       console.log("SimTx Failed, ", error);
-        //       return false;
-        //     }
-        //   );
-        //   return emp.methods.settleExpired().send(
-        //     {
-        //       from: store.state.account,
-        //       gas: ge,
-        //     },
-        //     async (error: any, txHash: string) => {
-        //       if (error) {
-        //         console.error("EMP could not settle", error);
-        //         payload.onTxHash && payload.onTxHash("");
-        //         return false;
-        //       }
-        //       if (payload.onTxHash) {
-        //         payload.onTxHash(txHash);
-        //       }
-        //       const status = await waitTransaction(web3Provider, txHash);
-        //       if (!status) {
-        //         console.log("Settle transaction failed.");
-        //         return false;
-        //       }
-        //       return true;
-        //     }
-        //   );
-        // } catch (e) {
         console.error("error", e);
         return [false, e];
       }
