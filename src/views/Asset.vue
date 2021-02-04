@@ -233,7 +233,7 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <!-- <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button> -->
+            <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button>
 
             <div class="wrapETH">
               <button class="button" @click="toggleWrap">Wrap ETH</button>
@@ -470,6 +470,7 @@ export default {
           emp: {
             name: "EMPJAN",
             address: EMPJAN,
+            settleTime: 0,
           },
         },
         UGASFEB21: {
@@ -485,6 +486,7 @@ export default {
           emp: {
             name: "EMPFEB",
             address: EMPFEB,
+            settleTime: 25,
           },
         },
         UGASMAR21: {
@@ -500,6 +502,7 @@ export default {
           emp: {
             name: "EMPMAR",
             address: EMPMAR,
+            settleTime: 25,
           },
         },
         UGASAPR21: {
@@ -515,6 +518,7 @@ export default {
           emp: {
             name: "EMPAPR",
             address: EMPAPR,
+            settleTime: 25,
           },
         },
       },
@@ -543,7 +547,7 @@ export default {
     };
   },
   async mounted() {
-    this.settleTimeCheck();
+    // this.settleTimeCheck();
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
@@ -568,6 +572,7 @@ export default {
       this.resetNumbers();
       this.initChart();
       this.getEmpState();
+      this.settleTimeCheck();
       this.getRewards();
     },
     navAct: function(newVal, oldVal) {
@@ -879,24 +884,52 @@ export default {
         }
       }
     },
-    settleTimeCheck() {
-      const settleDayAfter = 25; // after every xth day of the month enable settle
-      // we can have this set custom by asset, see assets in data()
-      const current = this.moment().format("DD");
-      console.log("settleTimeCheck", current);
-      if (current < settleDayAfter) {
-        console.log("settleTime is not due yet");
-        this.settleTime = false;
-      } else {
-        console.log("settleTime due");
-        this.settleTime = true;
+    async settleTimeCheck() {
+      if (this.tokenSelected) {
+        await this.getEmpState();
+        console.log("settleTimeCheck", store.state.empState);
+        if (store.state.empState && store.state.empState.isExpired) {
+          this.settleTime = true;
+        } else {
+          this.settleTime = false;
+        }
       }
+      // const settleDayAfter = this.assets[this.tokenSelected].emp.settleTime || 0; // after every xth day of the month enable settle
+      // // we can have this set custom by asset, see assets in data()
+      // const current = this.moment().format("DD");
+      // console.log("settleTimeCheck", current);
+      // if (current < settleDayAfter) {
+      //   console.log("settleTime is not due yet");
+      //   this.settleTime = false;
+      // } else {
+      //   console.log("settleTime due");
+      //   this.settleTime = true;
+      // }
     },
     async settleAsset() {
       console.log("settleAsset");
-      this.settle({});
-      // .then(async (e) => {})
-      // .catch(async (e) => {});
+      this.isPending = true;
+      this.settle({
+        contract: this.empAddr()[0],
+      })
+        .then(async e => {
+          console.log("settle", e[1]);
+          this.isPending = false;
+          if (e[1] && e[1] != "") {
+            this.hasError = true;
+            this.currentError = "Transaction would fail. Check balances & approvals";
+          }
+          this.updateUserInfo();
+        })
+        .catch(async e => {
+          console.log("error", e[1]);
+          this.isPending = false;
+          if (e[1] && e[1] != "") {
+            this.hasError = true;
+            this.currentError = "Transaction would fail. Check balances & approvals";
+          }
+          this.updateUserInfo();
+        });
     },
     updateCR(removeTokens = false, removeCollateral = false) {
       if (this.currPos) {
@@ -1068,6 +1101,8 @@ export default {
     },
     async getEmpState() {
       const contractAddr = this.empAddr()[0];
+      console.log("contractAddr", contractAddr);
+
       let k;
       let pos;
       if (this.price == 0) {
@@ -1203,6 +1238,7 @@ export default {
     async resetNumbers() {
       this.price = 0;
       this.aprAssetValue = 0;
+      this.settleTime = false;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
@@ -1457,7 +1493,6 @@ export default {
     async updateApprovals() {
       console.log("updating approvals");
       this.approvals = await this.checkContractApprovals();
-      console.log("approvals", this.approvals);
     },
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;
