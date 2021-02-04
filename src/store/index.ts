@@ -703,7 +703,7 @@ export default new Vuex.Store({
         return emp.methods.settleExpired().send(
           {
             from: store.state.account,
-            gas: 125000,
+            gas: 200000,
           },
           async (error: any, txHash: string) => {
             if (error) {
