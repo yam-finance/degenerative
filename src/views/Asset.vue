@@ -922,7 +922,7 @@ export default {
           this.updateUserInfo();
         })
         .catch(async e => {
-          console.log("error", e[1]);
+          console.log("error", e);
           this.isPending = false;
           if (e[1] && e[1] != "") {
             this.hasError = true;

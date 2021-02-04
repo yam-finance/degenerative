@@ -690,20 +690,20 @@ export default new Vuex.Store({
       const emp = await dispatch("getEMP", { address: payload.contract });
       try {
         const web3Provider = Vue.prototype.$provider;
-        const ge = await emp.methods.settleExpired().estimateGas(
-          {
-            from: store.state.account,
-            gas: 50000000,
-          },
-          async (error: any) => {
-            console.log("SimTx Failed, ", error);
-            return false;
-          }
-        );
+        // const ge = await emp.methods.settleExpired().estimateGas(
+        //   {
+        //     from: store.state.account,
+        //     gas: 50000000,
+        //   },
+        //   async (error: any) => {
+        //     console.log("SimTx Failed, ", error);
+        //     return false;
+        //   }
+        // );
         return emp.methods.settleExpired().send(
           {
             from: store.state.account,
-            gas: ge,
+            gas: 125000,
           },
           async (error: any, txHash: string) => {
             if (error) {
