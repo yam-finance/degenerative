@@ -246,7 +246,20 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <button class="button settle" v-if="settleTime" @click="settleAsset">Settle</button>
+            <button
+              class="button settle"
+              @click="settleAsset"
+              v-if="settleTime"
+              :disabled="
+                !(
+                  tokenSelected &&
+                  ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
+                    (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true))
+                )
+              "
+            >
+              Settle
+            </button>
 
             <div class="wrapETH">
               <button class="button" @click="toggleWrap">Wrap ETH</button>
@@ -1667,6 +1680,10 @@ div.error {
   }
   .settle {
     background: #e5ad67;
+    &:disabled {
+      opacity: 0.5;
+      cursor: no-drop;
+    }
   }
 }
 .chart-button {
