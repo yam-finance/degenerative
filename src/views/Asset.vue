@@ -193,11 +193,24 @@
                 </div>
                 </div>-->
                 <button
-                  :disabled="hasError == true || !tokenSelected"
                   id="act"
                   @click="act"
-                  v-bind:class="{ error: hasError, notokenselected: !tokenSelected }"
+                  v-bind:class="{
+                    error:
+                      hasError == true &&
+                      tokenSelected &&
+                      ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
+                        (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true)),
+                    notokenselected: !tokenSelected,
+                  }"
                   v-if="navAct !== 'lptrade'"
+                  :disabled="
+                    !tokenSelected ||
+                      (hasError == true &&
+                        tokenSelected &&
+                        ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
+                          (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true)))
+                  "
                 >
                   <span v-bind:class="{ notokenselectedlabel: !tokenSelected }">
                     {{
