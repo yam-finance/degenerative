@@ -4,6 +4,7 @@ import Home from "@/views/Home.vue";
 import Assets from "@/views/Assets.vue";
 import Asset from "@/views/Asset.vue";
 import About from "@/views/About.vue";
+import Positions from "@/views/Positions.vue";
 import LearnMore from "@/views/LearnMore.vue";
 import NotFound from "@/views/NotFound.vue";
 import Account from "@/views/Account.vue";
@@ -36,6 +37,11 @@ const routes: Array<RouteConfig> = [
   //     name: "Account",
   //     component: Account,
   //   },
+  {
+    path: "/positions",
+    name: "Positions",
+    component: Positions,
+  },
   {
     path: "/about",
     name: "About",

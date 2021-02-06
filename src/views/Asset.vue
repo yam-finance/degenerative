@@ -60,7 +60,13 @@
                   >APR</b
                 >
               </span>
-              <span v-if="tokenSelected">
+              <span
+                v-if="tokenSelected"
+                v-tooltip="{
+                  content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
                 <b>APR:</b>
                 {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
               </span>
@@ -101,16 +107,6 @@
                 Deposit
               </button>
               <button
-                @click="toNavAct('redeem')"
-                :class="{ active: navAct === 'redeem' }"
-                v-tooltip="{
-                  content: '<b>Redeem</b>: Redeem uTokens, reducing a position\'s debt.',
-                  delay: { show: 150, hide: 100 },
-                }"
-              >
-                Redeem
-              </button>
-              <button
                 @click="toNavAct('withdraw')"
                 :class="{ active: navAct === 'withdraw' }"
                 v-tooltip="{
@@ -120,7 +116,16 @@
               >
                 Withdraw
               </button>
-              <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }">LP/Trade</button>
+              <button
+                @click="toNavAct('redeem')"
+                :class="{ active: navAct === 'redeem' }"
+                v-tooltip="{
+                  content: '<b>Redeem</b>: Redeem uTokens, reducing a position\'s debt.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Redeem
+              </button>
             </div>
             <div id="inputbox">
               <div>
@@ -182,7 +187,7 @@
                   name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
-                  placeholder="0.00 WETH"
+                  :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
                   :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
                 <!-- to add max button -->
@@ -200,7 +205,7 @@
                       hasError == true &&
                       tokenSelected &&
                       ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
-                        (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true)),
+                        (navAct == 'redeem' && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)),
                     notokenselected: !tokenSelected,
                   }"
                   v-if="navAct !== 'lptrade'"
@@ -209,7 +214,7 @@
                       (hasError == true &&
                         tokenSelected &&
                         ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
-                          (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true)))
+                          (navAct == 'redeem' && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)))
                   "
                 >
                   <span v-bind:class="{ notokenselectedlabel: !tokenSelected }">
@@ -218,9 +223,11 @@
                         ? tokenSelected
                           ? approvals
                             ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
-                              (navAct == "redeem" && approvals[assets[tokenSelected].name + "_" + tokenSelected] === true)
+                              (navAct == "redeem" && approvals[assets[tokenSelected].emp.name + "_" + assets[tokenSelected].name] === true)
                               ? actName
-                              : "Approve"
+                              : navAct == "redeem"
+                              ? "Approve EMP"
+                              : "Approve Token"
                             : "Select Token"
                           : "Select Token"
                         : ""
@@ -246,23 +253,38 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <button
-              class="button settle"
-              @click="settleAsset"
-              v-if="settleTime"
-              :disabled="
-                !(
-                  tokenSelected &&
-                  ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
-                    (navAct == 'redeem' && approvals[assets[tokenSelected].name + '_' + tokenSelected] === true))
-                )
-              "
-            >
-              Settle
-            </button>
+            <div v-if="settleTime" class="settling">
+              <button
+                class="button settle"
+                @click="makeApprovalEmp('Settle')"
+                v-if="tokenSelected && settleTime && !(tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)"
+              >
+                <span v-if="!empPendingApproval">Approve EMP to Settle</span>
+                <beat-loader v-if="empPendingApproval" color="#71571e"></beat-loader>
+              </button>
+              <button
+                class="button settle"
+                @click="settleAsset"
+                v-if="tokenSelected && settleTime && tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true"
+              >
+                <span>Settle</span>
+              </button>
 
+              <Space size="10" />
+            </div>
+
+            <div class="row">
+              <div class="item">
+                <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }" class="button lptrade">LP/Trade</button>
+              </div>
+
+              <Space size="16" />
+
+              <div class="item">
+                <button class="button wrapeth" @click="toggleWrap">Wrap ETH</button>
+              </div>
+            </div>
             <div class="wrapETH">
-              <button class="button" @click="toggleWrap">Wrap ETH</button>
               <div v-if="showWrapETH">
                 <div class="wraprow">
                   <input type="number" placeholder="Amount" v-model="amountToWrap" />
@@ -277,13 +299,7 @@
           </div>
 
           <div class="info" v-if="info">
-            <label
-              v-tooltip="{
-                content: 'Synthetic selected',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
+            <label>
               <b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b>
             </label>
             <label
@@ -298,16 +314,6 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Collateral Ratio (Post-Tx):
-              <b>{{ numeral(pricedCR, "0.0000a") }}</b>
-            </label>
-            <label
-              v-tooltip="{
                 content: 'Global collateral ratio',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
@@ -316,6 +322,17 @@
               Collateral Ratio (Global):
               <b>{{ gcr }}</b>
             </label>
+            <label
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Collateral Ratio (Post-Tx):
+              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+            </label>
+
             <label
               v-tooltip="{
                 content: 'Collateral ratio of this particular tx',
@@ -355,7 +372,7 @@
                 placement: 'left-center',
               }"
             >
-              Position Outstanding Tokens ({{ tokenSelected }}):
+              Position Outstanding ({{ tokenSelected }}):
               <b>{{ currTokens ? currTokens : "0" }}</b>
             </label>
             <label
@@ -455,7 +472,7 @@ export default {
   },
   data() {
     return {
-      assetName: "UGAS", // move to dynamic ref object
+      assetName: "uGAS", // move to dynamic ref object
       navPage: "interact",
       actName: "Mint",
       withdrawType: "new",
@@ -482,6 +499,7 @@ export default {
       balanceUGAS: 0,
       assetChartData: null,
       isPending: false,
+      empPendingApproval: false,
       assets: {
         UGASJAN21: {
           name: "UGASJAN21",
@@ -557,6 +575,7 @@ export default {
         EMPFEB_UGASFEB21: false,
       },
       showWrapETH: false,
+      approvalsUpdate: 0,
       amountToWrap: 0,
       amountToUnwrap: 0,
       currCollat: null,
@@ -573,12 +592,11 @@ export default {
     };
   },
   async mounted() {
-    // this.settleTimeCheck();
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
     await this.getWETHBalance();
-    await this.updateApprovals();
+    await this.checkUpdateApprovals();
   },
   computed: {
     account() {
@@ -590,11 +608,7 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-      if (this.navAct == "redeem") {
-        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
-      } else {
-        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
-      }
+      this.fetchApprovalAll();
       this.resetNumbers();
       this.initChart();
       this.getEmpState();
@@ -605,16 +619,18 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-      if (newVal == "redeem") {
-        this.fetchAllowance(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1]);
-      } else {
-        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
-      }
+      this.fetchApprovalAll();
     },
     account(newAccount, oldAccount) {
+      this.resetNumbers();
+      this.settleTimeCheck();
       this.updateUserInfo();
     },
-    // navPage(newVal, oldVal) {},
+    // make account switch
+    approvalsUpdate(newApprovals, oldApprovals) {
+      this.fetchApprovalAll();
+      this.settleTimeCheck();
+    },
   },
   components: {},
   methods: {
@@ -631,7 +647,7 @@ export default {
       "settle",
       "getUserWETHBalance",
       "getUserUGasBalance",
-      "getContractApproval",
+      "makeContractApproval",
       "fetchContractApproval",
       "wrapETH",
       "unwrapETH",
@@ -642,7 +658,7 @@ export default {
     ...mapGetters(["empState"]),
     async initAsset() {
       if (this.tokenSelected) {
-        this.fetchAllowance(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH); // checks Approval
+        this.fetchApprovalAll();
       }
 
       // polling
@@ -760,6 +776,8 @@ export default {
           max: "dataMax",
         },
         yAxis: {
+          name: "AAA",
+          nameLocation: "end",
           scale: true,
           splitLine: { show: true },
           splitArea: {
@@ -856,6 +874,27 @@ export default {
         } else if (tn + Number(this.currEMP.withdrawalLiveness) > Number(this.currEMP.expierationTimestamp)) {
           this.hasError = true;
           this.currentError = "Request expires post-expiry, wait for contract to expire";
+        } else if (
+          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
+            new BigNumber(this.currPos.tokensOutstanding) /
+            this.price <
+          this.gcr
+        ) {
+          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
+          console.log("numerator", numerator);
+          console.log("denom", this.currPos.tokensOutstanding);
+          const newcr =
+            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
+          console.log(
+            "HERE",
+            newcr.toString(),
+            new BigNumber(this.currPos.rawCollateral),
+            new BigNumber(this.collatAmt).times(ethDecs),
+            this.currPos.tokensOutstanding,
+            this.gcr
+          );
+          this.hasError = true;
+          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
@@ -873,6 +912,27 @@ export default {
         } else if (tn < Number(this.currPos.withdrawalRequestPassTimestamp)) {
           this.hasError = true;
           this.currentError = "Withdrawal still pending approval";
+        } else if (
+          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
+            new BigNumber(this.currPos.tokensOutstanding) /
+            this.price <
+          this.gcr
+        ) {
+          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
+          console.log("numerator", numerator);
+          console.log("denom", this.currPos.tokensOutstanding);
+          const newcr =
+            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
+          console.log(
+            "HERE",
+            newcr.toString(),
+            new BigNumber(this.currPos.rawCollateral),
+            new BigNumber(this.collatAmt).times(ethDecs),
+            this.currPos.tokensOutstanding,
+            this.gcr
+          );
+          this.hasError = true;
+          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
@@ -934,13 +994,13 @@ export default {
     },
     async settleAsset() {
       console.log("settleAsset");
-      this.isPending = true;
+      this.empPendingApproval = true;
       this.settle({
         contract: this.empAddr()[0],
       })
         .then(async e => {
           console.log("settle", e[1]);
-          this.isPending = false;
+          this.empPendingApproval = false;
           if (e[1] && e[1] != "") {
             this.hasError = true;
             this.currentError = "Transaction would fail. Check balances & approvals";
@@ -949,7 +1009,7 @@ export default {
         })
         .catch(async e => {
           console.log("error", e);
-          this.isPending = false;
+          this.empPendingApproval = false;
           if (e[1] && e[1] != "") {
             this.hasError = true;
             this.currentError = "Transaction would fail. Check balances & approvals";
@@ -1286,8 +1346,7 @@ export default {
       }
       if (!this.approvals[this.assets[this.tokenSelected].name + "_WETH"] && this.actName !== "Redeem") {
         this.isPending = true;
-
-        this.getApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH)
+        this.makeApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH)
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1420,27 +1479,8 @@ export default {
               });
             break;
           case "Redeem":
-            if (!this.approvals[this.assets[this.tokenSelected].name + "_" + this.tokenSelected]) {
-              this.isPending = true;
-              this.getApproval(this.assets[this.tokenSelected].name + "_" + this.tokenSelected, this.empAddr()[0], this.empAddr()[1])
-                .then(async e => {
-                  console.log("approve", e[1]);
-                  this.isPending = false;
-                  if (e[1] && e[1] != "") {
-                    this.hasError = true;
-                    this.currentError = "Transaction would fail. Check balances & approvals";
-                  }
-                  this.updateUserInfo();
-                })
-                .catch(async e => {
-                  console.log("error", e[1]);
-                  this.isPending = false;
-                  if (e[1] && e[1] != "") {
-                    this.hasError = true;
-                    this.currentError = "Transaction would fail. Check balances & approvals";
-                  }
-                  this.updateUserInfo();
-                });
+            if (!this.approvals[this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name]) {
+              this.makeApprovalEmp("Redeem");
             } else {
               console.log("redeem");
               this.isPending = true;
@@ -1467,7 +1507,7 @@ export default {
       this.getEmpState();
     },
     async updateUserInfo() {
-      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.updateApprovals()]);
+      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
@@ -1506,19 +1546,68 @@ export default {
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
     },
-    async getApproval(identifier, spenderAddress, tokenAddress) {
+    async makeApproval(identifier, spenderAddress, tokenAddress) {
       if (spenderAddress) {
-        await this.getContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
+        await this.makeContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
       }
     },
-    async fetchAllowance(identifier, spenderAddress, tokenAddress) {
+    async fetchApproval(identifier, spenderAddress, tokenAddress) {
       if (spenderAddress) {
         await this.fetchContractApproval({ identifier: identifier, spenderAddress: spenderAddress, tokenAddress: tokenAddress });
       }
     },
-    async updateApprovals() {
+    async fetchApprovalAll() {
+      if (this.navAct == "redeem") {
+        this.fetchApproval(this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name, this.empAddr()[0], this.empAddr()[1]);
+      } else {
+        this.fetchApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
+      }
+    },
+    async checkUpdateApprovals() {
       console.log("updating approvals");
       this.approvals = await this.checkContractApprovals();
+    },
+    async makeApprovalEmp(from) {
+      if (!this.tokenSelected) {
+        return;
+      }
+
+      if (from === "Redeem") {
+        this.isPending = true;
+      }
+      if (from === "Settle") {
+        this.empPendingApproval = true;
+      }
+      this.makeApproval(this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name, this.empAddr()[0], this.empAddr()[1])
+        .then(async e => {
+          console.log("approve", e[1]);
+          if (from === "Redeem") {
+            this.isPending = false;
+            if (e[1] && e[1] != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+          }
+          if (from === "Settle") {
+            this.empPendingApproval = false;
+          }
+
+          this.updateUserInfo();
+        })
+        .catch(async e => {
+          console.log("error", e);
+          if (from === "Redeem") {
+            this.isPending = false;
+            if (e && e != "") {
+              this.hasError = true;
+              this.currentError = "Transaction would fail. Check balances & approvals";
+            }
+          }
+          if (from === "Settle") {
+            this.empPendingApproval = false;
+          }
+          this.updateUserInfo();
+        });
     },
     toggleWrap() {
       this.showWrapETH = !this.showWrapETH;
@@ -1548,7 +1637,8 @@ div.error {
   color: var(--primary);
   background: #0000000d;
   text-align: center;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: bold;
   width: 90%;
   margin: 0 auto;
   border-radius: 0px 0px 10px 10px;
@@ -1564,7 +1654,7 @@ div.error {
   white-space: nowrap;
   button {
     cursor: pointer;
-    width: calc(100% / 4.99);
+    width: calc(100% / 4);
     border: none;
     height: 50px;
     font-size: 14px;
@@ -1671,15 +1761,19 @@ div.error {
   .button {
     cursor: pointer;
     color: #fff;
-    background: var(--primary);
     border: none;
     border-radius: 8px;
     padding: 2px 20px;
     width: 100%;
-    margin-top: 5px;
   }
   .settle {
-    background: #e5ad67;
+    background: #e5be67;
+    border: 2px solid #cca54e;
+    height: 46px;
+    transition: background 0.1s ease-in-out;
+    &:active {
+      background: #ecc672;
+    }
     &:disabled {
       opacity: 0.5;
       cursor: no-drop;
@@ -1742,11 +1836,8 @@ div.error {
   width: 100%;
   transition: background 0.1s ease-in-out;
 
-  // &:hover {
-  //   background: #ffe7e7;
-  // }
   &:active {
-    background: #ffe1e1;
+    background: #f2edef;
     // background: darken($primary, 10%);
   }
   &.error {
@@ -1859,6 +1950,39 @@ div.error {
     }
   }
 }
+
+.settling {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.lptrade {
+  cursor: pointer;
+  background: #d4b2c3;
+  color: white;
+  &.active {
+    background: #e57067;
+  }
+}
+
+.wrapeth {
+  background: #a5cdf9;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+
+  @media (max-width: 540px) {
+    flex-flow: column nowrap;
+    align-items: center;
+  }
+  div.item {
+    flex: 1 1 0%;
+  }
+}
+
 .asset-info {
   margin: 0px 20px 10px 20px;
   display: flex;
