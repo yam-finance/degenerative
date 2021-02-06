@@ -49,14 +49,13 @@ const defaultState = () => {
     theNewKey: null,
     contracts: {},
     approvals: {
-      EMPFEB_WETH: false,
-      EMPJAN_WETH: false,
-      EMPMAR_WETH: false,
-      EMPMAR_UGASMAR21: false,
+      UGASJAN21_WETH: false,
+      UGASFEB21_WETH: false,
+      UGASMAR21_WETH: false,
       EMPJAN_UGASJAN21: false,
       EMPFEB_UGASFEB21: false,
+      EMPMAR_UGASMAR21: false,
     },
-
     web3: {
       core: null,
       isInjected: false,
@@ -756,7 +755,7 @@ export default new Vuex.Store({
     checkContractApprovals: async ({ commit, dispatch }) => {
       return store.state.approvals;
     },
-    getContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
+    makeContractApproval: async ({ commit, dispatch }, payload: { identifier: string; spenderAddress: string; tokenAddress: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");

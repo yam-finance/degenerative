@@ -65,6 +65,10 @@ a {
   font-family: "Consolas", Courier, monospace;
 }
 
+.center {
+  text-align: center;
+}
+
 a,
 button {
   &.grph {
@@ -149,6 +153,21 @@ h4 {
     background: var(--back-gradient);
     // add custom
   }
+}
+
+@keyframes unimate {
+  0%, 100% { transform: rotate(20deg); }
+  8.3% { transform: rotate(8deg); }
+  16.6% { transform: rotate(0deg); }
+  24.9% { transform: rotate(0deg); }
+  33.3% { transform: rotate(-30deg); }
+  41.6% { transform: rotate(-30deg); }
+  49.9% { transform: rotate(-20deg); margin-right: 0px; }
+  58.3% { transform: rotate(-10deg); margin-right: 20px; }
+  66.6% { transform: rotate(15deg); margin-right: 0px; }
+  74.9% { transform: rotate(0deg); }
+  83.3% { transform: rotate(0deg); }
+  91.6% { transform: rotate(20deg); }
 }
 
 // @media (prefers-reduced-motion: reduce) {
