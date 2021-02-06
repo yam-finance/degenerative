@@ -237,14 +237,40 @@
                 </button>
               </div>
               <div class="uniswap-info" v-if="navAct === 'lptrade'">
-                <div v-if="!tokenSelected">Select Token.</div>
+                <div v-if="!tokenSelected" class="center bold">Select Token.</div>
                 <div v-if="tokenSelected">
-                  <h2>Uniswap</h2>
-                  <div>
-                    <a :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address" target="_blank">Click here to LP</a>
-                  </div>
-                  <div>
-                    <a :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assets[tokenSelected].address" target="_blank">Click here to Trade</a>
+                  <h2 class="center unitemp">
+                    <span class="unitext">Uniswap</span>
+                    <span class="unicorn">🦄</span>
+                  </h2>
+                  <div class="row">
+                    <div class="item">
+                      <a
+                        target="_blank"
+                        class="clicklptrade"
+                        :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address"
+                        v-tooltip="{
+                          content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
+                          delay: { show: 150, hide: 100 },
+                          placement: 'bottom-center',
+                        }"
+                        >LP</a
+                      >
+                    </div>
+                    <Space size="10" />
+                    <div class="item">
+                      <a
+                        target="_blank"
+                        class="clicklptrade"
+                        :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assets[tokenSelected].address"
+                        v-tooltip="{
+                          content: 'Click here to buy the ' + assetName + ' asset',
+                          delay: { show: 150, hide: 100 },
+                          placement: 'bottom-center',
+                        }"
+                        >Trade</a
+                      >
+                    </div>
                   </div>
                 </div>
               </div>
@@ -253,26 +279,6 @@
           <div class="error" v-if="tokenSelected && hasError && navAct !== 'lptrade'">{{ currentError }}</div>
 
           <div id="thebuttons">
-            <div v-if="settleTime" class="settling">
-              <button
-                class="button settle"
-                @click="makeApprovalEmp('Settle')"
-                v-if="tokenSelected && settleTime && !(tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)"
-              >
-                <span v-if="!empPendingApproval">Approve EMP to Settle</span>
-                <beat-loader v-if="empPendingApproval" color="#71571e"></beat-loader>
-              </button>
-              <button
-                class="button settle"
-                @click="settleAsset"
-                v-if="tokenSelected && settleTime && tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true"
-              >
-                <span>Settle</span>
-              </button>
-
-              <Space size="10" />
-            </div>
-
             <div class="row">
               <div class="item">
                 <button @click="toNavAct('lptrade')" :class="{ active: navAct === 'lptrade' }" class="button lptrade">LP/Trade</button>
@@ -295,6 +301,25 @@
                   <button class="unwrap" :disabled="!amountToUnwrap" @click="makeUnwrapETH(amountToUnwrap)">Unwrap</button>
                 </div>
               </div>
+            </div>
+
+            <div v-if="settleTime" class="settling">
+              <Space size="10" />
+              <button
+                class="button settle"
+                @click="makeApprovalEmp('Settle')"
+                v-if="tokenSelected && settleTime && !(tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)"
+              >
+                <span v-if="!empPendingApproval">Approve EMP to Settle</span>
+                <beat-loader v-if="empPendingApproval" color="#71571e"></beat-loader>
+              </button>
+              <button
+                class="button settle"
+                @click="settleAsset"
+                v-if="tokenSelected && settleTime && tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true"
+              >
+                <span>Settle</span>
+              </button>
             </div>
           </div>
 
@@ -1876,7 +1901,7 @@ div.error {
 .uniswap-info {
   background: var(--back-act);
   border-radius: 0px 0px 10px 10px;
-  padding: 2px 10px 5px 10px;
+  padding: 0px 10px;
   min-height: 150px;
 }
 
@@ -1975,7 +2000,7 @@ div.error {
   width: 100%;
 
   @media (max-width: 540px) {
-    flex-flow: column nowrap;
+    flex-flow: row nowrap; // update
     align-items: center;
   }
   div.item {
@@ -1983,6 +2008,38 @@ div.error {
   }
 }
 
+.unitext {
+  text-shadow: 0px 1px 1px #de1d73;
+}
+.unitemp {
+  color: #fe187f;
+  font-size: 52px;
+  @media (max-width: 540px) {
+    margin-bottom: 16px;
+  }
+}
+.unicorn {
+  transform: rotate(0deg);
+  display: inline-block;
+  font-size: 24px;
+  line-height: 24px;
+  animation: unimate 10s linear infinite;
+}
+.clicklptrade {
+  background: #f7f3f3;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  height: 76px;
+  line-height: 76px;
+  display: block;
+  border-radius: 8px;
+  color: #ca6159;
+  transition: background 0.1s ease-in-out;
+  &:active {
+    background: #f2edef;
+  }
+}
 .asset-info {
   margin: 0px 20px 10px 20px;
   display: flex;
