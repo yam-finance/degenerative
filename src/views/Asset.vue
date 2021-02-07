@@ -2001,7 +2001,7 @@ div.error {
   text-shadow: 0px 1px 1px #de1d73;
 }
 .unitemp {
-  color: #fe187f;
+  color: #e07593; // #fe187f
   font-size: 52px;
   @media (max-width: 540px) {
     margin-bottom: 16px;
