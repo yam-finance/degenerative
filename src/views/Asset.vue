@@ -6,6 +6,8 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
+          <a class="asset-detail-switch tutorial" href="https://yamfinance.medium.com/9d2622dde72" target="_blank">Tutorial</a>
+          <Space size="sm" />
           <a class="asset-detail-switch" href="https://docs.degenerative.finance/ugas" target="_blank">Info</a>
           <!-- <button
             class="asset-detail-switch"
@@ -39,7 +41,7 @@
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
-                    content: 'Select token to continue',
+                    content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
                   >Asset Price</b
@@ -54,7 +56,7 @@
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
-                    content: 'Select token to continue',
+                    content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
                   >APR</b
@@ -134,7 +136,7 @@
                     @click="toWithdrawType('instant')"
                     :class="{ active: withdrawType === 'instant' }"
                     v-tooltip="{
-                      content: '<b>Instant Withdraw</b>: Withdraw up to the current GCR.',
+                      content: '<b>Instant Withdraw</b>: Withdraw up to the current Global collateral ratio (GCR).',
                       delay: { show: 150, hide: 100 },
                     }"
                   >
@@ -154,7 +156,7 @@
                     @click="toWithdrawType('existing')"
                     :class="{ active: withdrawType === 'existing' }"
                     v-tooltip="{
-                      content: '<b>Withdraw</b>: After a withdrawal request passes, you can withdraw collateral here.',
+                      content: '<b>Withdraw</b>: After a <u>withdrawal request</u> passes, you can withdraw collateral here.',
                       delay: { show: 150, hide: 100 },
                     }"
                   >
@@ -329,7 +331,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Price at which your position can be liquidated',
+                content: 'Asset price at which your position will be liquidated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -386,7 +388,7 @@
                 placement: 'left-center',
               }"
             >
-              Position Collateral (WETH):
+              Position Collateral WETH:
               <b>{{ currCollat ? currCollat : "0" }}</b>
             </label>
             <label
@@ -397,7 +399,7 @@
                 placement: 'left-center',
               }"
             >
-              Position Outstanding ({{ tokenSelected }}):
+              Position Outstanding {{ tokenSelected }}:
               <b>{{ currTokens ? currTokens : "0" }}</b>
             </label>
             <label
@@ -886,7 +888,7 @@ export default {
       }
       return false;
     },
-    checkNewWithdraw() {
+    checkRequestWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos) {
         const tn = new Date().getTime() / 1000;
@@ -899,27 +901,6 @@ export default {
         } else if (tn + Number(this.currEMP.withdrawalLiveness) > Number(this.currEMP.expierationTimestamp)) {
           this.hasError = true;
           this.currentError = "Request expires post-expiry, wait for contract to expire";
-        } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
-            new BigNumber(this.currPos.tokensOutstanding) /
-            this.price <
-          this.gcr
-        ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
-          console.log("numerator", numerator);
-          console.log("denom", this.currPos.tokensOutstanding);
-          const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
-          console.log(
-            "HERE",
-            newcr.toString(),
-            new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(ethDecs),
-            this.currPos.tokensOutstanding,
-            this.gcr
-          );
-          this.hasError = true;
-          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
@@ -1114,7 +1095,7 @@ export default {
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
         } else if (this.withdrawType == "new") {
-          this.checkNewWithdraw();
+          this.checkRequestWithdraw();
         } else {
           this.checkInstantWithdraw();
         }
@@ -1181,7 +1162,7 @@ export default {
         this.actName = "Request Withdraw";
         this.hasError = false;
         this.currentError = "";
-        this.checkNewWithdraw();
+        this.checkRequestWithdraw();
       } else if (on == "existing") {
         this.actName = "Withdraw";
         this.hasError = false;
@@ -1920,6 +1901,14 @@ div.error {
   font-size: 22px;
   font-weight: normal;
   height: 36px;
+  &.info {
+    background: var(--primary);
+    color: #fff;
+  }
+  &.tutorial {
+    background: #6799e5;
+    color: #fff;
+  }
 }
 
 .echarts,
@@ -1992,7 +1981,7 @@ div.error {
 }
 
 .wrapeth {
-  background: #a5cdf9;
+  background: #c5c5c5;
 }
 
 .row {
