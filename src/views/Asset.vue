@@ -385,6 +385,10 @@
               USD Tx Gas Cost:
               <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "loading on-chain data ..." }}</b>
             </label>
+            <label>
+              Total Gas used:
+              <b>{{ txTotalGas ? txTotalGas + " GAS" : "loading on-chain data ..." }}</b>
+            </label>
 
             <br />
             <label>
@@ -540,6 +544,7 @@ export default {
       txCount: 0,
       txGasCostETH: 0,
       txGasCostUSD: 0,
+      txTotalGas: 0,
       balanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
@@ -723,11 +728,12 @@ export default {
 
     async getAccountStats() {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
-      const [count, gasCost] = await this.getUserTxStats();
+      const [count, gasCost, totalGas] = await this.getUserTxStats();
       if (count != 0) {
         this.txCount = count;
         this.txGasCostETH = gasCost;
         this.txGasCostUSD = gasCost / price;
+        this.txTotalGas = totalGas;
       }
     },
     async getWETHBalance() {

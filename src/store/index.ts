@@ -745,14 +745,13 @@ export default new Vuex.Store({
       }
     },
 
-
     getUserTxStats: async ({ commit, dispatch }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const [count, gasCost] = await getTxStats(Vue.prototype.$provider, WETH, store.state.account, null, null); // Null can later be replaced with block numbers.
-      return [count, gasCost];
+      const [count, gasCost, totalGas] = await getTxStats(Vue.prototype.$provider, WETH, store.state.account, null, null); // Null can later be replaced with block numbers.
+      return [count, gasCost, totalGas];
     },
     getUserWETHBalance: async ({ commit, dispatch }) => {
       await sleep(500);
