@@ -374,11 +374,11 @@
             <br />
             <label>
               Tx Count:
-              <b>{{ txCount ? txCount : "0" }}</b>
+              <b>{{ txCount ? txCount : "loading ..." }}</b>
             </label>
             <label>
               Tx Gas Cost:
-              <b>{{ txGasCost ? txGasCost + " ETH" : "0 ETH" }}</b>
+              <b>{{ txGasCost ? txGasCost + " ETH" : "loading ..." }}</b>
             </label>
 
             <br />
