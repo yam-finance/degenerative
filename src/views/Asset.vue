@@ -522,6 +522,8 @@ export default {
       currEMP: null,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
+      txCount: 0,
+      txGasCost: 0,
       balanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
