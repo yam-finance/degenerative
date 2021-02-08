@@ -38,6 +38,55 @@ export const getERC20Contract = (provider: provider, address: string) => {
   return contract;
 };
 
+export const getTxStats = async (provider: provider, tokenAddress: string, userAddress: string, startBlock, endBlock): Promise<string[]> => {
+  const web3 = new Web3(provider);
+  // INFO: Replace userAccount for testing purposes if you do not have recent transactions.
+  const userAccount = userAddress;
+  let internalCount = new BigNumber(0);
+  let internalGasCost = new BigNumber(0);
+  let internalTotalGas = new BigNumber(0);
+  let internalGasPriceSum = new BigNumber(0);
+
+  try {
+    if (endBlock == null) {
+      endBlock = await web3.eth.getBlockNumber(function(error, result) {
+        if (!error) return result;
+      });
+      console.log("Using endBlock: " + endBlock);
+    }
+
+    if (startBlock == null) {
+      startBlock = endBlock - 1000;
+      console.log("Using startBlock: " + startBlock);
+    }
+
+    console.log('Evaluate transactions of account "' + userAccount + '" within blocks ' + startBlock + " and " + endBlock);
+
+    for (let i = startBlock; i <= endBlock; i++) {
+      //console.log("Searching block " + i);
+      const block = await web3.eth.getBlock(i, true);
+      if (block != null && block.transactions != null) {
+        block.transactions.forEach(function(e) {
+          if (userAccount == "*" || userAccount == e.from || userAccount == e.to) {
+            internalCount = internalCount.plus(1);
+            internalTotalGas = internalTotalGas.plus(e.gas);
+            internalGasCost = internalGasCost.plus(e.gas * e.gasPrice);
+            internalGasPriceSum = internalGasPriceSum.plus(e.gasPrice);
+          }
+        });
+      }
+    }
+    const count = internalCount.toString();
+    const gasCost = web3.utils.fromWei(internalGasCost.toString(), "ether");
+    const totalGas = internalTotalGas.toString();
+    const averageTxPrice = web3.utils.fromWei(internalGasPriceSum.dividedBy(internalCount).toString(), "gwei");
+
+    return [count, gasCost, totalGas, averageTxPrice];
+  } catch (e) {
+    return ["0"];
+  }
+};
+
 export const getBalance = async (provider: provider, tokenAddress: string, userAddress: string): Promise<string> => {
   const tokenContract = getERC20Contract(provider, tokenAddress);
   try {
