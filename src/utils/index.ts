@@ -70,8 +70,8 @@ export const getTxStats = async (provider: provider, tokenAddress: string, userA
           if (userAccount == "*" || userAccount == e.from || userAccount == e.to) {
             internalCount = internalCount.plus(1);
             internalTotalGas = internalTotalGas.plus(e.gas);
-            internalGasCost = internalGasCost.plus(e.gas * e.gasPrice);
-            internalGasPriceSum = internalGasPriceSum.plus(e.gasPrice);
+            internalGasCost = internalGasCost.plus(e.gas * parseInt(e.gasPrice));
+            internalGasPriceSum = internalGasPriceSum.plus(parseInt(e.gasPrice));
           }
         });
       }
