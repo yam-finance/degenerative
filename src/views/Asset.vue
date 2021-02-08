@@ -712,6 +712,12 @@ export default {
       // console.log("UGASJAN21 getUniswapDataDaily", daily);
       // this.assetChartData = daily;
     },
+    
+    async getAccountStats() {
+      const [count, gasCost] = await this.getUserTxStats();
+      this.txCount = count;
+      this.txGasCost = gasCost;
+    },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
       this.balanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
