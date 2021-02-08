@@ -634,6 +634,7 @@ export default {
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
+    await this.getAccountStats();
     await this.getWETHBalance();
     await this.checkUpdateApprovals();
   },
@@ -1531,7 +1532,7 @@ export default {
       this.getEmpState();
     },
     async updateUserInfo() {
-      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
+      await Promise.all([this.getAccountStats(), this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
