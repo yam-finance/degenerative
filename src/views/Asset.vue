@@ -373,6 +373,16 @@
 
             <br />
             <label>
+              Tx Count:
+              <b>{{ txCount ? txCount : "0" }}</b>
+            </label>
+            <label>
+              Tx Gas Cost:
+              <b>{{ txGasCost ? txGasCost + " ETH" : "0 ETH" }}</b>
+            </label>
+
+            <br />
+            <label>
               Your WETH:
               <b>{{ balanceWETH ? balanceWETH : "0" }}</b>
             </label>
