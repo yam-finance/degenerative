@@ -685,6 +685,7 @@ export default {
       "withdraw",
       "redeem",
       "settle",
+      "getUserTxStats",
       "getUserWETHBalance",
       "getUserUGasBalance",
       "makeContractApproval",
@@ -713,7 +714,7 @@ export default {
       // console.log("UGASJAN21 getUniswapDataDaily", daily);
       // this.assetChartData = daily;
     },
-    
+
     async getAccountStats() {
       const [count, gasCost] = await this.getUserTxStats();
       this.txCount = count;
