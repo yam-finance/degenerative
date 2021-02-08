@@ -372,17 +372,18 @@
             </label>
 
             <br />
+            <h3>{{ txCount ? "Your stats: " : "This might take a while ..." }}</h3>
             <label>
               Tx Count:
-              <b>{{ txCount ? txCount : "loading ..." }}</b>
+              <b>{{ txCount ? txCount : "loading on-chain data ..." }}</b>
             </label>
             <label>
               ETH Tx Gas Cost:
-              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "loading ..." }}</b>
+              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "loading on-chain data ..." }}</b>
             </label>
             <label>
               USD Tx Gas Cost:
-              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "loading ..." }}</b>
+              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "loading on-chain data ..." }}</b>
             </label>
 
             <br />
@@ -721,11 +722,13 @@ export default {
     },
 
     async getAccountStats() {
+      const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
       const [count, gasCost] = await this.getUserTxStats();
-      this.price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
-      this.txCount = count;
-      this.txGasCostETH = gasCost;
-      this.txGasCostUSD = gasCost / this.price;
+      if (count != 0) {
+        this.txCount = count;
+        this.txGasCostETH = gasCost;
+        this.txGasCostUSD = gasCost / price;
+      }
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
