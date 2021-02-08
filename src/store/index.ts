@@ -10,6 +10,7 @@ import {
   stateLoad,
   stateDestroy,
   getERC20Contract,
+  getTxStats,
   getBalance,
   waitTransaction,
   approve,
@@ -744,6 +745,15 @@ export default new Vuex.Store({
       }
     },
 
+
+    getUserTxStats: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const [count, gasCost] = await getTxStats(Vue.prototype.$provider, WETH, store.state.account, null, null); // Null can later be replaced with block numbers.
+      return [count, gasCost];
+    },
     getUserWETHBalance: async ({ commit, dispatch }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
