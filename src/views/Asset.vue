@@ -372,26 +372,26 @@
             </label>
 
             <br />
-            <h3>{{ txCount ? "Your stats: " : "This might take a while ..." }}</h3>
+            <h3>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</h3>
             <label>
               Tx Count:
-              <b>{{ txCount ? txCount : "loading on-chain data ..." }}</b>
+              <b>{{ txCount ? txCount : "0" }}</b>
             </label>
             <label>
               ETH Tx Gas Cost:
-              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "loading on-chain data ..." }}</b>
+              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "0 ETH" }}</b>
             </label>
             <label>
               USD Tx Gas Cost:
-              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "loading on-chain data ..." }}</b>
+              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "0 USD" }}</b>
             </label>
             <label>
               Total Gas used:
-              <b>{{ txTotalGas ? txTotalGas + " gas" : "loading on-chain data ..." }}</b>
+              <b>{{ txTotalGas ? txTotalGas + " gas" : "0 gas" }}</b>
             </label>
             <label>
               Average Gas price:
-              <b>{{ averageTxPrice ? averageTxPrice + " GWEI" : "loading on-chain data ..." }}</b>
+              <b>{{ averageTxPrice ? averageTxPrice + " GWEI" : "0 GWEI" }}</b>
             </label>
 
             <br />
@@ -545,11 +545,12 @@ export default {
       currEMP: null,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
-      txCount: 0,
-      txGasCostETH: 0,
-      txGasCostUSD: 0,
-      txTotalGas: 0,
-      averageTxPrice: 0,
+      hasFetched: false,
+      txCount: null,
+      txGasCostETH: null,
+      txGasCostUSD: null,
+      txTotalGas: null,
+      averageTxPrice: null,
       balanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
@@ -734,6 +735,8 @@ export default {
     async getAccountStats() {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
       const [count, gasCost, totalGas, averageTxPrice] = await this.getUserTxStats();
+      this.hasFetched = true;
+
       if (count != 0) {
         this.txCount = count;
         this.txGasCostETH = gasCost;

@@ -56,14 +56,14 @@ export const getTxStats = async (provider: provider, tokenAddress: string, userA
     }
 
     if (startBlock == null) {
-      startBlock = endBlock - 1000;
+      startBlock = endBlock - 100;
       console.log("Using startBlock: " + startBlock);
     }
 
     console.log('Evaluate transactions of account "' + userAccount + '" within blocks ' + startBlock + " and " + endBlock);
 
     for (let i = startBlock; i <= endBlock; i++) {
-      //console.log("Searching block " + i);
+      console.log("Searching block " + i);
       const block = await web3.eth.getBlock(i, true);
       if (block != null && block.transactions != null) {
         block.transactions.forEach(function(e) {
