@@ -377,8 +377,12 @@
               <b>{{ txCount ? txCount : "loading ..." }}</b>
             </label>
             <label>
-              Tx Gas Cost:
-              <b>{{ txGasCost ? txGasCost + " ETH" : "loading ..." }}</b>
+              ETH Tx Gas Cost:
+              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "loading ..." }}</b>
+            </label>
+            <label>
+              USD Tx Gas Cost:
+              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "loading ..." }}</b>
             </label>
 
             <br />
@@ -533,7 +537,8 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       txCount: 0,
-      txGasCost: 0,
+      txGasCostETH: 0,
+      txGasCostUSD: 0,
       balanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
@@ -717,8 +722,10 @@ export default {
 
     async getAccountStats() {
       const [count, gasCost] = await this.getUserTxStats();
+      this.price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
       this.txCount = count;
-      this.txGasCost = gasCost;
+      this.txGasCostETH = gasCost;
+      this.txGasCostUSD = gasCost / this.price;
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
