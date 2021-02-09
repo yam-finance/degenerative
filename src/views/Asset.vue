@@ -372,6 +372,9 @@
             </label>
 
             <br />
+            <button @click="updateInterval('month')">Month</button>
+            <button @click="updateInterval('year')">Year</button>
+            <button @click="updateInterval('allTime')">All Time</button>
             <h3>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</h3>
             <label>
               ETH tx gas cost:
@@ -554,6 +557,7 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       hasFetched: false,
+      interval: "",
       txGasCostETH: 0,
       txGasCostUSD: 0,
       averageTxPrice: 0,
@@ -742,10 +746,13 @@ export default {
       // this.assetChartData = daily;
     },
 
+    async updateInterval(value) {
+      this.interval = value;
+      await this.getAccountStats();
+    },
     async getAccountStats() {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
-      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats();
-
+      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats(this.interval);
       this.hasFetched = true;
 
       this.txGasCostETH = txGasCostETH;
