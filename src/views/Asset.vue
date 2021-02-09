@@ -374,24 +374,32 @@
             <br />
             <h3>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</h3>
             <label>
-              Tx Count:
-              <b>{{ txCount ? txCount : "0" }}</b>
-            </label>
-            <label>
-              ETH Tx Gas Cost:
+              ETH tx gas cost:
               <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "0 ETH" }}</b>
             </label>
             <label>
-              USD Tx Gas Cost:
+              USD tx gas cost:
               <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "0 USD" }}</b>
             </label>
             <label>
-              Total Gas used:
-              <b>{{ txTotalGas ? txTotalGas + " gas" : "0 gas" }}</b>
+              Average gas price:
+              <b>{{ averageTxPrice ? averageTxPrice + " GWEI" : "0 GWEI" }}</b>
             </label>
             <label>
-              Average Gas price:
-              <b>{{ averageTxPrice ? averageTxPrice + " GWEI" : "0 GWEI" }}</b>
+              Tx count:
+              <b>{{ txCount ? txCount : "0" }}</b>
+            </label>
+            <label>
+              Failed tx count:
+              <b>{{ failedTxCount ? failedTxCount : "0" }}</b>
+            </label>
+            <label>
+              ETH failed gas cost:
+              <b>{{ failedTxGasCostETH ? failedTxGasCostETH + " ETH" : "0" }}</b>
+            </label>
+            <label>
+              USD failed gas cost:
+              <b>{{ failedTxGasCostUSD ? failedTxGasCostUSD + " USD" : "0" }}</b>
             </label>
 
             <br />
@@ -546,11 +554,13 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       hasFetched: false,
-      txCount: null,
-      txGasCostETH: null,
-      txGasCostUSD: null,
-      txTotalGas: null,
-      averageTxPrice: null,
+      txGasCostETH: 0,
+      txGasCostUSD: 0,
+      averageTxPrice: 0,
+      txCount: 0,
+      failedTxCount: 0,
+      failedTxGasCostETH: 0,
+      failedTxGasCostUSD: 0,
       balanceWETH: 0,
       balanceUGAS: 0,
       assetChartData: null,
@@ -734,16 +744,17 @@ export default {
 
     async getAccountStats() {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
-      const [count, gasCost, totalGas, averageTxPrice] = await this.getUserTxStats();
+      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats();
+
       this.hasFetched = true;
 
-      if (count != 0) {
-        this.txCount = count;
-        this.txGasCostETH = gasCost;
-        this.txGasCostUSD = gasCost / price;
-        this.txTotalGas = totalGas;
-        this.averageTxPrice = averageTxPrice;
-      }
+      this.txGasCostETH = txGasCostETH;
+      this.txGasCostUSD = txGasCostETH / price;
+      this.averageTxPrice = averageTxPrice;
+      this.txCount = txCount;
+      this.failedTxCount = failedTxCount;
+      this.failedTxGasCostETH = failedTxGasCostETH;
+      this.failedTxGasCostUSD = failedTxGasCostETH / price;
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
