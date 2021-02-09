@@ -28,9 +28,9 @@
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
-          Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
-          OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
-          Users should take time to understand the token and ask questions on the Yam Discord.
+          Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out our
+          handy <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">uGAS User Guide</a> for step-by-step instructions. And
+          stop by the <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
         </div>
 
         <Space size="md" />
@@ -2038,5 +2038,8 @@ div.error {
   font-size: 13px;
   padding: 0px 10px;
   color: #0000005e;
+  a {
+    color: var(--primary);
+  }
 }
 </style>
