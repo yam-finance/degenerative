@@ -748,6 +748,7 @@ export default {
 
     async updateInterval(value) {
       this.interval = value;
+      this.hasFetched = false;
       await this.getAccountStats();
     },
     async getAccountStats() {
