@@ -745,17 +745,35 @@ export default new Vuex.Store({
       }
     },
 
-    getUserTxStats: async ({ commit, dispatch }) => {
+    getUserTxStats: async ({ commit, dispatch }, interval: string) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
+
+      const date = new Date();
+      let timestamp: number;
+
+      switch (interval) {
+        case "month":
+          date.setMonth(date.getMonth() - 1);
+          timestamp = date.getTime();
+          break;
+        case "year":
+          date.setFullYear(date.getFullYear() - 1);
+          timestamp = date.getTime();
+          break;
+        default:
+          timestamp = 0;
+      }
+
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
         Vue.prototype.$provider,
         WETH,
         store.state.account,
-        null,
-        null
+        timestamp,
+        0,
+        0
       ); // Null can later be replaced with block numbers.
       return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
     },
