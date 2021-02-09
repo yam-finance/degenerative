@@ -16,6 +16,26 @@ import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
 dayjs.extend(utc);
 dayjs.extend(duration);
 
+interface JsonResult {
+  blockHash: string;
+  blockNumber: string;
+  contractAddress: string;
+  cumulativeGasUsed: string;
+  from: string;
+  gas: string;
+  gasPrice: string;
+  gasUsed: string;
+  hash: string;
+  input: string;
+  isError: string;
+  nonce: string;
+  timeStamp: string;
+  to: string;
+  transactionIndex: string;
+  txreceipt_status: string;
+  value: string;
+}
+
 export function stateSave(key, state) {
   window.localStorage.setItem(key, JSON.stringify(state));
 }
@@ -38,53 +58,102 @@ export const getERC20Contract = (provider: provider, address: string) => {
   return contract;
 };
 
-export const getTxStats = async (provider: provider, tokenAddress: string, userAddress: string, startBlock, endBlock): Promise<string[]> => {
+const helper = async (arg1, arg2) => {
+  const result: number[] = [];
+
+  // Multiply each element in both arrays together.
+  for (let i = 0; i < arg1.length; i++) {
+    result[i] = arg1[i] * arg2[i];
+  }
+  return result;
+};
+
+// TODO: Change the api key before merging with Master.
+// TODO: Add error handling for api calls.
+export const getTxStats = async (
+  provider: provider,
+  tokenAddress: string,
+  userAddress: string,
+  timeStamp: number,
+  startBlockNumber: number,
+  endBlockNumber: number
+): Promise<string[]> => {
   const web3 = new Web3(provider);
-  // INFO: Replace userAccount for testing purposes if you do not have recent transactions.
-  const userAccount = userAddress;
-  let internalCount = new BigNumber(0);
-  let internalGasCost = new BigNumber(0);
-  let internalTotalGas = new BigNumber(0);
-  let internalGasPriceSum = new BigNumber(0);
+  const etherscanApiKey = "YY6XQICVXTH8DIVGUK1TNKZGEKDZV4NV3K";
+
+  if (endBlockNumber == 0) {
+    // Set current blog number to end blog number.
+    endBlockNumber = await web3.eth.getBlockNumber(function(error, result) {
+      if (!error) return result;
+    });
+  }
+
+  // console.log("Using startBlockNumber: " + startBlockNumber);
+  // console.log("Using endBlockNumber: " + endBlockNumber);
 
   try {
-    if (endBlock == null) {
-      endBlock = await web3.eth.getBlockNumber(function(error, result) {
-        if (!error) return result;
-      });
-      console.log("Using endBlock: " + endBlock);
+    let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
+    // Returns a maximum of 10000 records only.
+    let response = await fetch(url);
+    const json = await response.json();
+    const txs = json["result"];
+    let count = txs.length;
+    let result;
+    let gasFeeTotal = 0;
+    let gasPriceTotal = 0;
+    let gasFeeTotalFail = 0;
+
+    while (count === 10000) {
+      const startBlock = txs[txs.length - 1].blockNumber;
+      const endBlock = endBlockNumber;
+      url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
+      response = await fetch(url);
+      result = json["result"];
+      count = result.length;
+      txs.push(Math.max(...result));
     }
 
-    if (startBlock == null) {
-      startBlock = endBlock - 100;
-      console.log("Using startBlock: " + startBlock);
+    let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
+
+    if (timeStamp > 0) {
+      txsOut = txsOut.filter(v => v.timeStamp > Math.floor(timeStamp / 1000));
+      console.log(txsOut);
     }
 
-    console.log('Evaluate transactions of account "' + userAccount + '" within blocks ' + startBlock + " and " + endBlock);
+    txsOut = txsOut.map(({ confirmations, ...item }) => item);
+    txsOut = new Set(txsOut.map(JSON.stringify));
+    txsOut = Array.from(txsOut);
+    const txsOutArray: JsonResult = txsOut.map(JSON.parse);
+    txsOut = txsOutArray;
+    const txsOutCount = txsOut.length;
+    // Returned 'isError' values: 0=No Error, 1=Got Error.
+    const txsOutFail = txsOut.filter(v => v.isError === "1");
+    const txOutFail = txsOutFail.length;
 
-    for (let i = startBlock; i <= endBlock; i++) {
-      console.log("Searching block " + i);
-      const block = await web3.eth.getBlock(i, true);
-      if (block != null && block.transactions != null) {
-        block.transactions.forEach(function(e) {
-          if (userAccount == "*" || userAccount == e.from || userAccount == e.to) {
-            internalCount = internalCount.plus(1);
-            internalTotalGas = internalTotalGas.plus(e.gas);
-            internalGasCost = internalGasCost.plus(e.gas * parseInt(e.gasPrice));
-            internalGasPriceSum = internalGasPriceSum.plus(parseInt(e.gasPrice));
-          }
-        });
-      }
+    // console.log('All outgoing txs:', txsOut);
+    // console.log('Failed outgoing txs:', txsOutFail);
+
+    if (txsOutCount > 0) {
+      const gasUsedArray = txsOut.map(value => parseInt(value.gasUsed));
+      const gasPriceArray = txsOut.map(value => parseInt(value.gasPrice));
+      const gasFee = await helper(gasPriceArray, gasUsedArray);
+      gasFeeTotal = gasFee.reduce((partialSum, a) => partialSum + a, 0);
+      gasPriceTotal = gasPriceArray.reduce((partialSum, a) => partialSum + a, 0);
+      const gasUsedFailArray = txsOutFail.map(value => parseInt(value.gasUsed));
+      const gasPriceFailArray = txsOutFail.map(value => parseInt(value.gasPrice));
+      const gasFeeFail = await helper(gasPriceFailArray, gasUsedFailArray);
+      gasFeeTotalFail = gasFeeFail.reduce((partialSum, a) => partialSum + a, 0);
     }
-    console.log("Evaluation has ended.");
-    const count = internalCount.toString();
-    const gasCost = web3.utils.fromWei(internalGasCost.toString(), "ether");
-    const totalGas = internalTotalGas.toString();
-    const averageTxPrice = web3.utils.fromWei(internalGasPriceSum.dividedBy(internalCount).toString(), "gwei");
 
-    return [count, gasCost, totalGas, averageTxPrice];
+    const txGasCostETH = web3.utils.fromWei(gasFeeTotal.toString(), "ether");
+    const averageTxPrice = gasPriceTotal / txsOutCount / 1e9;
+    const txCount = txsOutCount.toString();
+    const failedTxCount = txOutFail.toString();
+    const failedTxGasCostETH = web3.utils.fromWei(gasFeeTotalFail.toString(), "ether");
+
+    return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
   } catch (e) {
-    return ["0"];
+    return ["0", "0", "0", "0", "0"];
   }
 };
 
