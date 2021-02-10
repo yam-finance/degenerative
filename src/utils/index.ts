@@ -62,6 +62,10 @@ export const getERC20Contract = (provider: provider, address: string) => {
   return contract;
 };
 
+export const sleep = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 const helper = async (arg1, arg2) => {
   const result: number[] = [];
 
@@ -109,6 +113,7 @@ export const getTxStats = async (
 
     // Continue fetching if response >= 1000.
     while (count === 10000) {
+      await sleep(500);
       const startBlock = txs[txs.length - 1].blockNumber;
       const endBlock = endBlockNumber;
       url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
@@ -132,6 +137,7 @@ export const getTxStats = async (
 
     // Continue fetching if response >= 1000.
     while (count === 10000) {
+      await sleep(500);
       const startBlock = txs[txs.length - 1].blockNumber;
       const endBlock = endBlockNumber;
       url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
@@ -201,10 +207,6 @@ export const getBalance = async (provider: provider, tokenAddress: string, userA
 
 export const decToBn = (dec: number, decimals = 18) => {
   return new BigNumber(dec).multipliedBy(new BigNumber(10).pow(decimals));
-};
-
-export const sleep = (ms: number) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 export const splitChartData = (rawData: any) => {
