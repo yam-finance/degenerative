@@ -379,11 +379,11 @@
             <br />
             <label>
               <b>Start </b>
-              <input type="date" @input="updateStartDate()" v-model="inputStart" />
+              <input type="date" @input="updateStartDate()" v-model="inputStartDate" />
             </label>
             <label>
               <b>Stop </b>
-              <input type="date" @input="updateEndDate()" v-model="inputEnd" />
+              <input type="date" @input="updateEndDate()" v-model="inputEndDate" />
             </label>
             <label>
               <b>{{ hasFetched ? "Your stats: " : "Loading off-chain data ..." }}</b>
@@ -570,8 +570,6 @@ export default {
       chartOptionsCandle: {},
       hasFetched: false,
       interval: "",
-      startDate: "",
-      endDate: "",
       txGasCostETH: 0,
       txGasCostUSD: 0,
       averageTxPrice: 0,
@@ -660,8 +658,8 @@ export default {
       },
       showWrapETH: false,
       approvalsUpdate: 0,
-      inputStart: null,
-      inputEnd: null,
+      inputStartDate: null,
+      inputEndDate: null,
       amountToWrap: 0,
       amountToUnwrap: 0,
       currCollat: null,
@@ -764,21 +762,17 @@ export default {
 
     async updateInterval(value) {
       this.interval = value;
-      this.inputStart = null;
-      this.inputEnd = null;
-      this.startDate = "";
-      this.endDate = "";
+      this.inputStartDate = null;
+      this.inputEndDate = null;
       this.hasFetched = false;
       await this.getAccountStats();
     },
     async updateStartDate() {
-      this.startDate = this.inputStart;
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
     },
     async updateEndDate() {
-      this.endDate = this.inputEnd;
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
@@ -787,8 +781,8 @@ export default {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats({
         interval: this.interval,
-        startDate: this.startDate,
-        endDate: this.endDate,
+        startDate: this.inputStartDate,
+        endDate: this.inputEndDate,
       });
       this.hasFetched = true;
 
