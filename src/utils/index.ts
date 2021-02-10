@@ -96,8 +96,8 @@ export const getTxStats = async (
   // console.log("Using endBlockNumber: " + endBlockNumber);
 
   try {
+    // Fetch a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
-    // Returns a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
     let response = await fetch(url);
     let json = await response.json();
     const txs = json["result"];
@@ -116,7 +116,27 @@ export const getTxStats = async (
       json = await response.json();
       nextTxs = json["result"];
       count = nextTxs.length;
-      txs.push(Math.max(...nextTxs));
+      txs.push(...nextTxs);
+    }
+
+    // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
+    url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
+    response = await fetch(url);
+    json = await response.json();
+    nextTxs = json["result"];
+    count = nextTxs.length;
+    txs.push(...nextTxs);
+
+    // Continue fetching if response >= 1000.
+    while (count === 10000) {
+      const startBlock = txs[txs.length - 1].blockNumber;
+      const endBlock = endBlockNumber;
+      url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
+      response = await fetch(url);
+      json = await response.json();
+      nextTxs = json["result"];
+      count = nextTxs.length;
+      txs.push(...nextTxs);
     }
 
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
