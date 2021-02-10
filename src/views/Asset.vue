@@ -375,7 +375,19 @@
             <button @click="updateInterval('month')">Month</button>
             <button @click="updateInterval('year')">Year</button>
             <button @click="updateInterval('allTime')">All Time</button>
-            <h3>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</h3>
+
+            <br />
+            <label>
+              <b>Start </b>
+              <input type="date" @input="updateStartDate({ inputStart })" v-model="inputStart" />
+            </label>
+            <label>
+              <b>Stop </b>
+              <input type="date" @input="updateEndDate({ inputEnd })" v-model="inputEnd" />
+            </label>
+            <label>
+              <b>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</b>
+            </label>
             <label>
               ETH tx gas cost:
               <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "0 ETH" }}</b>
@@ -558,6 +570,8 @@ export default {
       chartOptionsCandle: {},
       hasFetched: false,
       interval: "",
+      startDate: "",
+      endDate: "",
       txGasCostETH: 0,
       txGasCostUSD: 0,
       averageTxPrice: 0,
@@ -748,12 +762,32 @@ export default {
 
     async updateInterval(value) {
       this.interval = value;
+      this.startDate = "";
+      this.endDate = "";
+      this.hasFetched = false;
+      await this.getAccountStats();
+    },
+    async updateStartDate(value) {
+      console.log(value);
+      this.startDate = value.value;
+      this.interval = "";
+      this.hasFetched = false;
+      await this.getAccountStats();
+    },
+    async updateEndDate(value) {
+      console.log(value);
+      this.endDate = value;
+      this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
     },
     async getAccountStats() {
       const price = await getOffchainPriceFromTokenSymbol("uUSDrETH");
-      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats(this.interval);
+      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await this.getUserTxStats({
+        interval: this.interval,
+        startDate: this.startDate,
+        endDate: this.endDate,
+      });
       this.hasFetched = true;
 
       this.txGasCostETH = txGasCostETH;
