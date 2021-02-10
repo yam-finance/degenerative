@@ -74,7 +74,8 @@ export const getTxStats = async (
   provider: provider,
   tokenAddress: string,
   userAddress: string,
-  timeStamp: number,
+  startTimeStamp: number,
+  endTimeStamp: number,
   startBlockNumber: number,
   endBlockNumber: number
 ): Promise<string[]> => {
@@ -115,9 +116,12 @@ export const getTxStats = async (
 
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
 
-    if (timeStamp > 0) {
-      txsOut = txsOut.filter(v => v.timeStamp > Math.floor(timeStamp / 1000));
-      console.log(txsOut);
+    if (startTimeStamp > 0) {
+      txsOut = txsOut.filter(v => v.timeStamp > Math.floor(startTimeStamp / 1000));
+    }
+
+    if (endTimeStamp > 0) {
+      txsOut = txsOut.filter(v => v.timeStamp < Math.floor(endTimeStamp / 1000));
     }
 
     txsOut = txsOut.map(({ confirmations, ...item }) => item);
