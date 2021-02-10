@@ -114,6 +114,9 @@ export const getTxStats = async (
       url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
       response = await fetch(url);
       json = await response.json();
+      if (json["status"] == 0) {
+        break;
+      }
       nextTxs = json["result"];
       count = nextTxs.length;
       txs.push(...nextTxs);
@@ -134,6 +137,9 @@ export const getTxStats = async (
       url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
       response = await fetch(url);
       json = await response.json();
+      if (json["status"] == 0) {
+        break;
+      }
       nextTxs = json["result"];
       count = nextTxs.length;
       txs.push(...nextTxs);
