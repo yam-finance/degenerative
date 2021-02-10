@@ -745,33 +745,51 @@ export default new Vuex.Store({
       }
     },
 
-    getUserTxStats: async ({ commit, dispatch }, interval: string) => {
+    getUserTxStats: async ({ commit, dispatch }, payload: { interval: string; startDate: string; endDate: string }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
 
-      const date = new Date();
-      let timestamp: number;
+      console.log(payload.interval);
+      console.log(payload.startDate);
+      console.log(payload.endDate);
 
-      switch (interval) {
+      let date = new Date();
+      let startTimestamp = 0;
+      let endTimestamp = 0;
+
+      switch (payload.interval) {
         case "month":
           date.setMonth(date.getMonth() - 1);
-          timestamp = date.getTime();
+          startTimestamp = date.getTime();
           break;
         case "year":
           date.setFullYear(date.getFullYear() - 1);
-          timestamp = date.getTime();
+          startTimestamp = date.getTime();
           break;
         default:
-          timestamp = 0;
+          startTimestamp = 0;
+      }
+
+      if (payload.startDate != "") {
+        // Test date.
+        date = new Date("2020-02-10");
+        startTimestamp = date.getTime();
+      }
+
+      if (payload.endDate != "") {
+        // Test date.
+        date = new Date("2020-07-14");
+        endTimestamp = date.getTime();
       }
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
         Vue.prototype.$provider,
         WETH,
         store.state.account,
-        timestamp,
+        startTimestamp,
+        endTimestamp,
         0,
         0
       ); // Null can later be replaced with block numbers.
