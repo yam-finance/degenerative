@@ -764,6 +764,8 @@ export default {
 
     async updateInterval(value) {
       this.interval = value;
+      this.inputStart = null;
+      this.inputEnd = null;
       this.startDate = "";
       this.endDate = "";
       this.hasFetched = false;
