@@ -95,10 +95,10 @@ export const getTxStats = async (
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     // Returns a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
     let response = await fetch(url);
-    const json = await response.json();
+    let json = await response.json();
     const txs = json["result"];
     let count = txs.length;
-    let result;
+    let nextTxs;
     let gasFeeTotal = 0;
     let gasPriceTotal = 0;
     let gasFeeTotalFail = 0;
@@ -109,9 +109,10 @@ export const getTxStats = async (
       const endBlock = endBlockNumber;
       url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
       response = await fetch(url);
-      result = json["result"];
-      count = result.length;
-      txs.push(Math.max(...result));
+      json = await response.json();
+      nextTxs = json["result"];
+      count = nextTxs.length;
+      txs.push(Math.max(...nextTxs));
     }
 
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
