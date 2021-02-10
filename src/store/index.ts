@@ -772,14 +772,12 @@ export default new Vuex.Store({
           startTimestamp = 0;
       }
 
-      if (payload.startDate != "") {
-        // Test date.
+      if (payload.startDate != null) {
         date = new Date(payload.startDate);
         startTimestamp = date.getTime();
       }
 
-      if (payload.endDate != "") {
-        // Test date.
+      if (payload.endDate != null) {
         date = new Date(payload.endDate);
         endTimestamp = date.getTime();
       }
@@ -792,7 +790,7 @@ export default new Vuex.Store({
         endTimestamp,
         0,
         0
-      ); // Null can later be replaced with block numbers.
+      ); // Null can be replaced with block numbers.
       return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
     },
     getUserWETHBalance: async ({ commit, dispatch }) => {
