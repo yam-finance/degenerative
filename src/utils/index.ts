@@ -72,7 +72,6 @@ const helper = async (arg1, arg2) => {
 // TODO: Add error handling for api calls.
 export const getTxStats = async (
   provider: provider,
-  tokenAddress: string,
   userAddress: string,
   startTimeStamp: number,
   endTimeStamp: number,

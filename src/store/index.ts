@@ -751,9 +751,9 @@ export default new Vuex.Store({
         await dispatch("connect");
       }
 
-      console.log(payload.interval);
-      console.log(payload.startDate);
-      console.log(payload.endDate);
+      // console.log(payload.interval);
+      // console.log(payload.startDate);
+      // console.log(payload.endDate);
 
       let date = new Date();
       let startTimestamp = 0;
@@ -784,13 +784,12 @@ export default new Vuex.Store({
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
         Vue.prototype.$provider,
-        WETH,
         store.state.account,
         startTimestamp,
         endTimestamp,
         0,
         0
-      ); // Null can be replaced with block numbers.
+      ); // Zeros can be replaced by block numbers if necessary.
       return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
     },
     getUserWETHBalance: async ({ commit, dispatch }) => {
