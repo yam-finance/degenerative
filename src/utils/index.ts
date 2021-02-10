@@ -93,7 +93,7 @@ export const getTxStats = async (
 
   try {
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
-    // Returns a maximum of 10000 records only.
+    // Returns a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
     let response = await fetch(url);
     const json = await response.json();
     const txs = json["result"];
@@ -132,9 +132,6 @@ export const getTxStats = async (
     // Returned 'isError' values: 0=No Error, 1=Got Error.
     const txsOutFail = txsOut.filter(v => v.isError === "1");
     const txOutFail = txsOutFail.length;
-
-    // console.log('All outgoing txs:', txsOut);
-    // console.log('Failed outgoing txs:', txsOutFail);
 
     if (txsOutCount > 0) {
       const gasUsedArray = txsOut.map(value => parseInt(value.gasUsed));
