@@ -774,13 +774,13 @@ export default new Vuex.Store({
 
       if (payload.startDate != "") {
         // Test date.
-        date = new Date("2020-02-10");
+        date = new Date(payload.startDate);
         startTimestamp = date.getTime();
       }
 
       if (payload.endDate != "") {
         // Test date.
-        date = new Date("2020-07-14");
+        date = new Date(payload.endDate);
         endTimestamp = date.getTime();
       }
 

@@ -379,11 +379,11 @@
             <br />
             <label>
               <b>Start </b>
-              <input type="date" @input="updateStartDate({ inputStart })" v-model="inputStart" />
+              <input type="date" @input="updateStartDate()" v-model="inputStart" />
             </label>
             <label>
               <b>Stop </b>
-              <input type="date" @input="updateEndDate({ inputEnd })" v-model="inputEnd" />
+              <input type="date" @input="updateEndDate()" v-model="inputEnd" />
             </label>
             <label>
               <b>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</b>
@@ -660,6 +660,8 @@ export default {
       },
       showWrapETH: false,
       approvalsUpdate: 0,
+      inputStart: null,
+      inputEnd: null,
       amountToWrap: 0,
       amountToUnwrap: 0,
       currCollat: null,
@@ -767,16 +769,14 @@ export default {
       this.hasFetched = false;
       await this.getAccountStats();
     },
-    async updateStartDate(value) {
-      console.log(value);
-      this.startDate = value.value;
+    async updateStartDate() {
+      this.startDate = this.inputStart;
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
     },
-    async updateEndDate(value) {
-      console.log(value);
-      this.endDate = value;
+    async updateEndDate() {
+      this.endDate = this.inputEnd;
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
