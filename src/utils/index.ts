@@ -103,6 +103,7 @@ export const getTxStats = async (
     let gasPriceTotal = 0;
     let gasFeeTotalFail = 0;
 
+    // Continue fetching if response >= 1000.
     while (count === 10000) {
       const startBlock = txs[txs.length - 1].blockNumber;
       const endBlock = endBlockNumber;
