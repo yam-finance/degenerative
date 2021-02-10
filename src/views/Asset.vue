@@ -386,7 +386,7 @@
               <input type="date" @input="updateEndDate()" v-model="inputEnd" />
             </label>
             <label>
-              <b>{{ hasFetched ? "Your stats: " : "Loading on-chain data ..." }}</b>
+              <b>{{ hasFetched ? "Your stats: " : "Loading off-chain data ..." }}</b>
             </label>
             <label>
               ETH tx gas cost:
