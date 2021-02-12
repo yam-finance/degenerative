@@ -12,6 +12,7 @@
         <SpacePush />
         <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
+          <router-link @click.native="respNavClick" to="/positions">Positions</router-link>
           <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
           <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
           <!-- <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a> -->

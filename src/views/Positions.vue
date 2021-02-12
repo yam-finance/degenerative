@@ -1,20 +1,117 @@
 <template>
   <div class="positions">
     <Container :size="900">
-      <b class="gray">Listed user positions</b>
+      <Card>
+        <h2 class="flex">
+          <b>Positions</b>
+        </h2>
+      </Card>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th v-for="header in Object.keys(positions[0])" :key="header" v-on:click="sortTable(header)">
+                {{ header }}
+                <div class="arrow" v-if="header === sortColumn" v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in positions" :key="item">
+              <td v-for="key in Object.keys(item)" :key="key">{{ item[key] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!--<Table headers="testHeaders" data="positions"></Table>-->
     </Container>
   </div>
 </template>
 
-<style lang="scss" scoped></style>
-
-<script>
+<script lang="typescript">
 export default {
   name: "Positions",
-  head: {
-    title: "Positions",
-    meta: [{ name: "description", content: "Your assets positions." }],
+  data() {
+    return {
+      // TODO Get these from the store
+      positions: [
+        {
+          name: "uGas-JAN21",
+          price: 23,
+          quantity: 10,
+          total: 230
+        },
+        {
+          name: "uGas-FEB21",
+          price: 56,
+          quantity: 2,
+          total: 112
+        }
+      ],
+      ascending: false,
+      sortColumn: '',
+    }
   },
-  components: {},
-};
+  methods: {
+    sortTable: function sortTable(header) {
+      if(this.sortColumn === header) {
+        this.ascending = !this.ascending;
+      }
+      else {
+        this.ascending = true;
+        this.sortColumn = header;
+      }
+
+      this.positions.sort((a, b) => {
+        if(a[header] > b[header]) {
+          return this.ascending ? 1 : -1
+        }
+        else if(a[header] < b[header]) {
+          return this.ascending ? -1 : 1
+        }
+        return 0;
+      })
+    },
+  },
+  computed: {
+    columns: function () {
+      if(this.positions.length == 0) return [];
+      return Object.keys(this.positions[0])
+    }
+  }
+}
 </script>
+
+<style lang="scss" scoped>
+table {
+  font-family: "Open Sans", sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+  border: 3px solid #de473b;
+  margin: 10px 10px 0 0;
+}
+
+table th {
+  text-transform: uppercase;
+  text-align: left;
+  background: var(--primary);
+  color: var(--back);
+  cursor: pointer;
+  padding: 8px;
+  min-width: 30px;
+}
+table th:hover {
+  background: #de473b;
+}
+table td {
+  text-align: left;
+  padding: 8px;
+  border-right: 2px solid var(--primary);
+}
+table td:last-child {
+  border-right: none;
+}
+table tbody tr:nth-child(2n) td {
+  background: #f2a29b;
+}
+</style>
