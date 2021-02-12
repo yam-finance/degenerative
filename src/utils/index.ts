@@ -127,6 +127,8 @@ export const getTxStats = async (
       txs.push(...nextTxs);
     }
 
+    /*
+    
     // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
     url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     response = await fetch(url);
@@ -150,6 +152,8 @@ export const getTxStats = async (
       count = nextTxs.length;
       txs.push(...nextTxs);
     }
+
+    */
 
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
 
