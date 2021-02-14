@@ -833,7 +833,7 @@ export default new Vuex.Store({
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice) / 2 / assetReserveValue) * 100) / 2;
+        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice * 0.82) / assetReserveValue) * 100) / 2;
         console.debug("aprCalculate %", aprCalculate);
         return mixin.methods.numeral(aprCalculate);
       } catch (e) {
