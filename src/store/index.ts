@@ -30,7 +30,7 @@ import UNIContract from "@/utils/abi/uni.json";
 import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
-import { UMA, WETH } from "@/utils/addresses";
+import { UMA, WETH, assetContracts } from "@/utils/addresses";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -85,6 +85,7 @@ const defaultState = () => {
       expiryPrice: new BigNumber(0),
     },
     currPos: {},
+    userPositions: {},
     provider: {},
     connector: {},
   };
@@ -155,6 +156,10 @@ export default new Vuex.Store({
     CURR_POS(state, data) {
       state.currPos = data;
       console.debug("CURR_POS", data);
+    },
+    SET_USER_POSITIONS(state, data) {
+      state.userPositions = data;
+      console.debug("SET_USER_POSITIONS", data);
     },
     GET_EMP(state, data) {
       state.currentEMP = data.currentEMP;
@@ -345,6 +350,25 @@ export default new Vuex.Store({
       } catch (e) {
         console.debug("couldnt get position for: ", contract, " for user: ", store.state.account);
       }
+    },
+
+    // TODO Still don't know what data im getting back
+    getAllUserPositions: async ({ commit, dispatch }) => {
+      if (!Vue.prototype.$web3) await dispatch("connect");
+
+      let userPositions;
+      assetContracts.forEach(async asset => {
+        try {
+          const empContract = await dispatch("getEMP", { address: asset.emp });
+          const position = await empContract.methods.positions(store.state.account).call();
+          userPositions[asset.name] = position;
+        } catch (err) {
+          console.debug(`Get position failed for ${asset.name}: ${err.message}`);
+          userPositions[asset.name] = 0;
+        }
+      });
+
+      commit("SET_USER_POSITIONS", userPositions);
     },
 
     setEMPState: async ({ commit, dispatch }, contract: string) => {

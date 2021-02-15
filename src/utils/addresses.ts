@@ -21,3 +21,30 @@ export const UGASJAN21LP = "0x25fb29d865c1356f9e95d621f21366d3a5db6bb0";
 export const UGASFEB21LP = "0x4a8a2ea3718964ed0551a3191c30e49ea38a5ade";
 export const UGASMAR21LP = "0x683ea972ffa19b7bad6d6be0440e0a8465dba71c";
 export const UGASAPR21LP = "0x0000000000000000000000000000000000000000";
+
+export const assetContracts = [
+  {
+    name: "UGASJAN21",
+    token: UGASJAN21,
+    emp: EMPJAN,
+    lp: UGASJAN21LP,
+  },
+  {
+    name: "UGASFEB21",
+    token: UGASFEB21,
+    emp: EMPFEB,
+    lp: UGASFEB21LP,
+  },
+  {
+    name: "UGASMAR21",
+    token: UGASMAR21,
+    emp: EMPMAR,
+    lp: UGASMAR21LP,
+  },
+  {
+    name: "UGASAPR21",
+    token: UGASAPR21,
+    emp: EMPAPR,
+    lp: UGASAPR21LP,
+  },
+];
