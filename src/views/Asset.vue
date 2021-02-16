@@ -34,12 +34,12 @@
 
           <Space size="md" />
 
-          <!-- Enabled: "bg-blue-600", Not Enabled: "bg-gray-200" -->
+          <!-- Enabled: "bg-blue", Not Enabled: "bg-gray-200" -->
           <button
             type="button"
             :class="
               currency
-                ? 'bg-blue-600 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+                ? 'bg-blue relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
                 : 'bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
             "
             @click="currency = !currency"
@@ -108,7 +108,7 @@
           <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
-                <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                <div class="flex-shrink-0 bg-blue rounded-md p-3">
                   <!-- Heroicon name: outline/badge-check -->
                   <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path
@@ -128,7 +128,7 @@
                       {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
                     </div>
 
-                    <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                    <div class="ml-2 flex items-baseline text-sm font-semibold text-blue">
                       {{ currency ? "ΞTH" : "USD" }}
                     </div>
                   </dd>
@@ -140,7 +140,7 @@
           <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
-                <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                <div class="flex-shrink-0 bg-primary rounded-md p-3">
                   <!-- Heroicon name: outline/ban -->
                   <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path
@@ -160,7 +160,7 @@
                       {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
                     </div>
 
-                    <div class="ml-2 flex items-baseline text-sm font-semibold text-red-600">
+                    <div class="ml-2 flex items-baseline text-sm font-semibold text-primary">
                       {{ currency ? "ΞTH" : "USD" }}
                     </div>
                   </dd>
