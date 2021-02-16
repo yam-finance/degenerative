@@ -7,6 +7,7 @@ module.exports = {
   theme: {
     colors: {
       primary: "var(--primary)",
+      back: "var(--back-act)",
       transparent: "transparent",
       current: "currentColor",
       black: colors.black,

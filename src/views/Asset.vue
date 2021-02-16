@@ -214,7 +214,7 @@
             leave-from-class="transform opacity-100 scale-100"
             leave-to-class="transform opacity-0 scale-95"
           >
-            <div v-show="isOpen" class="origin-top-right absolute bottom-2 right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+            <div v-show="isOpen" class="origin-top-right absolute bottom-2 right-0 mt-2 w-56 rounded-md shadow-lg bg-back ring-1 ring-black ring-opacity-5">
               <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Month')" role="menuitem"
                   >Month</a
