@@ -759,7 +759,7 @@ export default new Vuex.Store({
       let startTimestamp = 0;
       let endTimestamp = 0;
 
-      switch (payload.interval) {
+      switch (payload.interval.toLowerCase()) {
         case "month":
           date.setMonth(date.getMonth() - 1);
           startTimestamp = date.getTime();
