@@ -80,7 +80,7 @@
 
           <Space size="sm" />
 
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-400 text-yellow-800">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-300 text-yellow-800">
             {{ badgeState }}
           </span>
 
