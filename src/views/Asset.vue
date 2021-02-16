@@ -106,9 +106,6 @@
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
                 <div class="ml-5 w-0 flex-1">
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    Avg. Gas Price
-                  </dt>
                   <dd class="flex items-baseline">
                     <div class="text-2xl font-semibold text-gray-900">
                       {{ averageTxPrice ? averageTxPrice : "0" }}
@@ -118,6 +115,9 @@
                       GWEI
                     </div>
                   </dd>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Avg. Gas Price
+                  </dt>
                 </div>
               </div>
             </div>
@@ -126,21 +126,7 @@
           <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
-                <div class="flex-shrink-0 bg-blue rounded-md p-3">
-                  <!-- Heroicon name: outline/badge-check -->
-                  <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                    />
-                  </svg>
-                </div>
                 <div class="ml-5 w-0 flex-1">
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
-                  </dt>
                   <dd class="flex items-baseline">
                     <div class="text-2xl font-semibold text-gray-900">
                       {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
@@ -150,6 +136,9 @@
                       {{ currency ? "ΞTH" : "USD" }}
                     </div>
                   </dd>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
+                  </dt>
                 </div>
               </div>
             </div>
@@ -158,21 +147,7 @@
           <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
-                <div class="flex-shrink-0 bg-primary rounded-md p-3">
-                  <!-- Heroicon name: outline/ban -->
-                  <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                    />
-                  </svg>
-                </div>
                 <div class="ml-5 w-0 flex-1">
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
-                  </dt>
                   <dd class="flex items-baseline">
                     <div class="text-2xl font-semibold text-gray-900">
                       {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
@@ -182,6 +157,9 @@
                       {{ currency ? "ΞTH" : "USD" }}
                     </div>
                   </dd>
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
+                  </dt>
                 </div>
               </div>
             </div>
