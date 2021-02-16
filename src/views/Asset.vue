@@ -33,52 +33,6 @@
             {{ hasFetched ? "Ethereum + ERC20 tx stats" : "Loading off-chain data (This might take a while if you have a lot of transactions)" }}
           </h3>
           -->
-          <!-- Enabled: "bg-blue", Not Enabled: "bg-gray-200" -->
-          <button
-            type="button"
-            :class="
-              currency
-                ? 'bg-blue relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-                : 'bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-            "
-            @click="currency = !currency"
-            aria-pressed="false"
-          >
-            <span class="sr-only">Use setting</span>
-            <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
-            <span
-              :class="
-                currency
-                  ? 'translate-x-5 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-                  : 'translate-x-0 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-              "
-            >
-              <!-- Enabled: "opacity-0 ease-out duration-100", Not Enabled: "opacity-100 ease-in duration-200" -->
-              <span
-                :class="
-                  currency
-                    ? 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                    : 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                "
-                aria-hidden="true"
-              >
-                $
-              </span>
-              <!-- Enabled: "opacity-100 ease-in duration-200", Not Enabled: "opacity-0 ease-out duration-100" -->
-              <span
-                :class="
-                  currency
-                    ? 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                    : 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                "
-                aria-hidden="true"
-              >
-                Ξ
-              </span>
-            </span>
-          </button>
-
-          <Space size="sm" />
 
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-300 text-yellow-800">
             {{ badgeState }}
@@ -194,6 +148,50 @@
           >
             <div v-show="isOpen" class="origin-top-right absolute bottom-2 right-0 mt-2 w-56 rounded-md shadow-lg bg-back ring-1 ring-black ring-opacity-5">
               <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                <!-- Enabled: "bg-blue", Not Enabled: "bg-gray-200" -->
+                <button
+                  type="button"
+                  :class="
+                    currency
+                      ? 'bg-blue relative left-4 mt-1 inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+                      : 'bg-gray-200 relative left-4 mt-1 inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+                  "
+                  @click="currency = !currency"
+                  aria-pressed="false"
+                >
+                  <span class="sr-only">Use setting</span>
+                  <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+                  <span
+                    :class="
+                      currency
+                        ? 'translate-x-5 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
+                        : 'translate-x-0 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
+                    "
+                  >
+                    <!-- Enabled: "opacity-0 ease-out duration-100", Not Enabled: "opacity-100 ease-in duration-200" -->
+                    <span
+                      :class="
+                        currency
+                          ? 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                          : 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                      "
+                      aria-hidden="true"
+                    >
+                      $
+                    </span>
+                    <!-- Enabled: "opacity-100 ease-in duration-200", Not Enabled: "opacity-0 ease-out duration-100" -->
+                    <span
+                      :class="
+                        currency
+                          ? 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                          : 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                      "
+                      aria-hidden="true"
+                    >
+                      Ξ
+                    </span>
+                  </span>
+                </button>
                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Month')" role="menuitem"
                   >Month</a
                 >
