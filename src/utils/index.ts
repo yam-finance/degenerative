@@ -187,11 +187,11 @@ export const getTxStats = async (
       gasFeeTotalFail = gasFeeFail.reduce((partialSum, a) => partialSum + a, 0);
     }
 
-    const txGasCostETH = web3.utils.fromWei(gasFeeTotal.toString(), "ether");
-    const averageTxPrice = gasPriceTotal / txsOutCount / 1e9;
+    const txGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotal.toString(), "ether")).decimalPlaces(3);
+    const averageTxPrice = new BigNumber(gasPriceTotal / txsOutCount / 1e9).decimalPlaces(3);
     const txCount = txsOutCount.toString();
     const failedTxCount = txOutFail.toString();
-    const failedTxGasCostETH = web3.utils.fromWei(gasFeeTotalFail.toString(), "ether");
+    const failedTxGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotalFail.toString(), "ether")).decimalPlaces(3);
 
     return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
   } catch (e) {
