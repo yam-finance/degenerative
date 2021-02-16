@@ -27,7 +27,7 @@
       <Space size="md" />
 
       <div>
-        <div class="inline-flex items-center">
+        <div class="inline-flex items-center mt-9">
           <!--
           <h3 class="text-lg leading-6 font-medium text-gray-900">
             {{ hasFetched ? "Ethereum + ERC20 tx stats" : "Loading off-chain data (This might take a while if you have a lot of transactions)" }}
