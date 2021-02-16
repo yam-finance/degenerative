@@ -26,6 +26,217 @@
 
       <Space size="md" />
 
+      <div>
+        <div class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            {{ hasFetched ? "Ethereum + ERC20 tx stats" : "Loading off-chain data (This might take a while if you have a lot of transactions)" }}
+          </h3>
+
+          <Space size="md" />
+
+          <!-- Enabled: "bg-blue-600", Not Enabled: "bg-gray-200" -->
+          <button
+            type="button"
+            :class="
+              currency
+                ? 'bg-blue-600 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+                : 'bg-gray-200 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+            "
+            @click="currency = !currency"
+            aria-pressed="false"
+          >
+            <span class="sr-only">Use setting</span>
+            <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
+            <span
+              :class="
+                currency
+                  ? 'translate-x-5 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
+                  : 'translate-x-0 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
+              "
+            >
+              <!-- Enabled: "opacity-0 ease-out duration-100", Not Enabled: "opacity-100 ease-in duration-200" -->
+              <span
+                :class="
+                  currency
+                    ? 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                    : 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                "
+                aria-hidden="true"
+              >
+                $
+              </span>
+              <!-- Enabled: "opacity-100 ease-in duration-200", Not Enabled: "opacity-0 ease-out duration-100" -->
+              <span
+                :class="
+                  currency
+                    ? 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                    : 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
+                "
+                aria-hidden="true"
+              >
+                Ξ
+              </span>
+            </span>
+          </button>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
+            {{ badgeState }}
+          </span>
+        </div>
+
+        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="flex flex-col bg-white overflow-hidden shadow rounded-lg">
+            <div class="flex-grow px-4 py-5 sm:p-6">
+              <div class="flex items-center">
+                <div class="ml-5 w-0 flex-1">
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    Avg. Gas Price
+                  </dt>
+                  <dd class="flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900">
+                      {{ averageTxPrice ? averageTxPrice : "0" }}
+                    </div>
+
+                    <div class="ml-2 flex items-baseline text-sm font-semibold text-gray-600">
+                      GWEI
+                    </div>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col bg-white overflow-hidden shadow rounded-lg">
+            <div class="flex-grow px-4 py-5 sm:p-6">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                  <!-- Heroicon name: outline/badge-check -->
+                  <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
+                  </dt>
+                  <dd class="flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900">
+                      {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
+                    </div>
+
+                    <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                      {{ currency ? "ΞTH" : "USD" }}
+                    </div>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col bg-white overflow-hidden shadow rounded-lg">
+            <div class="flex-grow px-4 py-5 sm:p-6">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                  <!-- Heroicon name: outline/ban -->
+                  <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dt class="text-sm font-medium text-gray-500 truncate">
+                    {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
+                  </dt>
+                  <dd class="flex items-baseline">
+                    <div class="text-2xl font-semibold text-gray-900">
+                      {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
+                    </div>
+
+                    <div class="ml-2 flex items-baseline text-sm font-semibold text-red-600">
+                      {{ currency ? "ΞTH" : "USD" }}
+                    </div>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+        </dl>
+
+        <div class="relative text-left mt-2">
+          <div class="absolute top-0 right-0">
+            <button
+              class="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+              @click="isOpen = !isOpen"
+              id="options-menu"
+              aria-haspopup="true"
+              aria-expanded="true"
+            >
+              <span class="sr-only">Open options</span>
+              <!-- Heroicon name: solid/dots-horizontal -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Dropdown panel, show/hide based on dropdown state. -->
+          <transition
+            enter-active-class="transition ease-out duration-100"
+            enter-from-class="transform opacity-0 scale-95"
+            enter-to-class="transform opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-75"
+            leave-from-class="transform opacity-100 scale-100"
+            leave-to-class="transform opacity-0 scale-95"
+          >
+            <div v-show="isOpen" class="origin-top-right absolute bottom-2 right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Month')" role="menuitem"
+                  >Month</a
+                >
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Year')" role="menuitem"
+                  >Year</a
+                >
+                <a
+                  href="#"
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  @click="updateInterval('All Time')"
+                  role="menuitem"
+                  >All Time</a
+                >
+                <div class="relative">
+                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div class="relative flex justify-center">
+                    <span class="px-2 bg-white text-sm text-gray-500">
+                      Custom Date
+                    </span>
+                  </div>
+                </div>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                  🏃‍♂️
+                  <input type="date" @input="updateCustomDate()" v-model="inputStartDate" />
+                </a>
+                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                  🏁
+                  <input type="date" @input="updateCustomDate()" v-model="inputEndDate" />
+                </a>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </div>
+
+      <Space size="md" />
+
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
           Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
@@ -372,52 +583,6 @@
             </label>
 
             <br />
-            <button @click="updateInterval('month')">Month</button>
-            <button @click="updateInterval('year')">Year</button>
-            <button @click="updateInterval('allTime')">All Time</button>
-
-            <br />
-            <label>
-              <b>Start </b>
-              <input type="date" @input="updateStartDate()" v-model="inputStartDate" />
-            </label>
-            <label>
-              <b>Stop </b>
-              <input type="date" @input="updateEndDate()" v-model="inputEndDate" />
-            </label>
-            <label>
-              <b>{{ hasFetched ? "Your Ethereum tx stats: " : "Loading off-chain data ... (This might take a while if you have a lot of transactions)" }}</b>
-            </label>
-            <label>
-              ETH tx gas cost:
-              <b>{{ txGasCostETH ? txGasCostETH + " ETH" : "0 ETH" }}</b>
-            </label>
-            <label>
-              USD tx gas cost:
-              <b>{{ txGasCostUSD ? txGasCostUSD + " USD" : "0 USD" }}</b>
-            </label>
-            <label>
-              Average gas price:
-              <b>{{ averageTxPrice ? averageTxPrice + " GWEI" : "0 GWEI" }}</b>
-            </label>
-            <label>
-              Tx count:
-              <b>{{ txCount ? txCount : "0" }}</b>
-            </label>
-            <label>
-              Failed tx count:
-              <b>{{ failedTxCount ? failedTxCount : "0" }}</b>
-            </label>
-            <label>
-              ETH failed gas cost:
-              <b>{{ failedTxGasCostETH ? failedTxGasCostETH + " ETH" : "0" }}</b>
-            </label>
-            <label>
-              USD failed gas cost:
-              <b>{{ failedTxGasCostUSD ? failedTxGasCostUSD + " USD" : "0" }}</b>
-            </label>
-
-            <br />
             <label>
               Your WETH:
               <b>{{ balanceWETH ? balanceWETH : "0" }}</b>
@@ -568,8 +733,11 @@ export default {
       currEMP: null,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
+      isOpen: false,
+      currency: true,
       hasFetched: false,
       interval: "",
+      badgeState: "All Time",
       txGasCostETH: 0,
       txGasCostUSD: 0,
       averageTxPrice: 0,
@@ -761,18 +929,23 @@ export default {
     },
 
     async updateInterval(value) {
+      this.isOpen = !this.isOpen;
+      this.badgeState = value;
       this.interval = value;
       this.inputStartDate = null;
       this.inputEndDate = null;
       this.hasFetched = false;
       await this.getAccountStats();
     },
-    async updateStartDate() {
-      this.interval = "";
-      this.hasFetched = false;
-      await this.getAccountStats();
-    },
-    async updateEndDate() {
+    async updateCustomDate() {
+      this.isOpen = !this.isOpen;
+      if (this.inputStartDate != null && this.inputEndDate != null) {
+        this.badgeState = this.inputStartDate + " -> " + this.inputEndDate;
+      } else if (this.inputStartDate == null) {
+        this.badgeState = "♾ -> " + this.inputEndDate;
+      } else {
+        this.badgeState = this.inputStartDate + " -> ♾";
+      }
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
@@ -787,12 +960,12 @@ export default {
       this.hasFetched = true;
 
       this.txGasCostETH = txGasCostETH;
-      this.txGasCostUSD = txGasCostETH / price;
+      this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(3);
       this.averageTxPrice = averageTxPrice;
       this.txCount = txCount;
       this.failedTxCount = failedTxCount;
       this.failedTxGasCostETH = failedTxGasCostETH;
-      this.failedTxGasCostUSD = failedTxGasCostETH / price;
+      this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(3);
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
