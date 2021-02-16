@@ -56,7 +56,7 @@
         </div>
 
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
+          <div class="flex flex-col bg-transparent overflow-hidden rounded-lg shadow-3 border-2 border-border">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
                 <div class="ml-5 w-0 flex-1">
@@ -77,7 +77,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
+          <div class="flex flex-col bg-transparent overflow-hidden rounded-lg shadow-3 border-2 border-border">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
                 <div class="ml-5 w-0 flex-1">
@@ -98,7 +98,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col bg-transparent overflow-hidden shadow rounded-lg shadow-3 border-2">
+          <div class="flex flex-col bg-transparent overflow-hidden rounded-lg shadow-3 border-2 border-border">
             <div class="flex-grow px-4 py-5 sm:p-6">
               <div class="flex items-center">
                 <div class="ml-5 w-0 flex-1">

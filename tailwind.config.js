@@ -9,6 +9,7 @@ module.exports = {
       primary: "var(--primary)",
       back: "var(--back-act)",
       transparent: "transparent",
+      border: "0000000f",
       current: "currentColor",
       black: colors.black,
       white: colors.white,
