@@ -188,7 +188,10 @@ export const getTxStats = async (
     }
 
     const txGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotal.toString(), "ether")).decimalPlaces(3);
-    const averageTxPrice = new BigNumber(gasPriceTotal / txsOutCount / 1e9).decimalPlaces(3);
+    let averageTxPrice = new BigNumber(0);
+    if (txsOutCount != 0) {
+      averageTxPrice = new BigNumber(gasPriceTotal / txsOutCount / 1e9).decimalPlaces(3);
+    }
     const txCount = txsOutCount.toString();
     const failedTxCount = txOutFail.toString();
     const failedTxGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotalFail.toString(), "ether")).decimalPlaces(3);
