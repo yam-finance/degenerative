@@ -41,10 +41,4 @@ export const assetContracts = [
     emp: EMPMAR,
     lp: UGASMAR21LP,
   },
-  {
-    name: "UGASAPR21",
-    token: UGASAPR21,
-    emp: EMPAPR,
-    lp: UGASAPR21LP,
-  },
 ];

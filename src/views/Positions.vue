@@ -10,20 +10,22 @@
         <table>
           <thead>
             <tr>
-              <th v-for="header in Object.keys(positions[0])" :key="header" v-on:click="sortTable(header)">
+              <th v-for="header in this.headers" :key="header" v-on:click="sortTable(header)">
                 {{ header }}
                 <div class="arrow" v-if="header === sortColumn" v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in positions" :key="item">
-              <td v-for="key in Object.keys(item)" :key="key">
-                <div v-if="typeof item[key] === 'string' || typeof item[key] === 'number'">
+            <tr v-for="item in positions" :key="item.name">
+              <td v-for="key in Object.keys(item)" :key="key.toString()">
+                <div v-if="typeof item[key] !== 'function' || typeof item[key] === 'number'">
                   {{ item[key] }}
                 </div>
                 <div v-else>
-                  <Button v-for="action in item[key]" :key="action" class="action-button">{{ action.name }}</Button>
+                  <Button v-for="action in item[key]" :key="action" class="action-button">
+                    {{ action.name }}
+                  </Button>
                 </div>
               </td>
             </tr>
@@ -48,22 +50,27 @@ interface PositionsData {
 }
 */
 
+import store from "@/store";
+import { mapActions, mapGetters } from "vuex";
+
 export default {
   name: "Positions",
+  head: {
+    title: "Positions",
+    meta: [{ name: "description", content: "User Positions" }],
+  },
   data() {
     return {
       // TODO Get these from the store
-      positions: [
-        {
+      headers: ["name", "price", "quantity", "total", "actions"],
+      positions: [],
+      /*{
           name: "uGas-JAN21",
           price: 23,
           quantity: 10,
           total: 230,
           actions: {
             settle: () => {
-              return 0;
-            },
-            redeem: () => {
               return 0;
             },
           },
@@ -77,17 +84,19 @@ export default {
             settle: () => {
               return 0;
             },
-            redeem: () => {
-              return 0;
-            },
           },
-        },
-      ],
+        },*/
+      currentPositions: {},
       ascending: false,
       sortColumn: "",
     };
   },
+
   methods: {
+    ...mapActions(["getAllUserPositions"]),
+
+    ...mapGetters(["userPositions"]),
+
     sortTable: function sortTable(header) {
       if (this.sortColumn === header) {
         this.ascending = !this.ascending;
@@ -101,16 +110,29 @@ export default {
           return this.ascending ? 1 : -1;
         } else if (a[header] < b[header]) {
           return this.ascending ? -1 : 1;
+        } else {
+          return 0;
         }
-        return 0;
       });
     },
+
+    setCurrentPositions: async function() {
+      //this.positions = this.$store.getters.userPositions;
+      this.positions = await this.getAllUserPositions();
+      console.log(this.positions);
+    },
   },
+
   computed: {
     columns: function() {
       if (this.positions.length == 0) return [];
       return Object.keys(this.positions[0]);
     },
+  },
+
+  mounted: async function() {
+    //await this.getAllUserPositions();
+    this.setCurrentPositions();
   },
 };
 </script>

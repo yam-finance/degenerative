@@ -356,19 +356,37 @@ export default new Vuex.Store({
     getAllUserPositions: async ({ commit, dispatch }) => {
       if (!Vue.prototype.$web3) await dispatch("connect");
 
-      let userPositions;
+      const userPositions: any = [];
       assetContracts.forEach(async asset => {
+        const tokenPrice = await getPriceByContract(asset.token);
+        const userAssetData = {};
+        userAssetData["name"] = asset.name;
+        userAssetData["price"] = tokenPrice;
+        userAssetData["actions"] = {};
         try {
           const empContract = await dispatch("getEMP", { address: asset.emp });
-          const position = await empContract.methods.positions(store.state.account).call();
-          userPositions[asset.name] = position;
+          //const position = await empContract.methods.positions(store.state.account).call();
+          console.log(await empContract.methods.positions(store.state.account).call());
+
+          const position = 14;
+          userAssetData["quantity"] = position; // TODO verify we are getting quantity back
+          userAssetData["total"] = tokenPrice * position;
+          userAssetData["actions"].settle = () =>
+            store.settle({
+              contract: empContract,
+            });
         } catch (err) {
-          console.debug(`Get position failed for ${asset.name}: ${err.message}`);
-          userPositions[asset.name] = 0;
+          console.log(`Get position failed for ${asset.name}: ${err.message}`);
+          userAssetData["quantity"] = 0;
+          userAssetData["total"] = 0;
+          userAssetData["actions"].settle = null;
         }
+
+        userPositions.push(userAssetData);
       });
 
       commit("SET_USER_POSITIONS", userPositions);
+      return userPositions;
     },
 
     setEMPState: async ({ commit, dispatch }, contract: string) => {
@@ -983,6 +1001,9 @@ export default new Vuex.Store({
     },
     empState(state) {
       return state.empState;
+    },
+    userPositions(state) {
+      return state.userPositions;
     },
   },
 });
