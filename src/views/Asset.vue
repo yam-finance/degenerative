@@ -1881,12 +1881,10 @@ ul {
   --tw-ring-opacity: 0.05;
   box-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
 
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
+  @media (min-width: 640px) {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 }
 .dropdownList li:hover {
   --tw-bg-opacity: 1;
@@ -2021,6 +2019,14 @@ ul {
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+  text-transform: none;
+  padding: 0;
+  line-height: inherit;
+  color: inherit;
 }
 .toggleButton:focus {
   outline: 2px solid transparent;
@@ -2029,6 +2035,8 @@ ul {
   --tw-ring-offset-width: 2px;
   box-shadow: 0 0 0 var(--ring-offset-width) var(--ring-offset-color), var(--ring-shadow);
   --tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
+  outline: 1px dotted;
+  outline: 5px auto -webkit-focus-ring-color;
 }
 .grey {
   --tw-text-opacity: 1;
@@ -2069,13 +2077,8 @@ ul {
   display: flex;
   flex-direction: row;
   margin: 1px;
-}
-.flex-card {
-  margin-right: 15px;
-  margin-bottom: 15px;
-  padding: 20px 50px !important;
-}
-@media (max-width: 800px) {
+
+  @media (max-width: 800px) {
   .flex-container {
     flex-direction: column;
   }
@@ -2083,17 +2086,57 @@ ul {
 .dropbtn {
   border: none;
   cursor: pointer;
+  background-color: transparent;
+  background-image: none;
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+  text-transform: none;
+  padding-left: 20px;
+  padding-top: 10px;
+  line-height: inherit;
+  color: inherit;
 }
-.dropdown {
-  position: relative;
+.stats-dropdown {
+  position: absolute;
   display: inline-block;
-  padding: 20px 20px;
+
+  @media (max-width: 768px) {
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 10px;
+  }
 }
-.dropdown:hover .dropdownList {
-  display: block;
-}
-.dropdown:hover .dropbtn {
+.stats-dropdown:hover .dropbtn {
   color: #4b5563;
+}
+.dropdown-content {
+  display: block;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  background: var(--back-act);
+  z-index: 2;
+  border-radius: 2px;
+  border: none;
+  right: 0;
+
+  @media (max-width: 768px) {
+    position: relative;
+    left: 0;
+  }
+}
+.dropdown-titel {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgba(17, 24, 39, var(--tw-text-opacity));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hideDropdown {
   display: none;
