@@ -32,8 +32,9 @@
       -->
 
       <div class="flex-container">
-        <Card class="flex-card">
+        <Card>
           <div class="flex" style="align-items:center;">
+            <Space size="50" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
@@ -45,13 +46,17 @@
                 </div>
               </dd>
               <dt class="card-description">
-                Your Avg. Gas Price
+                Your avg. gas price
               </dt>
             </div>
           </div>
         </Card>
-        <Card class="flex-card">
+
+        <Space size="20" />
+
+        <Card>
           <div class="flex" style="align-items:center;">
+            <Space size="50" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
@@ -63,13 +68,17 @@
                 </div>
               </dd>
               <dt class="card-description">
-                {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
+                {{ txCount ? txCount + " Successful txs." : "0 Successful txs." }}
               </dt>
             </div>
           </div>
         </Card>
-        <Card class="flex-card">
+
+        <Space size="20" />
+
+        <Card>
           <div class="flex" style="align-items:center;">
+            <Space size="50" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
@@ -81,24 +90,24 @@
                 </div>
               </dd>
               <dt class="card-description">
-                {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
+                {{ failedTxCount ? failedTxCount + " Failed txs." : "0 Failed txs." }}
               </dt>
             </div>
           </div>
         </Card>
-
-        <div class="dropdown">
-          <button class="dropbtn" @click="isOpen = !isOpen">
-            <!-- Heroicon name: medium/adjustments -->
-            <svg style="height:1.25rem; width:1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-              />
-            </svg>
-          </button>
+        <div style="position:relative">
+          <div class="stats-dropdown" ref="stats-dropdown">
+            <button class="dropbtn" @click="showPopup = !showPopup">
+              <!-- Heroicon name: medium/adjustments -->
+              <svg style="height:1.25rem; width:1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                />
+              </svg>
+            </button>
             <div v-show="showPopup" v-outside-click="{ exclude: ['stats-dropdown'], handler: 'onClose' }" class="dropdown-content">
               <div class="flex-container">
                 <div style="padding-left:1rem; padding-right:1rem; padding-top:1rem; padding-bottom:1rem;">
@@ -108,98 +117,100 @@
                 </div>
                 <div style="padding-left:1rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
                   <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton gray'" @click="currency = !currency" aria-pressed="false">
-              <span class="sr-only">Use setting</span>
-              <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
-                <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
-                  $
-                </span>
-                <span :class="currency ? 'easeIn toggleTransition flex' : 'easeOut toggleTransition flex'" aria-hidden="true">
-                  Ξ
-                </span>
-              </span>
-            </button>
+                    <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
+                      <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
+                        $
+                      </span>
+                      <span :class="currency ? 'easeIn toggleTransition flex' : 'easeOut toggleTransition flex'" aria-hidden="true">
+                        Ξ
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
 
-            <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3">
-              <li id="listbox-item-0" role="option" class="dropdownItem">
-                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
-                <span :class="badgeState == 'All Time' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('All Time')">
-                  All Time
-                </span>
+              <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" class="dropdownList">
+                <li id="listbox-item-0" role="option" class="dropdownItem">
+                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                  <span :class="badgeState == 'All Time' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('All Time')">
+                    All Time
+                  </span>
 
-                <!-- Checkmark, only display for selected option. -->
-                <span id="dropdownIcon" :class="badgeState == 'All Time' ? 'itemIcon flex' : 'itemIcon flex hidden'">
-                  <!-- Heroicon name: solid/check -->
-                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </li>
+                  <!-- Checkmark, only display for selected option. -->
+                  <span id="dropdownIcon" :class="badgeState == 'All Time' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                    <!-- Heroicon name: solid/check -->
+                    <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </li>
 
-              <li id="listbox-item-0" role="option" class="dropdownItem">
-                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
-                <span :class="badgeState == 'Year' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Year')">
-                  Year
-                </span>
+                <li id="listbox-item-0" role="option" class="dropdownItem">
+                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                  <span :class="badgeState == 'Year' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Year')">
+                    Year
+                  </span>
 
-                <!-- Checkmark, only display for selected option. -->
-                <span id="dropdownIcon" :class="badgeState == 'Year' ? 'itemIcon flex' : 'itemIcon flex hidden'">
-                  <!-- Heroicon name: solid/check -->
-                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </li>
+                  <!-- Checkmark, only display for selected option. -->
+                  <span id="dropdownIcon" :class="badgeState == 'Year' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                    <!-- Heroicon name: solid/check -->
+                    <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </li>
 
-              <li id="listbox-item-0" role="option" class="dropdownItem">
-                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
-                <span :class="badgeState == 'Month' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Month')">
-                  Month
-                </span>
+                <li id="listbox-item-0" role="option" class="dropdownItem">
+                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                  <span :class="badgeState == 'Month' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Month')">
+                    Month
+                  </span>
 
-                <!-- Checkmark, only display for selected option. -->
-                <span id="dropdownIcon" :class="badgeState == 'Month' ? 'itemIcon flex' : 'itemIcon flex hidden'">
-                  <!-- Heroicon name: solid/check -->
-                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </li>
+                  <!-- Checkmark, only display for selected option. -->
+                  <span id="dropdownIcon" :class="badgeState == 'Month' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                    <!-- Heroicon name: solid/check -->
+                    <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </li>
 
-              <li id="listbox-item-0" role="option" class="dropdownItem">
-                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
-                <span :class="badgeState == 'Custom' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateBadge('Custom')">
-                  Custom
-                </span>
+                <li id="listbox-item-0" role="option" class="dropdownItem">
+                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                  <span :class="badgeState == 'Custom' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateBadge('Custom')">
+                    Custom
+                  </span>
 
-                <!-- Checkmark, only display for selected option. -->
-                <span id="dropdownIcon" :class="badgeState == 'Custom' ? 'itemIcon flex' : 'itemIcon flex hidden'">
-                  <!-- Heroicon name: solid/check -->
-                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </li>
-              <li id="listbox-item-0" role="option" :class="badgeState == 'Custom' ? 'dropdownItem' : 'hidden dropdownItem'">
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
-              </li>
-            </ul>
+                  <!-- Checkmark, only display for selected option. -->
+                  <span id="dropdownIcon" :class="badgeState == 'Custom' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                    <!-- Heroicon name: solid/check -->
+                    <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </li>
+                <li id="listbox-item-0" role="option" :class="badgeState == 'Custom' ? 'dropdownItem' : 'hidden dropdownItem'">
+                  <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
+                  <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -735,7 +746,6 @@ export default {
       currEMP: null,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
-      isOpen: false,
       showPopup: false,
       currency: true,
       hasFetched: false,
@@ -937,7 +947,6 @@ export default {
       this.badgeState = value;
     },
     async updateInterval(value) {
-      this.isOpen = !this.isOpen;
       this.badgeState = value;
       this.interval = value;
       this.inputStartDate = null;
@@ -947,7 +956,6 @@ export default {
     },
     async updateCustomDate(value) {
       this.badgeState = value;
-      this.isOpen = !this.isOpen;
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
@@ -1942,12 +1950,6 @@ ul {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
-@media (min-width: 640px) {
-  .dropdownList {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-}
 .dropdownItem {
   cursor: pointer;
   user-select: none;
@@ -1977,17 +1979,6 @@ ul {
 }
 .blue {
   background: #6799e5;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
 }
 .transformC {
   --tw-translate-x: 0;
@@ -2123,7 +2114,6 @@ ul {
   margin: 1px;
 
   @media (max-width: 800px) {
-  .flex-container {
     flex-direction: column;
   }
 }
