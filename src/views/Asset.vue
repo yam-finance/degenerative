@@ -26,206 +26,174 @@
 
       <Space size="md" />
 
-      <div>
-        <div class="inline-flex items-center mt-9">
-          <!--
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            {{ hasFetched ? "Ethereum + ERC20 tx stats" : "Loading off-chain data (This might take a while if you have a lot of transactions)" }}
-          </h3>
-          -->
+      <!--
+      {{ hasFetched ? "Ethereum + ERC20 tx stats:" : "Loading off-chain data (This might take a while if you have a lot of transactions)" }}
+      {{ badgeState }}
+      -->
 
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-yellow-300 text-yellow-800">
-            {{ badgeState }}
-          </span>
-
-          <Space size="sm" />
-
-          <svg
-            :class="hasFetched ? 'hidden -ml-1 mr-3 h-5 w-5 text-black' : 'animate-spin -ml-1 mr-3 h-5 w-5 text-black'"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </div>
-
-        <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="flex flex-col bg-transparent overflow-hidden rounded-card shadow-3 border-2 border-border border-solid">
-            <div class="flex-grow px-4 py-5 sm:p-6">
-              <div class="flex items-center">
-                <div class="ml-5 w-0 flex-1">
-                  <dd class="flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900">
-                      {{ averageTxPrice ? averageTxPrice : "0" }}
-                    </div>
-
-                    <div class="ml-2 flex items-baseline text-sm font-semibold text-gray-600">
-                      GWEI
-                    </div>
-                  </dd>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    Avg. Gas Price
-                  </dt>
+      <div class="flex-container">
+        <Card class="flex-card">
+          <div class="flex" style="align-items:center;">
+            <div style="width:0px; flex:1 1 0%;">
+              <dd class="flex" style="align-items:baseline;">
+                <div class="card-titel">
+                  {{ averageTxPrice ? averageTxPrice : "0" }}
                 </div>
-              </div>
+
+                <div class="flex card-unit grey">
+                  GWEI
+                </div>
+              </dd>
+              <dt class="card-description">
+                Your Avg. Gas Price
+              </dt>
             </div>
           </div>
-
-          <div class="flex flex-col bg-transparent overflow-hidden rounded-card shadow-3 border-2 border-border border-solid">
-            <div class="flex-grow px-4 py-5 sm:p-6">
-              <div class="flex items-center">
-                <div class="ml-5 w-0 flex-1">
-                  <dd class="flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900">
-                      {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
-                    </div>
-
-                    <div class="ml-2 flex items-baseline text-sm font-semibold text-blue">
-                      {{ currency ? "ΞTH" : "USD" }}
-                    </div>
-                  </dd>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
-                  </dt>
+        </Card>
+        <Card class="flex-card">
+          <div class="flex" style="align-items:center;">
+            <div style="width:0px; flex:1 1 0%;">
+              <dd class="flex" style="align-items:baseline;">
+                <div class="card-titel">
+                  {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
                 </div>
-              </div>
+
+                <div class="flex card-unit green">
+                  {{ currency ? "ΞTH" : "USD" }}
+                </div>
+              </dd>
+              <dt class="card-description">
+                {{ txCount ? txCount + " successful txs" : "0 successful txs" }}
+              </dt>
             </div>
           </div>
-
-          <div class="flex flex-col bg-transparent overflow-hidden rounded-card shadow-3 border-2 border-border border-solid">
-            <div class="flex-grow px-4 py-5 sm:p-6">
-              <div class="flex items-center">
-                <div class="ml-5 w-0 flex-1">
-                  <dd class="flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900">
-                      {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
-                    </div>
-
-                    <div class="ml-2 flex items-baseline text-sm font-semibold text-primary">
-                      {{ currency ? "ΞTH" : "USD" }}
-                    </div>
-                  </dd>
-                  <dt class="text-sm font-medium text-gray-500 truncate">
-                    {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
-                  </dt>
+        </Card>
+        <Card class="flex-card">
+          <div class="flex" style="align-items:center;">
+            <div style="width:0px; flex:1 1 0%;">
+              <dd class="flex" style="align-items:baseline;">
+                <div class="card-titel">
+                  {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
                 </div>
-              </div>
+
+                <div class="flex card-unit primary">
+                  {{ currency ? "ΞTH" : "USD" }}
+                </div>
+              </dd>
+              <dt class="card-description">
+                {{ failedTxCount ? failedTxCount + " failed txs" : "0 failed txs" }}
+              </dt>
             </div>
           </div>
-        </dl>
+        </Card>
 
-        <div class="relative text-left mt-2">
-          <div class="absolute top-0 right-0">
-            <button
-              class="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-              @click="isOpen = !isOpen"
-              id="options-menu"
-              aria-haspopup="true"
-              aria-expanded="true"
-            >
-              <span class="sr-only">Open options</span>
-              <!-- Heroicon name: solid/dots-horizontal -->
-              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
+        <div class="dropdown">
+          <button class="dropbtn" @click="isOpen = !isOpen">
+            <!-- Heroicon name: medium/adjustments -->
+            <svg style="height:1.25rem; width:1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+              />
+            </svg>
+          </button>
+          <div class="dropdownList">
+            <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton gray'" @click="currency = !currency" aria-pressed="false">
+              <span class="sr-only">Use setting</span>
+              <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
+                <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
+                  $
+                </span>
+                <span :class="currency ? 'easeIn toggleTransition flex' : 'easeOut toggleTransition flex'" aria-hidden="true">
+                  Ξ
+                </span>
+              </span>
             </button>
-          </div>
 
-          <!-- Dropdown panel, show/hide based on dropdown state. -->
-          <transition
-            enter-active-class="transition ease-out duration-100"
-            enter-from-class="transform opacity-0 scale-95"
-            enter-to-class="transform opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-75"
-            leave-from-class="transform opacity-100 scale-100"
-            leave-to-class="transform opacity-0 scale-95"
-          >
-            <div v-show="isOpen" class="origin-top-right absolute bottom-2 right-0 mt-2 w-56 rounded-md shadow-lg bg-back ring-1 ring-black ring-opacity-5">
-              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <!-- Enabled: "bg-blue", Not Enabled: "bg-gray-200" -->
-                <button
-                  type="button"
-                  :class="
-                    currency
-                      ? 'bg-blue relative left-4 mt-1 inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-                      : 'bg-gray-200 relative left-4 mt-1 inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-                  "
-                  @click="currency = !currency"
-                  aria-pressed="false"
-                >
-                  <span class="sr-only">Use setting</span>
-                  <!-- Enabled: "translate-x-5", Not Enabled: "translate-x-0" -->
-                  <span
-                    :class="
-                      currency
-                        ? 'translate-x-5 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-                        : 'translate-x-0 pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200'
-                    "
-                  >
-                    <!-- Enabled: "opacity-0 ease-out duration-100", Not Enabled: "opacity-100 ease-in duration-200" -->
-                    <span
-                      :class="
-                        currency
-                          ? 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                          : 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                      "
-                      aria-hidden="true"
-                    >
-                      $
-                    </span>
-                    <!-- Enabled: "opacity-100 ease-in duration-200", Not Enabled: "opacity-0 ease-out duration-100" -->
-                    <span
-                      :class="
-                        currency
-                          ? 'opacity-100 ease-in duration-200 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                          : 'opacity-0 ease-out duration-100 absolute inset-0 h-full w-full flex items-center justify-center transition-opacity'
-                      "
-                      aria-hidden="true"
-                    >
-                      Ξ
-                    </span>
-                  </span>
-                </button>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Month')" role="menuitem"
-                  >Month</a
-                >
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" @click="updateInterval('Year')" role="menuitem"
-                  >Year</a
-                >
-                <a
-                  href="#"
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  @click="updateInterval('All Time')"
-                  role="menuitem"
-                  >All Time</a
-                >
-                <div class="relative">
-                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div class="relative flex justify-center">
-                    <span class="px-2 bg-white text-sm text-gray-500">
-                      Custom Date
-                    </span>
-                  </div>
-                </div>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
-                  🏃‍♂️
-                  <input type="date" @input="updateCustomDate()" v-model="inputStartDate" />
-                </a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
-                  🏁
-                  <input type="date" @input="updateCustomDate()" v-model="inputEndDate" />
-                </a>
-              </div>
-            </div>
-          </transition>
+            <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3">
+              <li id="listbox-item-0" role="option" class="dropdownItem">
+                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                <span :class="badgeState == 'All Time' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('All Time')">
+                  All Time
+                </span>
+
+                <!-- Checkmark, only display for selected option. -->
+                <span id="dropdownIcon" :class="badgeState == 'All Time' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <!-- Heroicon name: solid/check -->
+                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </li>
+
+              <li id="listbox-item-0" role="option" class="dropdownItem">
+                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                <span :class="badgeState == 'Year' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Year')">
+                  Year
+                </span>
+
+                <!-- Checkmark, only display for selected option. -->
+                <span id="dropdownIcon" :class="badgeState == 'Year' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <!-- Heroicon name: solid/check -->
+                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </li>
+
+              <li id="listbox-item-0" role="option" class="dropdownItem">
+                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                <span :class="badgeState == 'Month' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Month')">
+                  Month
+                </span>
+
+                <!-- Checkmark, only display for selected option. -->
+                <span id="dropdownIcon" :class="badgeState == 'Month' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <!-- Heroicon name: solid/check -->
+                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </li>
+
+              <li id="listbox-item-0" role="option" class="dropdownItem">
+                <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
+                <span :class="badgeState == 'Custom' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateBadge('Custom')">
+                  Custom
+                </span>
+
+                <!-- Checkmark, only display for selected option. -->
+                <span id="dropdownIcon" :class="badgeState == 'Custom' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <!-- Heroicon name: solid/check -->
+                  <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+              </li>
+              <li id="listbox-item-0" role="option" :class="badgeState == 'Custom' ? 'dropdownItem' : 'hidden dropdownItem'">
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -921,7 +889,9 @@ export default {
       // console.log("UGASJAN21 getUniswapDataDaily", daily);
       // this.assetChartData = daily;
     },
-
+    async updateBadge(value) {
+      this.badgeState = value;
+    },
     async updateInterval(value) {
       this.isOpen = !this.isOpen;
       this.badgeState = value;
@@ -931,15 +901,9 @@ export default {
       this.hasFetched = false;
       await this.getAccountStats();
     },
-    async updateCustomDate() {
+    async updateCustomDate(value) {
+      this.badgeState = value;
       this.isOpen = !this.isOpen;
-      if (this.inputStartDate != null && this.inputEndDate != null) {
-        this.badgeState = this.inputStartDate + " -> " + this.inputEndDate;
-      } else if (this.inputStartDate == null) {
-        this.badgeState = "♾ -> " + this.inputEndDate;
-      } else {
-        this.badgeState = this.inputStartDate + " -> ♾";
-      }
       this.interval = "";
       this.hasFetched = false;
       await this.getAccountStats();
@@ -954,12 +918,12 @@ export default {
       this.hasFetched = true;
 
       this.txGasCostETH = txGasCostETH;
-      this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(3);
+      this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
       this.averageTxPrice = averageTxPrice;
       this.txCount = txCount;
       this.failedTxCount = failedTxCount;
       this.failedTxGasCostETH = failedTxGasCostETH;
-      this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(3);
+      this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(0);
     },
     async getWETHBalance() {
       this.balanceWETH = await this.getUserWETHBalance();
@@ -1896,6 +1860,232 @@ export default {
 <style lang="scss" scoped>
 .maker {
   zoom: 1;
+}
+.dropdownList {
+  max-height: 15rem;
+  border-radius: 0.375rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  overflow: auto;
+  --tw-ring-color: rgba(0, 0, 0, var(--tw-ring-opacity));
+  --tw-ring-opacity: 0.05;
+  box-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.dropdownList li:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+}
+#dropdownIcon:hover {
+  --tw-text-opacity: 1;
+  color: rgba(255, 255, 255, var(--tw-text-opacity));
+}
+.dropdownList:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+@media (min-width: 640px) {
+  .dropdownList {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+.dropdownItem {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 1rem;
+}
+.itemTitle {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.itemIcon {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  align-items: center;
+  padding-left: 0.375rem;
+}
+.gray {
+  --tw-bg-opacity: 1;
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+}
+.blue {
+  background: #6799e5;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+.transformC {
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
+    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+.translateX5 {
+  --tw-translate-x: 1.25rem;
+}
+.translateX0 {
+  --tw-translate-x: 0px;
+}
+.easeIn {
+  opacity: 1;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  transition-duration: 200ms;
+}
+.easeOut {
+  opacity: 0;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 100ms;
+}
+.toggleTransition {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.toggleIcon {
+  pointer-events: none;
+  position: relative;
+  display: inline-block;
+  height: 1.25rem;
+  width: 1.25rem;
+  border-radius: 9999px;
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+  --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+.toggleButton {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 1.5rem;
+  width: 2.75rem;
+  border-width: 2px;
+  border-color: transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+.toggleButton:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  --tw-ring-offset-width: 2px;
+  box-shadow: 0 0 0 var(--ring-offset-width) var(--ring-offset-color), var(--ring-shadow);
+  --tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
+}
+.grey {
+  --tw-text-opacity: 1;
+  color: rgba(75, 85, 99, var(--tw-text-opacity));
+}
+.green {
+  --tw-text-opacity: 1;
+  color: rgba(52, 211, 153, var(--tw-text-opacity));
+}
+.primary {
+  color: var(--primary);
+}
+.card-description {
+  font-size: 15px;
+  line-height: 1.25rem;
+  font-weight: 500;
+  --tw-text-opacity: 1;
+  color: rgba(107, 114, 128, var(--tw-text-opacity));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-unit {
+  margin-left: 0.5rem;
+  align-items: baseline;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+.card-titel {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgba(17, 24, 39, var(--tw-text-opacity));
+}
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  margin: 1px;
+}
+.flex-card {
+  margin-right: 15px;
+  margin-bottom: 15px;
+  padding: 20px 50px !important;
+}
+@media (max-width: 800px) {
+  .flex-container {
+    flex-direction: column;
+  }
+}
+.dropbtn {
+  border: none;
+  cursor: pointer;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+  padding: 20px 20px;
+}
+.dropdown:hover .dropdownList {
+  display: block;
+}
+.dropdown:hover .dropbtn {
+  color: #4b5563;
 }
 .hideDropdown {
   display: none;
