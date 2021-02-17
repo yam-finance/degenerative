@@ -1861,6 +1861,14 @@ export default {
 .maker {
   zoom: 1;
 }
+.hidden {
+  display: none;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 .dropdownList {
   max-height: 15rem;
   border-radius: 0.375rem;
