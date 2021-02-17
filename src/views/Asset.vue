@@ -99,8 +99,15 @@
               />
             </svg>
           </button>
-          <div class="dropdownList">
-            <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton gray'" @click="currency = !currency" aria-pressed="false">
+            <div v-show="showPopup" v-outside-click="{ exclude: ['stats-dropdown'], handler: 'onClose' }" class="dropdown-content">
+              <div class="flex-container">
+                <div style="padding-left:1rem; padding-right:1rem; padding-top:1rem; padding-bottom:1rem;">
+                  <p class="dropdown-titel">
+                    Stats Settings
+                  </p>
+                </div>
+                <div style="padding-left:1rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
+                  <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton gray'" @click="currency = !currency" aria-pressed="false">
               <span class="sr-only">Use setting</span>
               <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
                 <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
@@ -653,6 +660,39 @@ import {
 } from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
 
+// Outside Click Listener
+import Vue from "vue";
+
+let handleOutsideClick;
+
+Vue.directive("outside-click", {
+  bind(el, binding, vnode) {
+    handleOutsideClick = e => {
+      e.stopPropagation();
+      const { handler, exclude } = binding.value;
+
+      let clickedOnExcludedEl = false;
+      exclude.forEach(refName => {
+        if (!clickedOnExcludedEl) {
+          const excludedEl = vnode.context.$refs[refName];
+          clickedOnExcludedEl = excludedEl.contains(e.target);
+        }
+      });
+
+      if (!el.contains(e.target) && !clickedOnExcludedEl) {
+        vnode.context[handler]();
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+  },
+
+  unbind() {
+    document.removeEventListener("click", handleOutsideClick);
+    document.removeEventListener("touchstart", handleOutsideClick);
+  },
+});
+
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
 const empDecs = new BigNumber(10).pow(new BigNumber(18));
 
@@ -696,6 +736,7 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       chartOptionsCandle: {},
       isOpen: false,
+      showPopup: false,
       currency: true,
       hasFetched: false,
       interval: "",
@@ -872,6 +913,9 @@ export default {
       "getUniPrice",
     ]),
     ...mapGetters(["empState"]),
+    async onClose() {
+      this.showPopup = false;
+    },
     async initAsset() {
       if (this.tokenSelected) {
         this.fetchApprovalAll();
