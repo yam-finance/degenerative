@@ -193,6 +193,7 @@ export const getTxStats = async (
 
     return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
   } catch (e) {
+    console.log("An error occurred while retrieving your transaction data.\nPlease contact the YAM Community.");
     return ["0", "0", "0", "0", "0"];
   }
 };
