@@ -40,7 +40,6 @@
                 <div class="card-titel">
                   {{ averageTxPrice ? averageTxPrice : "0" }}
                 </div>
-
                 <div class="flex card-unit grey">
                   GWEI
                 </div>
@@ -62,7 +61,6 @@
                 <div class="card-titel">
                   {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
                 </div>
-
                 <div class="flex card-unit green">
                   {{ currency ? "ΞTH" : "USD" }}
                 </div>
@@ -84,7 +82,6 @@
                 <div class="card-titel">
                   {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
                 </div>
-
                 <div class="flex card-unit primary">
                   {{ currency ? "ΞTH" : "USD" }}
                 </div>
@@ -95,6 +92,7 @@
             </div>
           </div>
         </Card>
+
         <div style="position:relative">
           <div class="stats-dropdown" ref="stats-dropdown">
             <button class="dropbtn" @click="showPopup = !showPopup">
@@ -116,7 +114,7 @@
                   </p>
                 </div>
                 <div style="padding-left:1rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
-                  <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton gray'" @click="currency = !currency" aria-pressed="false">
+                  <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton grey-bg'" @click="currency = !currency" aria-pressed="false">
                     <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
                       <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
                         $
@@ -131,12 +129,9 @@
 
               <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" class="dropdownList">
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
                   <span :class="badgeState == 'All Time' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('All Time')">
                     All Time
                   </span>
-
-                  <!-- Checkmark, only display for selected option. -->
                   <span id="dropdownIcon" :class="badgeState == 'All Time' ? 'itemIcon flex' : 'itemIcon flex hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -150,12 +145,9 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
                   <span :class="badgeState == 'Year' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Year')">
                     Year
                   </span>
-
-                  <!-- Checkmark, only display for selected option. -->
                   <span id="dropdownIcon" :class="badgeState == 'Year' ? 'itemIcon flex' : 'itemIcon flex hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -169,12 +161,9 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
                   <span :class="badgeState == 'Month' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Month')">
                     Month
                   </span>
-
-                  <!-- Checkmark, only display for selected option. -->
                   <span id="dropdownIcon" :class="badgeState == 'Month' ? 'itemIcon flex' : 'itemIcon flex hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -188,12 +177,9 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <!-- Selected: "font-weight: 600;", Not Selected: "font-weight: 400;" -->
                   <span :class="badgeState == 'Custom' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateBadge('Custom')">
                     Custom
                   </span>
-
-                  <!-- Checkmark, only display for selected option. -->
                   <span id="dropdownIcon" :class="badgeState == 'Custom' ? 'itemIcon flex' : 'itemIcon flex hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -205,6 +191,7 @@
                     </svg>
                   </span>
                 </li>
+
                 <li id="listbox-item-0" role="option" :class="badgeState == 'Custom' ? 'dropdownItem' : 'hidden dropdownItem'">
                   <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
                   <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
@@ -967,8 +954,8 @@ export default {
         startDate: this.inputStartDate,
         endDate: this.inputEndDate,
       });
-      this.hasFetched = true;
 
+      this.hasFetched = true;
       this.txGasCostETH = txGasCostETH;
       this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
       this.averageTxPrice = averageTxPrice;
@@ -1921,6 +1908,24 @@ ul {
   margin: 0;
   padding: 0;
 }
+.grey-bg {
+  --tw-bg-opacity: 1;
+  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+}
+.blue {
+  background: #6799e5;
+}
+.grey {
+  --tw-text-opacity: 1;
+  color: rgba(75, 85, 99, var(--tw-text-opacity));
+}
+.green {
+  --tw-text-opacity: 1;
+  color: rgba(52, 211, 153, var(--tw-text-opacity));
+}
+.primary {
+  color: var(--primary);
+}
 .dropdownList {
   max-height: 15rem;
   border-radius: 0.375rem;
@@ -1942,13 +1947,13 @@ ul {
   --tw-bg-opacity: 1;
   background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
 }
-#dropdownIcon:hover {
-  --tw-text-opacity: 1;
-  color: rgba(255, 255, 255, var(--tw-text-opacity));
-}
 .dropdownList:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+#dropdownIcon:hover {
+  --tw-text-opacity: 1;
+  color: rgba(255, 255, 255, var(--tw-text-opacity));
 }
 .dropdownItem {
   cursor: pointer;
@@ -1972,13 +1977,6 @@ ul {
   left: 0px;
   align-items: center;
   padding-left: 0.375rem;
-}
-.gray {
-  --tw-bg-opacity: 1;
-  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
-}
-.blue {
-  background: #6799e5;
 }
 .transformC {
   --tw-translate-x: 0;
@@ -2072,17 +2070,6 @@ ul {
   --tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
   outline: 1px dotted;
   outline: 5px auto -webkit-focus-ring-color;
-}
-.grey {
-  --tw-text-opacity: 1;
-  color: rgba(75, 85, 99, var(--tw-text-opacity));
-}
-.green {
-  --tw-text-opacity: 1;
-  color: rgba(52, 211, 153, var(--tw-text-opacity));
-}
-.primary {
-  color: var(--primary);
 }
 .card-description {
   font-size: 15px;
