@@ -77,7 +77,6 @@ const helper = async (arg1, arg2) => {
 };
 
 // TODO: Change the api key before merging with Master.
-// TODO: Add error handling for api calls.
 export const getTxStats = async (
   provider: provider,
   userAddress: string,
@@ -127,8 +126,6 @@ export const getTxStats = async (
       txs.push(...nextTxs);
     }
 
-    /*
-    
     // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
     url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     response = await fetch(url);
@@ -152,8 +149,6 @@ export const getTxStats = async (
       count = nextTxs.length;
       txs.push(...nextTxs);
     }
-
-    */
 
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
 
