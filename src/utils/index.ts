@@ -76,7 +76,41 @@ const helper = async (arg1, arg2) => {
   return result;
 };
 
-// TODO: Change the api key before merging with Master.
+const fetchTxs = async (_type: string, _userAddress: string, _count: number, _endBlockNumber: number, _etherscanApiKey: string, _txs) => {
+  let url;
+
+  while (_count === 10000) {
+    await sleep(500);
+    const startBlock = _txs[_txs.length - 1].blockNumber;
+    const endBlock = _endBlockNumber;
+
+    switch (_type) {
+      case "ether":
+        url = `https://api.etherscan.io/api?module=account&action=txlist&address=${_userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${_etherscanApiKey}`;
+        break;
+      case "erc20":
+        url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${_userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${_etherscanApiKey}`;
+        break;
+      default:
+        console.log("No transaction type passed.");
+        break;
+    }
+
+    const response = await fetch(url);
+    const json = await response.json();
+
+    if (json["status"] == 0) {
+      break;
+    }
+
+    const nextTxs = json["result"];
+    _count = nextTxs.length;
+    _txs.push(...nextTxs);
+  }
+
+  return _txs;
+};
+
 export const getTxStats = async (
   provider: provider,
   userAddress: string,
@@ -86,7 +120,11 @@ export const getTxStats = async (
   endBlockNumber: number
 ): Promise<string[]> => {
   const web3 = new Web3(provider);
+  // TODO: Change the api key before merging with Master.
   const etherscanApiKey = "YY6XQICVXTH8DIVGUK1TNKZGEKDZV4NV3K";
+  let gasFeeTotal = 0;
+  let gasPriceTotal = 0;
+  let gasFeeTotalFail = 0;
 
   if (endBlockNumber == 0) {
     // Set current blog number to end blog number.
@@ -95,61 +133,25 @@ export const getTxStats = async (
     });
   }
 
-  // console.log("Using startBlockNumber: " + startBlockNumber);
-  // console.log("Using endBlockNumber: " + endBlockNumber);
-
   try {
     // Fetch a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     let response = await fetch(url);
     let json = await response.json();
-    const txs = json["result"];
+    let txs = json["result"];
     let count = txs.length;
-    let nextTxs;
-    let gasFeeTotal = 0;
-    let gasPriceTotal = 0;
-    let gasFeeTotalFail = 0;
-
     // Continue fetching if response >= 1000.
-    while (count === 10000) {
-      await sleep(500);
-      const startBlock = txs[txs.length - 1].blockNumber;
-      const endBlock = endBlockNumber;
-      url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
-      response = await fetch(url);
-      json = await response.json();
-      if (json["status"] == 0) {
-        break;
-      }
-      nextTxs = json["result"];
-      count = nextTxs.length;
-      txs.push(...nextTxs);
-    }
+    txs = await fetchTxs("ether", userAddress, count, endBlockNumber, etherscanApiKey, txs);
 
     // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
     url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     response = await fetch(url);
     json = await response.json();
-    nextTxs = json["result"];
-    count = nextTxs.length;
-    txs.push(...nextTxs);
-
+    const erc20Txs = json["result"];
+    count = erc20Txs.length;
+    txs.push(...erc20Txs);
     // Continue fetching if response >= 1000.
-    while (count === 10000) {
-      await sleep(500);
-      const startBlock = txs[txs.length - 1].blockNumber;
-      const endBlock = endBlockNumber;
-      url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${etherscanApiKey}`;
-      response = await fetch(url);
-      json = await response.json();
-      if (json["status"] == 0) {
-        break;
-      }
-      nextTxs = json["result"];
-      count = nextTxs.length;
-      txs.push(...nextTxs);
-    }
-
+    txs = await fetchTxs("erc20", userAddress, count, endBlockNumber, etherscanApiKey, txs);
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
 
     if (startTimeStamp > 0) {
@@ -184,9 +186,11 @@ export const getTxStats = async (
 
     const txGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotal.toString(), "ether")).decimalPlaces(3);
     let averageTxPrice = new BigNumber(0);
+
     if (txsOutCount != 0) {
       averageTxPrice = new BigNumber(gasPriceTotal / txsOutCount / 1e9).decimalPlaces(3);
     }
+
     const txCount = txsOutCount.toString();
     const failedTxCount = txOutFail.toString();
     const failedTxGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotalFail.toString(), "ether")).decimalPlaces(3);
