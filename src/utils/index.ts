@@ -16,7 +16,7 @@ import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
 dayjs.extend(utc);
 dayjs.extend(duration);
 
-interface JsonResult {
+interface JsonTxResult {
   blockHash: string;
   blockNumber: string;
   confirmations: string;
@@ -165,7 +165,7 @@ export const getTxStats = async (
     txsOut = txsOut.map(({ confirmations, ...item }) => item);
     txsOut = new Set(txsOut.map(JSON.stringify));
     txsOut = Array.from(txsOut);
-    const txsOutArray: JsonResult = txsOut.map(JSON.parse);
+    const txsOutArray: JsonTxResult = txsOut.map(JSON.parse);
     txsOut = txsOutArray;
     const txsOutCount = txsOut.length;
     // Returned 'isError' values: 0=No Error, 1=Got Error.
