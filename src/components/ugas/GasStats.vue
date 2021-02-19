@@ -4,7 +4,7 @@
       <div class="flex" style="align-items:center;">
         <div style="width:0px; flex:1 1 0%;">
           <div class="flex" style="align-items:baseline;">
-            <div class="card-titel">
+            <div class="card-title">
               {{ averageTxPrice ? averageTxPrice : "..." }}
             </div>
             <div class="flex card-unit grey">
@@ -24,7 +24,7 @@
       <div class="flex" style="align-items:center;">
         <div style="width:0px; flex:1 1 0%;">
           <div class="flex" style="align-items:baseline;">
-            <div class="card-titel">
+            <div class="card-title">
               {{ currency ? (txGasCostETH ? txGasCostETH : "...") : txGasCostUSD ? txGasCostUSD : "..." }}
             </div>
             <div class="flex card-unit green">
@@ -44,7 +44,7 @@
       <div class="flex" style="align-items:center;">
         <div style="width:0px; flex:1 1 0%;">
           <div class="flex" style="align-items:baseline;">
-            <div class="card-titel">
+            <div class="card-title">
               {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "...") : failedTxGasCostUSD ? failedTxGasCostUSD : "..." }}
             </div>
             <div class="flex card-unit primary">
@@ -462,7 +462,7 @@ ul {
   line-height: 1.25rem;
   font-weight: 600;
 }
-.card-titel {
+.card-title {
   font-size: 1.5rem;
   line-height: 1rem;
   font-weight: 600;
