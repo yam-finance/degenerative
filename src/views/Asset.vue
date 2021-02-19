@@ -34,7 +34,7 @@
       <div class="flex-container">
         <Card>
           <div class="flex" style="align-items:center;">
-            <Space size="50" />
+            <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
@@ -51,11 +51,11 @@
           </div>
         </Card>
 
-        <Space size="20" />
+        <Space size="20" style="flex:none;" />
 
         <Card>
           <div class="flex" style="align-items:center;">
-            <Space size="50" />
+            <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
@@ -72,11 +72,11 @@
           </div>
         </Card>
 
-        <Space size="20" />
+        <Space size="20" style="flex:none;" />
 
         <Card>
           <div class="flex" style="align-items:center;">
-            <Space size="50" />
+            <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
               <dd class="flex" style="align-items:baseline;">
                 <div class="card-titel">
