@@ -202,7 +202,7 @@
         </div>
       </div>
 
-      <Space size="md" />
+      <Space size="25" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
@@ -2098,7 +2098,6 @@ ul {
 .flex-container {
   display: flex;
   flex-direction: row;
-  margin: 1px;
 
   @media (max-width: 800px) {
     flex-direction: column;
