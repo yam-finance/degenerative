@@ -24,7 +24,7 @@
         </h2>
       </Card>
 
-      <Space size="md" />
+      <Space size="20" />
 
       <GasStats ref="gasStats" />
 
