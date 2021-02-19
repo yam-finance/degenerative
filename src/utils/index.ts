@@ -103,7 +103,7 @@ export const getTxStats = async (
   let gasFeeTotalFail = 0;
 
   if (endBlockNumber == 0) {
-    // Set current blog number to end blog number.
+    // Set current block number to end block number.
     endBlockNumber = await web3.eth.getBlockNumber(function(error, result) {
       if (!error) return result;
     });
