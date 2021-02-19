@@ -347,16 +347,16 @@ ul {
   cursor: pointer;
   user-select: none;
   position: relative;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 2rem;
-  padding-right: 1rem;
 }
 .itemTitle {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 2rem;
+  padding-right: 1rem;
 }
 .itemIcon {
   position: absolute;
