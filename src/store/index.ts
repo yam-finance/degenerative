@@ -31,6 +31,7 @@ import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
 import { UMA, WETH, assetContracts } from "@/utils/addresses";
+import { utils } from "ethers";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -352,36 +353,33 @@ export default new Vuex.Store({
       }
     },
 
-    // TODO Still don't know what data im getting back
     getAllUserPositions: async ({ commit, dispatch }) => {
       if (!Vue.prototype.$web3) await dispatch("connect");
 
       const userPositions: any = [];
       assetContracts.forEach(async asset => {
-        const tokenPrice = await getPriceByContract(asset.token);
+        const tokenPrice = (await getPriceByContract(asset.token)) ?? 120; // TODO
         const userAssetData = {};
         userAssetData["name"] = asset.name;
         userAssetData["price"] = tokenPrice;
         userAssetData["actions"] = {};
+
         try {
           const empContract = await dispatch("getEMP", { address: asset.emp });
           //const position = await empContract.methods.positions(store.state.account).call();
-          console.log(await empContract.methods.positions(store.state.account).call());
+          const synth = await empContract.methods.tokenCurrency().call();
+          const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
+          const quantity = parseFloat(utils.formatEther(balance));
 
-          const position = 14;
-          userAssetData["quantity"] = position; // TODO verify we are getting quantity back
-          userAssetData["total"] = tokenPrice * position;
-          userAssetData["actions"].settle = () =>
-            store.settle({
-              contract: empContract,
-            });
+          if (quantity < 1) return;
+
+          userAssetData["quantity"] = quantity;
+          userAssetData["total"] = tokenPrice * quantity;
         } catch (err) {
           console.log(`Get position failed for ${asset.name}: ${err.message}`);
           userAssetData["quantity"] = 0;
           userAssetData["total"] = 0;
-          userAssetData["actions"].settle = null;
         }
-
         userPositions.push(userAssetData);
       });
 
@@ -720,6 +718,19 @@ export default new Vuex.Store({
       } catch (e) {
         console.error("error", e);
         return false;
+      }
+    },
+
+    settleUserPosition: async ({ commit, dispatch }, tokenName) => {
+      try {
+        let emp;
+        for (const asset of assetContracts) {
+          if (asset.name == tokenName) emp = asset.emp;
+        }
+        const empContract = await dispatch("getEMP", { address: emp });
+        await dispatch("settle", { contract: empContract });
+      } catch (err) {
+        console.error(err.message);
       }
     },
 
