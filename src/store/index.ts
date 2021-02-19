@@ -761,6 +761,10 @@ export default new Vuex.Store({
           date.setHours(date.getHours() - 24);
           startTimestamp = date.getTime();
           break;
+        case "week":
+          date.setHours(date.getHours() - 168);
+          startTimestamp = date.getTime();
+          break;
         case "month":
           date.setMonth(date.getMonth() - 1);
           startTimestamp = date.getTime();
