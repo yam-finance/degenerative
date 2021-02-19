@@ -36,14 +36,14 @@
           <div class="flex" style="align-items:center;">
             <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
-              <dd class="flex" style="align-items:baseline;">
+              <div class="flex" style="align-items:baseline;">
                 <div class="card-titel">
                   {{ averageTxPrice ? averageTxPrice : "0" }}
                 </div>
                 <div class="flex card-unit grey">
                   GWEI
                 </div>
-              </dd>
+              </div>
               <dt class="card-description">
                 Your avg. gas price
               </dt>
@@ -57,14 +57,14 @@
           <div class="flex" style="align-items:center;">
             <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
-              <dd class="flex" style="align-items:baseline;">
+              <div class="flex" style="align-items:baseline;">
                 <div class="card-titel">
                   {{ currency ? (txGasCostETH ? txGasCostETH : "0") : txGasCostUSD ? txGasCostUSD : "0" }}
                 </div>
                 <div class="flex card-unit green">
                   {{ currency ? "ΞTH" : "USD" }}
                 </div>
-              </dd>
+              </div>
               <dt class="card-description">
                 {{ txCount ? txCount + " Successful txs." : "0 Successful txs." }}
               </dt>
@@ -78,14 +78,14 @@
           <div class="flex" style="align-items:center;">
             <Space size="50" style="flex:none;" />
             <div style="width:0px; flex:1 1 0%;">
-              <dd class="flex" style="align-items:baseline;">
+              <div class="flex" style="align-items:baseline;">
                 <div class="card-titel">
                   {{ currency ? (failedTxGasCostETH ? failedTxGasCostETH : "0") : failedTxGasCostUSD ? failedTxGasCostUSD : "0" }}
                 </div>
                 <div class="flex card-unit primary">
                   {{ currency ? "ΞTH" : "USD" }}
                 </div>
-              </dd>
+              </div>
               <dt class="card-description">
                 {{ failedTxCount ? failedTxCount + " Failed txs." : "0 Failed txs." }}
               </dt>
