@@ -5,7 +5,7 @@ import request from "request";
 import YAM from "./abi/yam.json";
 import { provider, TransactionReceipt } from "web3-core";
 import { GET_BLOCK, GET_BLOCKS, GET_PRICES_BY_BLOCK, GET_HEALTH } from "@/plugins/graphql/queries";
-import { AbiItem, encodePacked } from "web3-utils";
+import { AbiItem } from "web3-utils";
 import { ethers } from "ethers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
