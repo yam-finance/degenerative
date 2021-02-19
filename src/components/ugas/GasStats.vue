@@ -61,7 +61,6 @@
     <div style="position:relative">
       <div class="stats-dropdown" ref="stats-dropdown">
         <button class="dropbtn" @click="showPopup = !showPopup">
-          <!-- Heroicon name: medium/adjustments -->
           <svg style="height:1.25rem; width:1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
@@ -98,7 +97,6 @@
                 All Time
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'All Time' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -114,7 +112,6 @@
                 Year
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Year' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -130,7 +127,6 @@
                 Month
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Month' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -146,7 +142,6 @@
                 Week
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Week' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -162,7 +157,6 @@
                 Day
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Day' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -178,7 +172,6 @@
                 Custom
               </span>
               <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Custom' ? '' : 'hidden'">
-                <!-- Heroicon name: solid/check -->
                 <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
