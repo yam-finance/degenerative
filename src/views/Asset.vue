@@ -115,7 +115,7 @@
                 </div>
                 <div style="padding-left:1rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
                   <button type="button" class="toggleButton" :class="currency ? 'blue' : 'grey-bg'" @click="currency = !currency" aria-pressed="false">
-                    <span class="toggleIcon transformC" :class="currency ? 'translateX5' : 'translateX0'">
+                    <span class="toggleIcon" :class="currency ? 'translateX5' : 'translateX0'">
                       <span class="toggleTransition flex" :class="currency ? 'easeOut' : 'easeIn'" aria-hidden="true">
                         $
                       </span>
@@ -1909,19 +1909,16 @@ ul {
   padding: 0;
 }
 .grey-bg {
-  --tw-bg-opacity: 1;
-  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+  background-color: rgba(229, 231, 235, 1);
 }
 .blue {
   background: #6799e5;
 }
 .grey {
-  --tw-text-opacity: 1;
-  color: rgba(75, 85, 99, var(--tw-text-opacity));
+  color: rgba(75, 85, 99, 1);
 }
 .green {
-  --tw-text-opacity: 1;
-  color: rgba(52, 211, 153, var(--tw-text-opacity));
+  color: rgba(52, 211, 153, 1);
 }
 .primary {
   color: var(--primary);
@@ -1934,9 +1931,6 @@ ul {
   font-size: 1rem;
   line-height: 1.5rem;
   overflow: auto;
-  --tw-ring-color: rgba(0, 0, 0, var(--tw-ring-opacity));
-  --tw-ring-opacity: 0.05;
-  box-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
 
   @media (min-width: 640px) {
     font-size: 0.875rem;
@@ -1944,16 +1938,14 @@ ul {
   }
 }
 .dropdownList li:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgba(229, 231, 235, var(--tw-bg-opacity));
+  background-color: rgba(229, 231, 235, 1);
 }
 .dropdownList:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
 #dropdownIcon:hover {
-  --tw-text-opacity: 1;
-  color: rgba(255, 255, 255, var(--tw-text-opacity));
+  color: rgba(255, 255, 255, 1);
 }
 .dropdownItem {
   cursor: pointer;
@@ -1978,22 +1970,11 @@ ul {
   align-items: center;
   padding-left: 0.375rem;
 }
-.transformC {
-  --tw-translate-x: 0;
-  --tw-translate-y: 0;
-  --tw-rotate: 0;
-  --tw-skew-x: 0;
-  --tw-skew-y: 0;
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y))
-    scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
 .translateX5 {
-  --tw-translate-x: 1.25rem;
+  transform: translateX(1.25rem) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);
 }
 .translateX0 {
-  --tw-translate-x: 0px;
+  transform: translateX(0px) translateY(0) rotate(0) skewX(0) skewY(0) scaleX(1) scaleY(1);
 }
 .easeIn {
   opacity: 1;
@@ -2026,11 +2007,10 @@ ul {
   height: 1.25rem;
   width: 1.25rem;
   border-radius: 9999px;
-  --tw-bg-opacity: 1;
-  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
-  --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-  box-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  background-color: rgba(255, 255, 255, 1);
+  --toggle-icon-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0, 0, var(--toggle-icon-shadow);
+  box-shadow: 0 0;
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
@@ -2064,10 +2044,9 @@ ul {
 .toggleButton:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
-  box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-  --tw-ring-offset-width: 2px;
-  box-shadow: 0 0 0 var(--ring-offset-width) var(--ring-offset-color), var(--ring-shadow);
-  --tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
+  --toggle-button-ring-color: rgba(59, 130, 246, 0);
+  box-shadow: 0 0 0 0 4px var(--toggle-button-ring-color);
+  box-shadow: 0 0 0 2px 0, 0;
   outline: 1px dotted;
   outline: 5px auto -webkit-focus-ring-color;
 }
@@ -2075,8 +2054,7 @@ ul {
   font-size: 15px;
   line-height: 1.25rem;
   font-weight: 500;
-  --tw-text-opacity: 1;
-  color: rgba(107, 114, 128, var(--tw-text-opacity));
+  color: rgba(107, 114, 128, 1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2092,8 +2070,7 @@ ul {
   font-size: 1.5rem;
   line-height: 1rem;
   font-weight: 600;
-  --tw-text-opacity: 1;
-  color: rgba(17, 24, 39, var(--tw-text-opacity));
+  color: rgba(17, 24, 39, 1);
 }
 .flex-container {
   display: flex;
@@ -2152,8 +2129,7 @@ ul {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 600;
-  --tw-text-opacity: 1;
-  color: rgba(17, 24, 39, var(--tw-text-opacity));
+  color: rgba(17, 24, 39, 1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
