@@ -2090,7 +2090,7 @@ ul {
 }
 .card-titel {
   font-size: 1.5rem;
-  line-height: 2rem;
+  line-height: 1rem;
   font-weight: 600;
   --tw-text-opacity: 1;
   color: rgba(17, 24, 39, var(--tw-text-opacity));
