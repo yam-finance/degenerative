@@ -55,10 +55,12 @@ import { mapActions, mapGetters } from "vuex";
 
 export default {
   name: "Positions",
+
   head: {
     title: "Positions",
     meta: [{ name: "description", content: "User Positions" }],
   },
+
   data() {
     return {
       // TODO Get these from the store
@@ -114,6 +116,7 @@ export default {
 
 <style lang="scss" scoped>
 table {
+  table-layout: fixed;
   font-family: "Open Sans", sans-serif;
   width: 100%;
   border: 3px solid #de473b;

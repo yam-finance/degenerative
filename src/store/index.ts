@@ -738,8 +738,6 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      console.log("CONTRACT IS ");
-      console.log(payload.contract);
       const emp = await dispatch("getEMP", { address: payload.contract });
       try {
         const web3Provider = Vue.prototype.$provider;
@@ -753,7 +751,6 @@ export default new Vuex.Store({
         //     return false;
         //   }
         // );
-        console.log(state.account);
         return emp.methods.settleExpired().send(
           {
             from: state.account,
