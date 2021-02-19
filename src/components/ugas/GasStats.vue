@@ -368,7 +368,6 @@ ul {
 .easeIn {
   opacity: 1;
   transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
-  transition-duration: 200ms;
 }
 .easeOut {
   opacity: 0;
@@ -386,7 +385,6 @@ ul {
   align-items: center;
   justify-content: center;
   transition-property: opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 .toggleIcon {
@@ -401,10 +399,7 @@ ul {
   box-shadow: 0, 0, var(--toggle-icon-shadow);
   box-shadow: 0 0;
   transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
 }
 .toggleButton {
   position: relative;
@@ -417,10 +412,7 @@ ul {
   border-radius: 9999px;
   cursor: pointer;
   transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
   font-family: inherit;
   font-size: 100%;
   line-height: 1.15;
