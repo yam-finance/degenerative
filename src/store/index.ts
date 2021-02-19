@@ -723,22 +723,23 @@ export default new Vuex.Store({
 
     settleUserPosition: async ({ commit, dispatch }, tokenName) => {
       try {
-        let emp;
+        let empAddress;
         for (const asset of assetContracts) {
-          if (asset.name == tokenName) emp = asset.emp;
+          if (asset.name == tokenName) empAddress = asset.emp;
         }
-        const empContract = await dispatch("getEMP", { address: emp });
-        await dispatch("settle", { contract: empContract });
+        await dispatch("settle", { contract: empAddress });
       } catch (err) {
         console.error(err.message);
       }
     },
 
     // settle prep
-    settle: async ({ commit, dispatch }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+    settle: async ({ commit, dispatch, state }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
+      console.log("CONTRACT IS ");
+      console.log(payload.contract);
       const emp = await dispatch("getEMP", { address: payload.contract });
       try {
         const web3Provider = Vue.prototype.$provider;
@@ -752,9 +753,10 @@ export default new Vuex.Store({
         //     return false;
         //   }
         // );
+        console.log(state.account);
         return emp.methods.settleExpired().send(
           {
-            from: store.state.account,
+            from: state.account,
             gas: 200000,
           },
           async (error: any, txHash: string) => {
