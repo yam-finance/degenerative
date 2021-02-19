@@ -111,6 +111,7 @@ const fetchTxs = async (_type: string, _userAddress: string, _count: number, _en
   return _txs;
 };
 
+// TODO: Change the api key before merging with Master.
 export const getTxStats = async (
   provider: provider,
   userAddress: string,
@@ -120,7 +121,6 @@ export const getTxStats = async (
   endBlockNumber: number
 ): Promise<string[]> => {
   const web3 = new Web3(provider);
-  // TODO: Change the api key before merging with Master.
   const etherscanApiKey = "YY6XQICVXTH8DIVGUK1TNKZGEKDZV4NV3K";
   let gasFeeTotal = 0;
   let gasPriceTotal = 0;
@@ -135,23 +135,25 @@ export const getTxStats = async (
 
   try {
     // Fetch a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
+    // Continue fetching if response >= 1000.
     let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     let response = await fetch(url);
     let json = await response.json();
     let txs = json["result"];
     let count = txs.length;
-    // Continue fetching if response >= 1000.
     txs = await fetchTxs("ether", userAddress, count, endBlockNumber, etherscanApiKey, txs);
 
     // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
+    // Continue fetching if response >= 1000.
     url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
     response = await fetch(url);
     json = await response.json();
     const erc20Txs = json["result"];
     count = erc20Txs.length;
     txs.push(...erc20Txs);
-    // Continue fetching if response >= 1000.
     txs = await fetchTxs("erc20", userAddress, count, endBlockNumber, etherscanApiKey, txs);
+
+    // Show only txs that come from the user address.
     let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
 
     if (startTimeStamp > 0) {
@@ -168,8 +170,7 @@ export const getTxStats = async (
     const txsOutArray: JsonTxResult = txsOut.map(JSON.parse);
     txsOut = txsOutArray;
     const txsOutCount = txsOut.length;
-    // Returned 'isError' values: 0=No Error, 1=Got Error.
-    const txsOutFail = txsOut.filter(v => v.isError === "1");
+    const txsOutFail = txsOut.filter(v => v.isError === "1"); // 0 = No Error, 1 = Got Error.
     const txOutFail = txsOutFail.length;
 
     if (txsOutCount > 0) {
