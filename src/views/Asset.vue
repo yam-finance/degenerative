@@ -114,12 +114,12 @@
                   </p>
                 </div>
                 <div style="padding-left:1rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
-                  <button type="button" :class="currency ? 'toggleButton blue' : 'toggleButton grey-bg'" @click="currency = !currency" aria-pressed="false">
-                    <span :class="currency ? 'translateX5 toggleIcon transformC' : 'translateX0 toggleIcon transformC'">
-                      <span :class="currency ? 'easeOut toggleTransition flex' : 'easeIn toggleTransition flex'" aria-hidden="true">
+                  <button type="button" class="toggleButton" :class="currency ? 'blue' : 'grey-bg'" @click="currency = !currency" aria-pressed="false">
+                    <span class="toggleIcon transformC" :class="currency ? 'translateX5' : 'translateX0'">
+                      <span class="toggleTransition flex" :class="currency ? 'easeOut' : 'easeIn'" aria-hidden="true">
                         $
                       </span>
-                      <span :class="currency ? 'easeIn toggleTransition flex' : 'easeOut toggleTransition flex'" aria-hidden="true">
+                      <span class="toggleTransition flex" :class="currency ? 'easeIn' : 'easeOut'" aria-hidden="true">
                         Ξ
                       </span>
                     </span>
@@ -129,10 +129,10 @@
 
               <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" class="dropdownList">
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <span :class="badgeState == 'All Time' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('All Time')">
+                  <span class="itemTitle" :style="badgeState == 'All Time' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('All Time')">
                     All Time
                   </span>
-                  <span id="dropdownIcon" :class="badgeState == 'All Time' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'All Time' ? '' : 'hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path
@@ -145,10 +145,10 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <span :class="badgeState == 'Year' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Year')">
+                  <span class="itemTitle" :style="badgeState == 'Year' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Year')">
                     Year
                   </span>
-                  <span id="dropdownIcon" :class="badgeState == 'Year' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Year' ? '' : 'hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path
@@ -161,10 +161,10 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <span :class="badgeState == 'Month' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateInterval('Month')">
+                  <span class="itemTitle" :style="badgeState == 'Month' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Month')">
                     Month
                   </span>
-                  <span id="dropdownIcon" :class="badgeState == 'Month' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Month' ? '' : 'hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path
@@ -177,10 +177,10 @@
                 </li>
 
                 <li id="listbox-item-0" role="option" class="dropdownItem">
-                  <span :class="badgeState == 'Custom' ? 'itemTitle font-weight: 600;' : 'itemTitle font-weight: 400;'" @click="updateBadge('Custom')">
+                  <span class="itemTitle" :style="badgeState == 'Custom' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateBadge('Custom')">
                     Custom
                   </span>
-                  <span id="dropdownIcon" :class="badgeState == 'Custom' ? 'itemIcon flex' : 'itemIcon flex hidden'">
+                  <span id="dropdownIcon" class="itemIcon flex" :class="badgeState == 'Custom' ? '' : 'hidden'">
                     <!-- Heroicon name: solid/check -->
                     <svg style="height: 1.25rem; width: 1.25rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path
@@ -192,7 +192,7 @@
                   </span>
                 </li>
 
-                <li id="listbox-item-0" role="option" :class="badgeState == 'Custom' ? 'dropdownItem' : 'hidden dropdownItem'">
+                <li id="listbox-item-0" role="option" class="dropdownItem" :class="badgeState == 'Custom' ? '' : 'hidden'">
                   <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
                   <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
                 </li>
