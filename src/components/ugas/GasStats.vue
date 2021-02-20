@@ -491,12 +491,11 @@ ul {
 }
 .dropdown-content {
   position: absolute;
-  background-color: #f9f9f9;
   width: 225px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   background: var(--back-act);
   z-index: 2;
-  border-radius: 2px;
+  border-radius: 5px;
   border: none;
   right: 0;
 
