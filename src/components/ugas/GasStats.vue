@@ -303,7 +303,7 @@ ul {
   padding: 0;
 }
 .toggle-grey {
-  background-color: rgba(229, 231, 235, 1);
+  background-color: #f2eef0;
 }
 .toggle-blue {
   background: rgba(199, 167, 249, 1);
@@ -327,7 +327,7 @@ ul {
   overflow: auto;
 }
 .dropdown-list li:hover {
-  background-color: rgba(229, 231, 235, 1);
+  background-color: #f2eef0;
 }
 .dropdown-list:focus {
   outline: 2px solid transparent;
