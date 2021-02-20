@@ -12,6 +12,7 @@ import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
+import { JsonTxResult } from "../interfaces/degenerative.i";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
