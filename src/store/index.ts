@@ -371,11 +371,11 @@ export default new Vuex.Store({
 
           if (quantity < 1) return;
 
-          userAssetData["price"] = (await dispatch("getUniPrice", { tokenA: asset.token, tokenB: WETH })).toFixed(3);
+          userAssetData["price"] = (await dispatch("getUniPrice", { tokenA: asset.token, tokenB: WETH })).toFixed(4);
           userAssetData["quantity"] = quantity;
           userAssetData["collateral"] = parseFloat(utils.formatEther(position.rawCollateral[0]));
           userAssetData["total"] = userAssetData["price"] * userAssetData["quantity"];
-          userAssetData["collateralRatio"] = (userAssetData["collateral"] / userAssetData["total"]).toFixed(3);
+          userAssetData["collateralRatio"] = (userAssetData["collateral"] / userAssetData["total"]).toFixed(4);
         } catch (err) {
           console.log(`Get position failed for ${asset.name}: ${err.message}`);
           userAssetData["price"] = 0;

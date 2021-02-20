@@ -107,10 +107,7 @@ export default {
     },
   },
 
-  computed: {},
-
   mounted: async function() {
-    //await this.getAllUserPositions();
     this.setCurrentPositions();
   },
 };
