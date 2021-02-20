@@ -475,14 +475,16 @@ ul {
   padding-top: 10px;
   line-height: inherit;
   color: inherit;
-
-  @media (max-width: 800px) {
-    padding-left: 0px;
-  }
 }
 .stats-dropdown {
   position: absolute;
   display: block;
+
+  @media (max-width: 800px) {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
 }
 .stats-dropdown:hover .dropdown-button {
   color: #4b5563;
