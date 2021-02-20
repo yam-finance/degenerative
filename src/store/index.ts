@@ -365,8 +365,6 @@ export default new Vuex.Store({
         try {
           const empContract = await dispatch("getEMP", { address: asset.emp });
           const position = await empContract.methods.positions(state.account).call();
-          console.log("POSITION IS: ");
-          console.log(position);
           const quantity = parseFloat(utils.formatEther(position.tokensOutstanding[0]));
 
           if (quantity < 1) return;
