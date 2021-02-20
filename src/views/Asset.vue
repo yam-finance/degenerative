@@ -24,11 +24,11 @@
         </h2>
       </Card>
 
-      <Space size="10" />
+      <Space size="20" />
 
       <GasStats ref="gasStats" />
 
-      <Space size="md" />
+      <Space size="10" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
