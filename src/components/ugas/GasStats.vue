@@ -472,6 +472,10 @@ ul {
   padding-top: 10px;
   line-height: inherit;
   color: inherit;
+
+  @media (max-width: 800px) {
+    padding-top: 20px;
+  }
 }
 .stats-dropdown {
   position: absolute;
