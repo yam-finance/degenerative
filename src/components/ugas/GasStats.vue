@@ -318,7 +318,7 @@ ul {
   color: var(--primary);
 }
 .dropdown-list {
-  max-height: 15rem;
+  max-height: 25rem;
   border-radius: 0.375rem;
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
