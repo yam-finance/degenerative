@@ -73,7 +73,7 @@
         <div v-show="showPopup" v-outside-click="{ exclude: ['stats-dropdown'], handler: 'onClose' }" class="dropdown-content">
           <div style="display:flex; flex-direction:row;">
             <div style="padding-left:1rem; padding-right:1rem; padding-top:1rem; padding-bottom:1rem;">
-              <p class="dropdown-titel">
+              <p class="dropdown-title">
                 Stats Settings
               </p>
             </div>
@@ -502,7 +502,7 @@ ul {
     left: 0;
   }
 }
-.dropdown-titel {
+.dropdown-title {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 600;
