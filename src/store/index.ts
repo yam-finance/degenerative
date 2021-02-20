@@ -353,31 +353,35 @@ export default new Vuex.Store({
       }
     },
 
-    getAllUserPositions: async ({ commit, dispatch }) => {
+    getAllUserPositions: async ({ commit, dispatch, state }) => {
       if (!Vue.prototype.$web3) await dispatch("connect");
 
       const userPositions: any = [];
       assetContracts.forEach(async asset => {
-        const tokenPrice = (await getPriceByContract(asset.token)) ?? 120; // TODO
         const userAssetData = {};
         userAssetData["name"] = asset.name;
-        userAssetData["price"] = tokenPrice;
         userAssetData["actions"] = {};
 
         try {
           const empContract = await dispatch("getEMP", { address: asset.emp });
-          //const position = await empContract.methods.positions(store.state.account).call();
-          const synth = await empContract.methods.tokenCurrency().call();
-          const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
-          const quantity = parseFloat(utils.formatEther(balance));
+          const position = await empContract.methods.positions(state.account).call();
+          console.log("POSITION IS: ");
+          console.log(position);
+          const quantity = parseFloat(utils.formatEther(position.tokensOutstanding[0]));
 
           if (quantity < 1) return;
 
+          userAssetData["price"] = (await dispatch("getUniPrice", { tokenA: asset.token, tokenB: WETH })).toFixed(3);
           userAssetData["quantity"] = quantity;
-          userAssetData["total"] = tokenPrice * quantity;
+          userAssetData["collateral"] = parseFloat(utils.formatEther(position.rawCollateral[0]));
+          userAssetData["total"] = userAssetData["price"] * userAssetData["quantity"];
+          userAssetData["collateralRatio"] = (userAssetData["collateral"] / userAssetData["total"]).toFixed(3);
         } catch (err) {
           console.log(`Get position failed for ${asset.name}: ${err.message}`);
+          userAssetData["price"] = 0;
           userAssetData["quantity"] = 0;
+          userAssetData["collateral"] = 0;
+          userAssetData["collateralRatio"] = 0;
           userAssetData["total"] = 0;
         }
         userPositions.push(userAssetData);

@@ -19,9 +19,11 @@
           <tbody>
             <tr v-for="item in positions" :key="item.name">
               <td>{{ item.name }}</td>
+              <td>{{ item.price }} WETH</td>
               <td>{{ item.quantity }}</td>
-              <td>{{ item.price }}</td>
-              <td>{{ item.total }}</td>
+              <td>{{ item.total }} WETH</td>
+              <td>{{ item.collateral }} WETH</td>
+              <td>{{ item.collateralRatio }}</td>
               <td>
                 <div v-on:click="settlePosition(item.name)">
                   <Button class="action-button">
@@ -64,7 +66,7 @@ export default {
   data() {
     return {
       // TODO Get these from the store
-      headers: ["name", "quantity", "price", "total", "actions"],
+      headers: ["name", "price", "quantity", "total", "collateral", "collateral ratio", "actions"],
       positions: [],
       ascending: false,
       sortColumn: "",
@@ -116,7 +118,7 @@ export default {
 
 <style lang="scss" scoped>
 table {
-  table-layout: fixed;
+  table-layout: auto;
   font-family: "Open Sans", sans-serif;
   width: 100%;
   border: 3px solid #de473b;
