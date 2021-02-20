@@ -78,7 +78,7 @@
               </p>
             </div>
             <div style="padding-left:3rem; padding-right:1rem; padding-top:0.75rem; padding-bottom:0.75rem;">
-              <button type="button" class="toggle-button" :class="currency ? 'toggle-blue' : 'toggle-grey'" @click="currency = !currency" aria-pressed="false">
+              <button type="button" class="toggle-button toggle-grey" @click="currency = !currency" aria-pressed="false">
                 <span class="toggle-icon" :class="currency ? 'translate-x-5' : 'translate-x-0'">
                   <span class="toggle-transition flex" :class="currency ? 'ease-out' : 'ease-in'" aria-hidden="true">
                     $
@@ -304,9 +304,6 @@ ul {
 }
 .toggle-grey {
   background-color: #f2eef0;
-}
-.toggle-blue {
-  background: rgba(199, 167, 249, 1);
 }
 .grey {
   color: rgba(75, 85, 99, 1);
