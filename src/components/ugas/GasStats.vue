@@ -59,8 +59,8 @@
     </Card>
 
     <div style="position:relative">
-      <div class="stats-dropdown" ref="stats-dropdown">
-        <button class="dropdown-button" @click="showPopup = !showPopup">
+      <div class="stats-dropdown">
+        <button class="dropdown-button" ref="stats-dropdown" @click="showPopup = !showPopup">
           <svg style="height:1.25rem; width:1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
