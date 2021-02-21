@@ -748,7 +748,7 @@ export default new Vuex.Store({
     getUserTxStats: async ({ commit, dispatch }, payload: { interval: string; startDate: string; endDate: string }) => {
       await sleep(500);
 
-      if (!Vue.prototype.$web3) {
+      if (!Vue.prototype.$web3 && !Vue.prototype.$provider) {
         await dispatch("connect");
       }
 
