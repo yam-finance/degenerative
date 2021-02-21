@@ -28,7 +28,7 @@
 
       <GasStats ref="gasStats" />
 
-      <Space size="10" />
+      <Space size="dynamic" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">

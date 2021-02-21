@@ -23,6 +23,18 @@ export default {
           width: "32px",
           height: "32px",
         };
+      } else if (this.size === "dynamic") {
+        if (window.screen.width > 800) {
+          return {
+            width: "32px",
+            height: "32px",
+          };
+        } else {
+          return {
+            width: "10px",
+            height: "10px",
+          };
+        }
       } else if (this.size === "lg") {
         return {
           width: "64px",
