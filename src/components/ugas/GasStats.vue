@@ -93,40 +93,10 @@
 
           <ul tabindex="-1" role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-item-3" class="dropdown-list">
             <li id="listbox-item-0" role="option" class="dropdown-item">
-              <span class="item-title" :style="badgeState == 'All Time' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('All Time')">
-                All Time
+              <span class="item-title" :style="badgeState == 'Day' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Day')">
+                Day
               </span>
-              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'All Time' ? '' : 'hidden'">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path
-                    fill-rule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </span>
-            </li>
-
-            <li id="listbox-item-0" role="option" class="dropdown-item">
-              <span class="item-title" :style="badgeState == 'Year' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Year')">
-                Year
-              </span>
-              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Year' ? '' : 'hidden'">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path
-                    fill-rule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </span>
-            </li>
-
-            <li id="listbox-item-0" role="option" class="dropdown-item">
-              <span class="item-title" :style="badgeState == 'Month' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Month')">
-                Month
-              </span>
-              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Month' ? '' : 'hidden'">
+              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Day' ? '' : 'hidden'">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
@@ -153,10 +123,40 @@
             </li>
 
             <li id="listbox-item-0" role="option" class="dropdown-item">
-              <span class="item-title" :style="badgeState == 'Day' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Day')">
-                Day
+              <span class="item-title" :style="badgeState == 'Month' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Month')">
+                Month
               </span>
-              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Day' ? '' : 'hidden'">
+              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Month' ? '' : 'hidden'">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+            </li>
+
+            <li id="listbox-item-0" role="option" class="dropdown-item">
+              <span class="item-title" :style="badgeState == 'Year' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('Year')">
+                Year
+              </span>
+              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'Year' ? '' : 'hidden'">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+            </li>
+
+            <li id="listbox-item-0" role="option" class="dropdown-item">
+              <span class="item-title" :style="badgeState == 'All Time' ? 'font-weight: 600;' : 'font-weight: 400;'" @click="updateInterval('All Time')">
+                All Time
+              </span>
+              <span id="dropdown-icon" class="item-icon flex" :class="badgeState == 'All Time' ? '' : 'hidden'">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
                     fill-rule="evenodd"
