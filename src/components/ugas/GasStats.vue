@@ -488,7 +488,7 @@ ul {
   }
 }
 .stats-dropdown:hover .dropdown-button {
-  color: #4b5563;
+  opacity: 0.5;
 }
 .dropdown-content {
   position: absolute;
