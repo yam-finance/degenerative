@@ -505,7 +505,7 @@ ul {
   }
 }
 .dropdown-title {
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.25rem;
   font-weight: 600;
   color: rgba(17, 24, 39, 1);
