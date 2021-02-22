@@ -502,6 +502,7 @@ ul {
 
   @media (max-width: 800px) {
     left: 0;
+    margin-top: 50px;
     margin-left: auto;
     margin-right: auto;
   }
