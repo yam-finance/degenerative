@@ -502,6 +502,8 @@ ul {
 
   @media (max-width: 800px) {
     left: 0;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 .dropdown-title {
