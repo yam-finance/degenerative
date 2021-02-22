@@ -28,7 +28,8 @@
 
       <GasStats ref="gasStats" />
 
-      <Space size="dynamic" />
+      <Space class="showBigSpacer" size="md" />
+      <Space class="showSmallSpacer" size="10" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
@@ -1638,6 +1639,20 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.showBigSpacer {
+  display: inline-block !important;
+
+  @media (max-width: 800px) {
+    display: none !important;
+  }
+}
+.showSmallSpacer {
+  display: none !important;
+
+  @media (max-width: 800px) {
+    display: inline-block !important;
+  }
+}
 .maker {
   zoom: 1;
 }
