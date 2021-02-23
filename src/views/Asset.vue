@@ -35,7 +35,7 @@
 
         <Space size="md" />
 
-        <Container :size="440" class="maker">
+        <Container :size="600" class="maker">
           <div class="asset-info">
             <span>
               <span v-if="!tokenSelected">
@@ -171,27 +171,40 @@
                     <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
                   </vue-picker>
                 </div>
-                <input
+                <div
                   v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
-                  id
-                  class="numeric setvalue"
-                  type="number"
-                  name
-                  v-model="tokenAmt"
-                  v-on:keyup="tokenHandler"
-                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
-                />
-                <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
-                  id
-                  class="numeric setvalue"
-                  type="number"
-                  name
-                  v-model="collatAmt"
-                  v-on:keyup="collatHandler"
-                  :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
-                />
+                  class="input-container"
+                >
+                  <label class="input-label">Amount: </label>
+                  <div class="input-group">
+                    <input
+                      id
+                      type="number"
+                      name
+                      v-model="tokenAmt"
+                      v-on:keyup="tokenHandler"
+                      :placeholder="'0.00'"
+                    />
+                    <span class="input-addon">{{tokenSelected}}</span>
+                    <button>MAX</button>
+                  </div>
+                </div>
+                <div
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'">
+                  <span>Collateral: </span>
+                  <input
+                    id
+                    class="numeric setvalue"
+                    type="number"
+                    name
+                    v-model="collatAmt"
+                    v-on:keyup="collatHandler"
+                    :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
+                    :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
+                  />
+                  <span class="suffix">WETH</span>
+                  <button class="max-button">MAX</button>
+                </div>
                 <!-- to add max button -->
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
                 Info ▼
@@ -1722,8 +1735,8 @@ div.error {
   width: 100%;
   border: 0px;
   background: white;
-  height: 50px;
-  padding: 20px;
+  //height: 50px;
+  padding: 10px;
 }
 .setvalue {
   width: 100%;
@@ -1746,6 +1759,52 @@ div.error {
     color: #0000001c;
   }
 }
+.max-button {
+  position: relative;
+}
+// ---------------------------------------------------
+.input-container {
+  margin: 10px;
+}
+.input-group {
+  @media screen and (max-width: 600px){
+    display: grid;
+  }
+ display: flex;
+}
+.input-label {
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+input {
+  width: 100%;
+  padding: 6px 12px;
+  border: 0px;
+  margin: 0;
+  background: var(--back-act);
+  color: var(--primary);
+  font-size: 22px;
+  // font-family: "Share Tech Mono", monospace;
+  font-family: "Inconsolata", monospace;
+  &::placeholder {
+    color: #0000001c;
+    opacity: 1;
+  }
+  &:-ms-input-placeholder {
+    color: #0000001c;
+  }
+  &::-ms-input-placeholder {
+    color: #0000001c;
+  }
+}
+.input-addon {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ccc;
+  font-weight: 400;
+  vertical-align: middle;
+}
+// ---------------------------------------------------
 .dropdown {
   border-radius: 0px 0px 10px 10px;
 
