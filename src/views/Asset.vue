@@ -28,8 +28,8 @@
 
       <GasStats ref="gasStats" />
 
-      <Space class="showBigSpacer" size="md" />
-      <Space class="showSmallSpacer" size="10" />
+      <Space class="desktop-display" size="md" />
+      <Space class="mobile-display" size="10" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
@@ -1639,14 +1639,14 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.showBigSpacer {
+.desktop-display {
   display: inline-block !important;
 
   @media (max-width: 800px) {
     display: none !important;
   }
 }
-.showSmallSpacer {
+.mobile-display {
   display: none !important;
 
   @media (max-width: 800px) {
