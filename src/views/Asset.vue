@@ -171,39 +171,30 @@
                     <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
                   </vue-picker>
                 </div>
-                <div
-                  v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
-                  class="input-container"
-                >
+                <div v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'" class="input-container">
                   <label class="input-label">Amount: </label>
                   <div class="input-group">
-                    <input
-                      id
-                      type="number"
-                      name
-                      v-model="tokenAmt"
-                      v-on:keyup="tokenHandler"
-                      :placeholder="'0.00'"
-                    />
-                    <span class="input-addon">{{tokenSelected}}</span>
+                    <input id type="number" name v-model="tokenAmt" v-on:keyup="tokenHandler" :placeholder="'0.00'" />
+                    <span class="input-addon">{{ tokenSelected }}</span>
                     <button>MAX</button>
                   </div>
                 </div>
-                <div
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'">
-                  <span>Collateral: </span>
-                  <input
-                    id
-                    class="numeric setvalue"
-                    type="number"
-                    name
-                    v-model="collatAmt"
-                    v-on:keyup="collatHandler"
-                    :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
-                    :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
-                  />
-                  <span class="suffix">WETH</span>
-                  <button class="max-button">MAX</button>
+                <div v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'" class="input-container">
+                  <label class="input-label">Collateral: </label>
+                  <div class="input-group">
+                    <input
+                      id
+                      class="numeric setvalue"
+                      type="number"
+                      name
+                      v-model="collatAmt"
+                      v-on:keyup="collatHandler"
+                      :placeholder="'0.00'"
+                      :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
+                    />
+                    <span class="input-addon">WETH</span>
+                    <button class="max-button">MAX</button>
+                  </div>
                 </div>
                 <!-- to add max button -->
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
@@ -1665,6 +1656,7 @@ div.error {
   z-index: 0;
 }
 #inputbox {
+  background: white;
 }
 .tabs {
   border-radius: 10px 10px 0px 0px;
@@ -1759,18 +1751,16 @@ div.error {
     color: #0000001c;
   }
 }
-.max-button {
-  position: relative;
-}
 // ---------------------------------------------------
 .input-container {
   margin: 10px;
 }
 .input-group {
-  @media screen and (max-width: 600px){
+  @media screen and (max-width: 600px) {
     display: grid;
   }
- display: flex;
+  display: flex;
+  align-items: center;
 }
 .input-label {
   font-weight: bold;
@@ -1798,11 +1788,16 @@ input {
   }
 }
 .input-addon {
-  padding: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
   text-align: center;
-  border: 1px solid #ccc;
+  //border: 1px solid #ccc;
+  border: none;
   font-weight: 400;
-  vertical-align: middle;
+  //vertical-align: middle;
+}
+.max-button {
+  position: relative;
 }
 // ---------------------------------------------------
 .dropdown {
