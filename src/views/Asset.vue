@@ -1656,7 +1656,7 @@ div.error {
   z-index: 0;
 }
 #inputbox {
-  background: white;
+  background: var(--back-act);
 }
 .tabs {
   border-radius: 10px 10px 0px 0px;
