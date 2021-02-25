@@ -173,27 +173,36 @@
                 </div>
                 <div v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'" class="input-container">
                   <label class="input-label">Amount: </label>
-                  <div class="input-group">
-                    <input id type="number" name v-model="tokenAmt" v-on:keyup="tokenHandler" :placeholder="'0.00'" />
-                    <span class="input-addon">{{ tokenSelected }}</span>
-                    <button>MAX</button>
+                  <div class="input-row">
+                    <div class="input-group">
+                      <input class="text-input" id type="number" name v-model="tokenAmt" v-on:keyup="tokenHandler" :placeholder="'0.00'" />
+                      <span class="input-addon">{{ tokenSelected }}</span>
+                    </div>
+                    <div v-if="navAct != 'redeem'" class="input-modifier">
+                      <input type="checkbox" id="checkbox" v-model="adjustToGcr" @change="handleAdjustToGcr()" />
+                      <label for="checkbox">Adjust To GCR</label>
+                    </div>
                   </div>
                 </div>
-                <div v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'" class="input-container">
+                <div v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'" class="input-container">
                   <label class="input-label">Collateral: </label>
-                  <div class="input-group">
-                    <input
-                      id
-                      class="numeric setvalue"
-                      type="number"
-                      name
-                      v-model="collatAmt"
-                      v-on:keyup="collatHandler"
-                      :placeholder="'0.00'"
-                      :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
-                    />
-                    <span class="input-addon">WETH</span>
-                    <button class="max-button">MAX</button>
+                  <div class="input-row">
+                    <div class="input-group">
+                      <input
+                        class="text-input"
+                        id
+                        type="number"
+                        name
+                        v-model="collatAmt"
+                        v-on:keyup="collatHandler"
+                        :placeholder="'0.00'"
+                        :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
+                      />
+                      <span class="input-addon">WETH</span>
+                    </div>
+                    <div class="input-modifier">
+                      <button class="max-button" style="width: 100%" @click="onPressMax">MAX</button>
+                    </div>
                   </div>
                 </div>
                 <!-- to add max button -->
@@ -517,6 +526,7 @@ export default {
       pricedTxCR: 0,
       gcr: 0,
       price: 0,
+      adjustToGcr: false,
       collReq: new BigNumber(0),
       existingColl: new BigNumber(0),
       existingTokens: new BigNumber(0),
@@ -1538,11 +1548,29 @@ export default {
       this.runChecks();
       console.log("toNavAct", on);
     },
+    onPressMax() {
+      this.collatAmt = this.balanceWETH;
+      this.handleAdjustToGcr();
+    },
+    handleAdjustToGcr() {
+      if (this.collatAmt) {
+        this.collatHandler();
+        this.tokenHandler();
+      } else {
+        this.tokenHandler();
+        this.collatHandler();
+      }
+    },
     tokenHandler() {
-      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      if (this.adjustToGcr) {
+        this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      }
       this.posUpdateHandler();
     },
     collatHandler() {
+      if (this.adjustToGcr) {
+        this.tokenAmt = (this.collatAmt / (this.gcr * this.price)).toFixed(4);
+      }
       this.posUpdateHandler();
     },
     async posUpdateHandler() {
@@ -1755,7 +1783,7 @@ div.error {
 .input-container {
   margin: 10px;
 }
-.input-group {
+.input-row {
   @media screen and (max-width: 600px) {
     display: grid;
   }
@@ -1766,8 +1794,17 @@ div.error {
   font-weight: bold;
   padding-bottom: 10px;
 }
-input {
-  width: 100%;
+.input-group {
+  @media screen and (max-width: 600px) {
+    display: grid;
+  }
+  flex: 2;
+  display: flex;
+  align-items: center;
+  flex-basis: 200px;
+}
+.text-input {
+  flex: 3;
   padding: 6px 12px;
   border: 0px;
   margin: 0;
@@ -1788,16 +1825,26 @@ input {
   }
 }
 .input-addon {
+  flex: 1;
   padding-left: 10px;
   padding-right: 10px;
-  text-align: center;
+  text-align: right;
   //border: 1px solid #ccc;
   border: none;
   font-weight: 400;
   //vertical-align: middle;
 }
+.input-modifier {
+  flex: 2;
+}
 .max-button {
-  position: relative;
+  cursor: pointer;
+  margin: 5px;
+  padding: 3px;
+  color: #fff;
+  border: none;
+  background-color: var(--primary);
+  border-radius: 8px;
 }
 // ---------------------------------------------------
 .dropdown {
