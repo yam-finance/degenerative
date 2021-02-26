@@ -184,7 +184,7 @@
 
             <li id="listbox-item-0" role="option" class="dropdown-item" :class="showDateInput ? '' : 'hidden'">
               <span class="item-title" style="font-weight: 600;">
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" placeholder="dd.mm.yyyy" />
               </span>
               <span id="dropdown-icon" class="item-icon flex">
                 🏃‍♂️
@@ -193,7 +193,7 @@
 
             <li id="listbox-item-0" role="option" class="dropdown-item" :class="showDateInput ? '' : 'hidden'">
               <span class="item-title" style="font-weight: 600;">
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" placeholder="dd.mm.yyyy" />
               </span>
               <span id="dropdown-icon" class="item-icon flex">
                 🏁
@@ -411,7 +411,7 @@ ul {
   transition-duration: 150ms;
   font-family: inherit;
   font-size: 100%;
-  line-height: 1.15;
+  line-height: 1.15rem;
   margin: 0;
   text-transform: none;
   padding: 0;
@@ -430,7 +430,7 @@ ul {
 .card-description {
   font-size: 15px;
   line-height: 1.25rem;
-  font-weight: 500;
+  font-weight: 500px;
   color: rgba(107, 114, 128, 1);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -441,7 +441,7 @@ ul {
   align-items: baseline;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  font-weight: 600;
+  font-weight: 600px;
 }
 .card-title {
   font-size: 1.5rem;
@@ -464,7 +464,7 @@ ul {
   background-image: none;
   font-family: inherit;
   font-size: 100%;
-  line-height: 1.15;
+  line-height: 1.15rem;
   margin: 0;
   text-transform: none;
   padding-left: 20px;
@@ -510,7 +510,7 @@ ul {
 .dropdown-title {
   font-size: 1rem;
   line-height: 1.25rem;
-  font-weight: 600;
+  font-weight: 600px;
   color: rgba(17, 24, 39, 1);
   overflow: hidden;
   text-overflow: ellipsis;
