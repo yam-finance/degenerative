@@ -57,6 +57,10 @@ a {
   justify-content: center;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .numeric {
   font-family: "Consolas", Courier, monospace;
 }

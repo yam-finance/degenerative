@@ -294,9 +294,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.hidden {
-  display: none;
-}
 ul {
   list-style: none;
   margin: 0;
@@ -472,6 +469,7 @@ ul {
   padding-top: 10px;
   line-height: inherit;
   color: inherit;
+  opacity: 0.5;
 
   @media (max-width: 800px) {
     padding-top: 20px;
@@ -488,7 +486,7 @@ ul {
   }
 }
 .stats-dropdown:hover .dropdown-button {
-  opacity: 0.5;
+  opacity: 0.9;
 }
 .dropdown-content {
   position: absolute;
