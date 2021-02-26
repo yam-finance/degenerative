@@ -47,12 +47,8 @@ a {
   color: var(--accent);
 }
 
-.centered {
-  text-align: center;
-}
-
 .flex {
-  display: flex;
+  display: flex !important;
 }
 
 .flex.vert {
@@ -61,10 +57,15 @@ a {
   justify-content: center;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .numeric {
   font-family: "Consolas", Courier, monospace;
 }
 
+.centered,
 .center {
   text-align: center;
 }

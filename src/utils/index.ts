@@ -12,6 +12,7 @@ import utc from "dayjs/plugin/utc";
 import duration from "dayjs/plugin/duration";
 import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
+import { JsonTxResult } from "../interfaces/degenerative.i";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
@@ -38,6 +39,147 @@ export const getERC20Contract = (provider: provider, address: string) => {
   return contract;
 };
 
+export const sleep = (ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+const helper = async (arg1, arg2) => {
+  const result: number[] = [];
+
+  // Multiply each element in both arrays together.
+  for (let i = 0; i < arg1.length; i++) {
+    result[i] = arg1[i] * arg2[i];
+  }
+  return result;
+};
+
+const fetchTxs = async (_type: string, _userAddress: string, _count: number, _endBlockNumber: number, _etherscanApiKey: string, _txs) => {
+  let url;
+
+  while (_count === 10000) {
+    await sleep(500);
+    const startBlock = _txs[_txs.length - 1].blockNumber;
+    const endBlock = _endBlockNumber;
+
+    switch (_type) {
+      case "ether":
+        url = `https://api.etherscan.io/api?module=account&action=txlist&address=${_userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${_etherscanApiKey}`;
+        break;
+      case "erc20":
+        url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${_userAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${_etherscanApiKey}`;
+        break;
+      default:
+        console.log("No transaction type passed.");
+        break;
+    }
+
+    const response = await fetch(url);
+    const json = await response.json();
+
+    if (json["status"] == 0) {
+      break;
+    }
+
+    const nextTxs = json["result"];
+    _count = nextTxs.length;
+    _txs.push(...nextTxs);
+  }
+
+  return _txs;
+};
+
+// TODO: Change the api key before merging with Master.
+export const getTxStats = async (
+  provider: provider,
+  userAddress: string,
+  startTimeStamp: number,
+  endTimeStamp: number,
+  startBlockNumber: number,
+  endBlockNumber: number
+): Promise<string[]> => {
+  const web3 = new Web3(provider);
+  const etherscanApiKey = "YY6XQICVXTH8DIVGUK1TNKZGEKDZV4NV3K";
+  let gasFeeTotal = 0;
+  let gasPriceTotal = 0;
+  let gasFeeTotalFail = 0;
+
+  if (endBlockNumber == 0) {
+    // Set current block number to end block number.
+    endBlockNumber = await web3.eth.getBlockNumber(function(error, result) {
+      if (!error) return result;
+    });
+  }
+
+  try {
+    // Fetch a list of 'normal' unique outgoing transactions by address (maximum of 10000 records only).
+    // Continue fetching if response >= 1000.
+    let url = `https://api.etherscan.io/api?module=account&action=txlist&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
+    let response = await fetch(url);
+    let json = await response.json();
+    let txs = json["result"];
+    let count = txs.length;
+    txs = await fetchTxs("ether", userAddress, count, endBlockNumber, etherscanApiKey, txs);
+
+    // Fetch a list of "ERC20 - Token Transfer Events" by address (maximum of 10000 records only).
+    // Continue fetching if response >= 1000.
+    url = `https://api.etherscan.io/api?module=account&action=tokentx&address=${userAddress}&startblock=${startBlockNumber}&endblock=${endBlockNumber}&sort=asc&apikey=${etherscanApiKey}`;
+    response = await fetch(url);
+    json = await response.json();
+    const erc20Txs = json["result"];
+    count = erc20Txs.length;
+    txs.push(...erc20Txs);
+    txs = await fetchTxs("erc20", userAddress, count, endBlockNumber, etherscanApiKey, txs);
+
+    // Show only txs that come from the user address.
+    let txsOut = txs.filter(v => v.from === userAddress.toLowerCase());
+
+    if (startTimeStamp > 0) {
+      txsOut = txsOut.filter(v => v.timeStamp > Math.floor(startTimeStamp / 1000));
+    }
+
+    if (endTimeStamp > 0) {
+      txsOut = txsOut.filter(v => v.timeStamp < Math.floor(endTimeStamp / 1000));
+    }
+
+    txsOut = txsOut.map(({ confirmations, ...item }) => item);
+    txsOut = new Set(txsOut.map(JSON.stringify));
+    txsOut = Array.from(txsOut);
+    const txsOutArray: JsonTxResult = txsOut.map(JSON.parse);
+    txsOut = txsOutArray;
+    const txsOutCount = txsOut.length;
+    const txsOutFail = txsOut.filter(v => v.isError === "1"); // 0 = No Error, 1 = Got Error.
+    const txOutFail = txsOutFail.length;
+
+    if (txsOutCount > 0) {
+      const gasUsedArray = txsOut.map(value => parseInt(value.gasUsed));
+      const gasPriceArray = txsOut.map(value => parseInt(value.gasPrice));
+      const gasFee = await helper(gasPriceArray, gasUsedArray);
+      gasFeeTotal = gasFee.reduce((partialSum, a) => partialSum + a, 0);
+      gasPriceTotal = gasPriceArray.reduce((partialSum, a) => partialSum + a, 0);
+      const gasUsedFailArray = txsOutFail.map(value => parseInt(value.gasUsed));
+      const gasPriceFailArray = txsOutFail.map(value => parseInt(value.gasPrice));
+      const gasFeeFail = await helper(gasPriceFailArray, gasUsedFailArray);
+      gasFeeTotalFail = gasFeeFail.reduce((partialSum, a) => partialSum + a, 0);
+    }
+
+    const txGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotal.toString(), "ether")).decimalPlaces(3);
+    let averageTxPrice = new BigNumber(0);
+
+    if (txsOutCount != 0) {
+      averageTxPrice = new BigNumber(gasPriceTotal / txsOutCount / 1e9).decimalPlaces(3);
+    }
+
+    const txCount = txsOutCount.toString();
+    const failedTxCount = txOutFail.toString();
+    const failedTxGasCostETH = new BigNumber(web3.utils.fromWei(gasFeeTotalFail.toString(), "ether")).decimalPlaces(3);
+
+    return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
+  } catch (e) {
+    console.log("An error occurred while retrieving your transaction data.\nPlease submit it as an issue.");
+    return ["...", "...", "...", "...", "..."];
+  }
+};
+
 export const getBalance = async (provider: provider, tokenAddress: string, userAddress: string): Promise<string> => {
   const tokenContract = getERC20Contract(provider, tokenAddress);
   try {
@@ -50,10 +192,6 @@ export const getBalance = async (provider: provider, tokenAddress: string, userA
 
 export const decToBn = (dec: number, decimals = 18) => {
   return new BigNumber(dec).multipliedBy(new BigNumber(10).pow(decimals));
-};
-
-export const sleep = (ms: number) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
 };
 
 export const splitChartData = (rawData: any) => {
@@ -420,7 +558,6 @@ const emplistDataBackup = {
   empWhitelist: [
     "0x3a93E863cb3adc5910E6cea4d51f132E8666654F",
     "0x516f595978D87B67401DaB7AfD8555c3d28a3Af4",
-    "0x4AA79c00240a2094Ff3fa6CF7c67f521f32D84a2",
     "0x1c3f1A342c8D9591D9759220d114C685FD1cF6b8",
     "0xE4256C47a3b27a969F25de8BEf44eCA5F2552bD5",
     "0xeAddB6AD65dcA45aC3bB32f88324897270DA0387",
@@ -428,8 +565,11 @@ const emplistDataBackup = {
     "0x267D46e71764ABaa5a0dD45260f95D9c8d5b8195",
     "0x2862A798B3DeFc1C24b9c0d241BEaF044C45E585",
     "0xd81028a6fbAAaf604316F330b20D24bFbFd14478",
-    "0x94C7cab26c04B76D9Ab6277a0960781b90f74294",
     "0x7c4090170aeADD54B1a0DbAC2C8D08719220A435",
+    "0xaD3cceebeFfCdC3576dE56811d0A6D164BF9A5A1",
+    "0xC843538d70ee5d28C5A80A75bb94C28925bB1cf2",
+    "0xeFA41F506EAA5c24666d4eE40888bA18FA60a1c7",
+    "0xaB3Aa2768Ba6c5876B2552a6F9b70E54aa256175",
     EMPFEB,
     EMPMAR,
   ],
@@ -453,3 +593,8 @@ export async function getDevMiningEmps() {
   // return data;
   return emplistDataBackup;
 }
+
+export const get30DMedian = async () => {
+  const data: any = await requestHttp("https://ugasapi.yam.finance/median");
+  return data.slice(Math.max(data.length - 10, 0));
+};
