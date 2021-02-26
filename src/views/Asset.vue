@@ -35,7 +35,7 @@
 
         <Space size="md" />
 
-        <Container :size="600" class="maker">
+        <Container :size="600">
           <div class="asset-info">
             <span>
               <span v-if="!tokenSelected">
@@ -1665,9 +1665,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.maker {
-  zoom: 1;
-}
 .hideDropdown {
   display: none;
 }
