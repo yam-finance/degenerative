@@ -12,7 +12,7 @@
             </div>
           </div>
           <dt class="card-description">
-            Your avg. gas price
+            Your average gas price
           </dt>
         </div>
       </div>
@@ -32,7 +32,7 @@
             </div>
           </div>
           <dt class="card-description">
-            {{ txCount ? txCount + " Successful txs." : "0 Successful txs." }}
+            {{ txCount ? txCount + " Successful transactions." : "... Successful transactions." }}
           </dt>
         </div>
       </div>
@@ -52,7 +52,7 @@
             </div>
           </div>
           <dt class="card-description">
-            {{ failedTxCount ? failedTxCount + " Failed txs." : "0 Failed txs." }}
+            {{ failedTxCount ? failedTxCount + " Failed transactions." : "... Failed transactions." }}
           </dt>
         </div>
       </div>
@@ -281,13 +281,15 @@ export default {
         endDate: this.inputEndDate,
       });
 
-      this.txGasCostETH = txGasCostETH;
-      this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
-      this.averageTxPrice = averageTxPrice;
-      this.txCount = txCount;
-      this.failedTxCount = failedTxCount;
-      this.failedTxGasCostETH = failedTxGasCostETH;
-      this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(0);
+      if (txCount != "...") {
+        this.txGasCostETH = txGasCostETH;
+        this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
+        this.averageTxPrice = averageTxPrice;
+        this.txCount = txCount;
+        this.failedTxCount = failedTxCount;
+        this.failedTxGasCostETH = failedTxGasCostETH;
+        this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(0);
+      }
     },
   },
 };
