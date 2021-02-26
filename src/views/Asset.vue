@@ -24,7 +24,12 @@
         </h2>
       </Card>
 
-      <Space size="md" />
+      <Space size="20" />
+
+      <GasStats ref="gasStats" />
+
+      <Space class="desktop-display" size="md" />
+      <Space class="mobile-display" size="10" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
@@ -624,6 +629,7 @@ export default {
     await this.initChart();
     await this.getWETHBalance();
     await this.checkUpdateApprovals();
+    await this.$refs.gasStats.getAccountStats();
   },
   computed: {
     account() {
@@ -1513,7 +1519,7 @@ export default {
       this.getEmpState();
     },
     async updateUserInfo() {
-      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
+      await Promise.all([this.$refs.gasStats.getAccountStats(), this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
@@ -1633,6 +1639,20 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.desktop-display {
+  display: inline-block !important;
+
+  @media (max-width: 800px) {
+    display: none !important;
+  }
+}
+.mobile-display {
+  display: none !important;
+
+  @media (max-width: 800px) {
+    display: inline-block !important;
+  }
+}
 .maker {
   zoom: 1;
 }
