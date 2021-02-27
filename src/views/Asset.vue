@@ -527,7 +527,7 @@ export default {
       info: true,
       tokenSelected: null,
       showInfo: false,
-      showInfoButtonText: "More Info",
+      showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       tokenAmt: null,
       collatAmt: null,

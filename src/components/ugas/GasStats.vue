@@ -430,7 +430,7 @@ ul {
 .card-description {
   font-size: 15px;
   line-height: 1.25rem;
-  font-weight: 500px;
+  font-weight: 500;
   color: rgba(107, 114, 128, 1);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -441,7 +441,7 @@ ul {
   align-items: baseline;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  font-weight: 600px;
+  font-weight: 600;
 }
 .card-title {
   font-size: 1.5rem;
@@ -510,7 +510,7 @@ ul {
 .dropdown-title {
   font-size: 1rem;
   line-height: 1.25rem;
-  font-weight: 600px;
+  font-weight: 600;
   color: rgba(17, 24, 39, 1);
   overflow: hidden;
   text-overflow: ellipsis;
