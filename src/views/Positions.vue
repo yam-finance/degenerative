@@ -6,14 +6,15 @@
           <b>Positions</b>
         </h2>
       </Card>
-      <div v-if="showTable">
+      <Space size="md" />
+      <div v-if="showTable" style="overflow-x: auto;" id="container">
         <table>
           <thead>
             <tr>
               <th v-for="header in this.headers" :key="header" v-on:click="sortTable(header)">
                 {{ header }}
-                <div class="arrow" v-if="header === sortColumn" v-bind:class="ascending ? 'arrow-up' : 'arrow-down'"></div>
-                <div class="arrow placeholder" v-else></div>
+                <div class="arrow" v-if="header === sortColumn" v-bind:class="ascending ? 'arrow-down' : 'arrow-up'" />
+                <div class="arrow placeholder" v-else />
               </th>
             </tr>
           </thead>
@@ -82,7 +83,7 @@ export default {
 
     ...mapGetters(["userPositions"]),
 
-    sortTable: function sortTable(header) {
+    sortTable: function(header) {
       if (this.sortColumn === header) {
         this.ascending = !this.ascending;
       } else {
@@ -124,14 +125,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#container {
+  box-shadow: 0px 4px 10px 2px #ca625a14;
+  border-radius: 10px;
+  z-index: 1;
+}
 table {
   table-layout: auto;
   font-family: "Shanti", sans-serif;
   width: 100%;
-  border: 3px solid #de473b;
   border-collapse: collapse;
-  border-radius: 100px;
-  margin: 10px 10px 0 0;
 }
 table th {
   text-transform: uppercase;
@@ -148,7 +151,7 @@ table td {
   text-align: left;
   padding-left: 8px;
   padding-right: 8px;
-  border-right: 2px solid var(--primary);
+  border-right: 2px solid #00000017;
 }
 table td:last-child {
   border-right: none;
