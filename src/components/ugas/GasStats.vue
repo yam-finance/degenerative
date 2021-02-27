@@ -12,7 +12,7 @@
             </div>
           </div>
           <dt class="card-description">
-            Your avg. gas price
+            Your average gas price
           </dt>
         </div>
       </div>
@@ -32,7 +32,7 @@
             </div>
           </div>
           <dt class="card-description">
-            {{ txCount ? txCount + " Successful txs." : "0 Successful txs." }}
+            {{ txCount ? txCount + " Successful transactions." : "... Successful transactions." }}
           </dt>
         </div>
       </div>
@@ -52,7 +52,7 @@
             </div>
           </div>
           <dt class="card-description">
-            {{ failedTxCount ? failedTxCount + " Failed txs." : "0 Failed txs." }}
+            {{ failedTxCount ? failedTxCount + " Failed transactions." : "... Failed transactions." }}
           </dt>
         </div>
       </div>
@@ -184,7 +184,7 @@
 
             <li id="listbox-item-0" role="option" class="dropdown-item" :class="showDateInput ? '' : 'hidden'">
               <span class="item-title" style="font-weight: 600;">
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" />
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputStartDate" placeholder="dd.mm.yyyy" />
               </span>
               <span id="dropdown-icon" class="item-icon flex">
                 🏃‍♂️
@@ -193,7 +193,7 @@
 
             <li id="listbox-item-0" role="option" class="dropdown-item" :class="showDateInput ? '' : 'hidden'">
               <span class="item-title" style="font-weight: 600;">
-                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" />
+                <input type="date" @input="updateCustomDate('Custom')" v-model="inputEndDate" placeholder="dd.mm.yyyy" />
               </span>
               <span id="dropdown-icon" class="item-icon flex">
                 🏁
@@ -281,13 +281,15 @@ export default {
         endDate: this.inputEndDate,
       });
 
-      this.txGasCostETH = txGasCostETH;
-      this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
-      this.averageTxPrice = averageTxPrice;
-      this.txCount = txCount;
-      this.failedTxCount = failedTxCount;
-      this.failedTxGasCostETH = failedTxGasCostETH;
-      this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(0);
+      if (txCount != "...") {
+        this.txGasCostETH = txGasCostETH;
+        this.txGasCostUSD = new BigNumber(txGasCostETH / price).decimalPlaces(0);
+        this.averageTxPrice = averageTxPrice;
+        this.txCount = txCount;
+        this.failedTxCount = failedTxCount;
+        this.failedTxGasCostETH = failedTxGasCostETH;
+        this.failedTxGasCostUSD = new BigNumber(failedTxGasCostETH / price).decimalPlaces(0);
+      }
     },
   },
 };
@@ -409,7 +411,7 @@ ul {
   transition-duration: 150ms;
   font-family: inherit;
   font-size: 100%;
-  line-height: 1.15;
+  line-height: 1.15rem;
   margin: 0;
   text-transform: none;
   padding: 0;
@@ -462,7 +464,7 @@ ul {
   background-image: none;
   font-family: inherit;
   font-size: 100%;
-  line-height: 1.15;
+  line-height: 1.15rem;
   margin: 0;
   text-transform: none;
   padding-left: 20px;
