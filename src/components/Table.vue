@@ -12,9 +12,16 @@
       </thead>
       <tbody>
         <tr v-for="(synth, s_index) in positions" :key="s_index">
+          <!--
           <td v-for="key in Object.keys(synth)" :key="key">
             {{ synth[key] }}
-          </td>
+          </td>-->
+          <td>{{ synth.name }}</td>
+          <td>{{ synth.price }} WETH</td>
+          <td>{{ synth.quantity }}</td>
+          <td>{{ synth.total }} WETH</td>
+          <td>{{ synth.collateral }} WETH</td>
+          <td>{{ synth.collateralRatio }}</td>
           <td>
             <div v-for="(action, a_index) in actions" :key="a_index" v-on:click="action.action(synth.name)">
               <Button class="action-button">
@@ -46,6 +53,7 @@ export default Vue.extend({
   },
   methods: {
     sortTable: function(header) {
+      console.log(this.positions);
       if (this.sortColumn === header) {
         this.ascending = !this.ascending;
       } else {
@@ -68,11 +76,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-#container {
-  box-shadow: 0px 4px 10px 2px #ca625a14;
-  border-radius: 10px;
-  z-index: 1;
-}
 table {
   table-layout: auto;
   font-family: "Shanti", sans-serif;
