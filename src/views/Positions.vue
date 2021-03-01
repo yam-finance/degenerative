@@ -8,6 +8,7 @@
       </Card>
       <Space size="md" />
       <div v-if="showTable" style="overflow-x: auto;" id="container">
+        <!--
         <table>
           <thead>
             <tr>
@@ -27,15 +28,17 @@
               <td>{{ item.collateral }} WETH</td>
               <td>{{ item.collateralRatio }}</td>
               <td>
-                <div v-on:click="settlePosition(item.name)">
+                <div v-on:click="actions[0].function(item.name)">
                   <Button class="action-button">
-                    Settle
+                    {{ actions[0].name }}
                   </Button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+        -->
+        <Table headers="headers" positions="positions" actions="actions" />
       </div>
       <div v-else>
         <span>You do not have any positions to display.</span>
@@ -46,18 +49,6 @@
 </template>
 
 <script>
-// TODO Add in Typescript
-/*
-import { PropType } from 'vue';
-
-interface PositionsData {
-  name: string,
-  price: number,
-  quantity: number,
-  total: number
-}
-*/
-
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -119,6 +110,15 @@ export default {
   computed: {
     showTable: function() {
       return this.positions.length !== 0;
+    },
+
+    actions: function() {
+      return [
+        {
+          name: "Settle",
+          action: tokenName => this.settleUserPosition(tokenName),
+        },
+      ];
     },
   },
 };
