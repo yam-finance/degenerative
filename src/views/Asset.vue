@@ -87,7 +87,7 @@
 
         <Space size="10" class="flex" />
 
-        <Container id="thebox-nav" :size="440">
+        <Container id="thebox-nav" :size="600">
           <div class="row row-item-col">
             <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
               >Step by Step User Guide</a
@@ -102,7 +102,7 @@
 
         <Space size="10" class="flex" />
 
-        <Container v-if="!showMedian" :size="440">
+        <Container v-if="!showMedian" :size="600">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
@@ -206,9 +206,10 @@
                       <input class="text-input" id type="number" name v-model="tokenAmt" v-on:keyup="tokenHandler" :placeholder="'0.00'" />
                       <span class="input-addon">{{ tokenSelected }}</span>
                     </div>
-                    <div v-if="navAct != 'redeem'" class="input-modifier">
-                      <input type="checkbox" id="checkbox" v-model="adjustToGcr" @change="handleAdjustToGcr()" />
-                      <label for="checkbox">Adjust To GCR</label>
+                    <div v-if="navAct != 'redeem'" class="input-modifier" id="toggle-button">
+                      <ToggleButton label="Adjust to GCR" defaultState="true" v-on:change="handleAdjustToGcr" />
+                      <!--<input type="checkbox" v-model="adjustToGcr" @change="handleAdjustToGcr()" />
+                      <label for="checkbox">Adjust To GCR</label>-->
                     </div>
                   </div>
                 </div>
@@ -229,7 +230,7 @@
                       <span class="input-addon">WETH</span>
                     </div>
                     <div class="input-modifier">
-                      <button class="max-button" style="width: 100%" @click="onPressMax">MAX</button>
+                      <button id="max-button" style="width: 100%" @click="onPressMax">MAX</button>
                     </div>
                   </div>
                 </div>
@@ -1895,7 +1896,7 @@ div.error {
 .input-modifier {
   flex: 2;
 }
-.max-button {
+#max-button {
   cursor: pointer;
   margin: 5px;
   padding: 3px;
@@ -1903,6 +1904,9 @@ div.error {
   border: none;
   background-color: var(--primary);
   border-radius: 8px;
+}
+#toggle-button {
+  margin: auto;
 }
 // ---------------------------------------------------
 .dropdown {
