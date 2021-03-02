@@ -10,6 +10,7 @@ import {
   stateLoad,
   stateDestroy,
   getERC20Contract,
+  getTxStats,
   getBalance,
   waitTransaction,
   approve,
@@ -744,6 +745,66 @@ export default new Vuex.Store({
       }
     },
 
+    getUserTxStats: async ({ commit, dispatch }, payload: { interval: string; startDate: string; endDate: string }) => {
+      await sleep(500);
+
+      if (!Vue.prototype.$web3 && !Vue.prototype.$provider) {
+        await dispatch("connect");
+      }
+
+      let date = new Date();
+      let startTimestamp = 0;
+      let endTimestamp = 0;
+
+      switch (payload.interval.toLowerCase()) {
+        case "day":
+          date.setHours(date.getHours() - 24);
+          startTimestamp = date.getTime();
+          break;
+        case "week":
+          date.setHours(date.getHours() - 168);
+          startTimestamp = date.getTime();
+          break;
+        case "month":
+          date.setMonth(date.getMonth() - 1);
+          startTimestamp = date.getTime();
+          break;
+        case "year":
+          date.setFullYear(date.getFullYear() - 1);
+          startTimestamp = date.getTime();
+          break;
+        default:
+          startTimestamp = 0;
+      }
+
+      if (payload.startDate != null) {
+        date = new Date(payload.startDate);
+        startTimestamp = date.getTime();
+
+        if (payload.endDate == null) {
+          endTimestamp = 0;
+        }
+      }
+
+      if (payload.endDate != null) {
+        date = new Date(payload.endDate);
+        endTimestamp = date.getTime();
+
+        if (payload.startDate == null) {
+          startTimestamp = 0;
+        }
+      }
+
+      const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
+        Vue.prototype.$provider,
+        store.state.account,
+        startTimestamp,
+        endTimestamp,
+        0,
+        0
+      ); // Zeros can be replaced by block numbers if necessary.
+      return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
+    },
     getUserWETHBalance: async ({ commit, dispatch }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
@@ -833,7 +894,7 @@ export default new Vuex.Store({
         const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice) / 2 / assetReserveValue) * 100) / 2;
+        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice * 0.82) / assetReserveValue) * 100) / 2;
         console.debug("aprCalculate %", aprCalculate);
         return mixin.methods.numeral(aprCalculate);
       } catch (e) {
