@@ -1973,7 +1973,7 @@ div.error {
   display: none;
   cursor: pointer;
   background: var(--back-wallet);
-  border-radius: 2px;
+  border-radius: 5px;
   border: none;
   padding: 0px 10px;
   height: 36px;
