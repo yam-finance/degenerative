@@ -31,7 +31,8 @@ import UNIContract from "@/utils/abi/uni.json";
 import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
 import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
-import { UMA, WETH } from "@/utils/addresses";
+import { UMA, WETH, assetContracts } from "@/utils/addresses";
+import { utils } from "ethers";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -86,6 +87,7 @@ const defaultState = () => {
       expiryPrice: new BigNumber(0),
     },
     currPos: {},
+    userPositions: {},
     provider: {},
     connector: {},
   };
@@ -156,6 +158,10 @@ export default new Vuex.Store({
     CURR_POS(state, data) {
       state.currPos = data;
       console.debug("CURR_POS", data);
+    },
+    SET_USER_POSITIONS(state, data) {
+      state.userPositions = data;
+      console.debug("SET_USER_POSITIONS", data);
     },
     GET_EMP(state, data) {
       state.currentEMP = data.currentEMP;
@@ -346,6 +352,42 @@ export default new Vuex.Store({
       } catch (e) {
         console.debug("couldnt get position for: ", contract, " for user: ", store.state.account);
       }
+    },
+
+    getAllUserPositions: async ({ commit, dispatch, state }) => {
+      if (!Vue.prototype.$web3) await dispatch("connect");
+
+      const userPositions: any = [];
+      assetContracts.forEach(async asset => {
+        const userAssetData = {};
+        userAssetData["name"] = asset.name;
+        userAssetData["actions"] = {};
+
+        try {
+          const empContract = await dispatch("getEMP", { address: asset.emp });
+          const position = await empContract.methods.positions(state.account).call();
+          const quantity = parseFloat(utils.formatEther(position.tokensOutstanding[0]));
+
+          if (quantity < 1) return;
+
+          userAssetData["price"] = (await dispatch("getUniPrice", { tokenA: asset.token, tokenB: WETH })).toFixed(4);
+          userAssetData["quantity"] = quantity;
+          userAssetData["collateral"] = parseFloat(utils.formatEther(position.rawCollateral[0]));
+          userAssetData["total"] = (userAssetData["price"] * userAssetData["quantity"]).toFixed(4);
+          userAssetData["collateralRatio"] = (userAssetData["collateral"] / userAssetData["total"]).toFixed(4);
+        } catch (err) {
+          console.log(`Get position failed for ${asset.name}: ${err.message}`);
+          userAssetData["price"] = 0;
+          userAssetData["quantity"] = 0;
+          userAssetData["collateral"] = 0;
+          userAssetData["collateralRatio"] = 0;
+          userAssetData["total"] = 0;
+        }
+        userPositions.push(userAssetData);
+      });
+
+      commit("SET_USER_POSITIONS", userPositions);
+      return userPositions;
     },
 
     setEMPState: async ({ commit, dispatch }, contract: string) => {
@@ -682,8 +724,20 @@ export default new Vuex.Store({
       }
     },
 
+    settleUserPosition: async ({ commit, dispatch }, tokenName) => {
+      try {
+        let empAddress;
+        for (const asset of assetContracts) {
+          if (asset.name == tokenName) empAddress = asset.emp;
+        }
+        await dispatch("settle", { contract: empAddress });
+      } catch (err) {
+        console.error(err.message);
+      }
+    },
+
     // settle prep
-    settle: async ({ commit, dispatch }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+    settle: async ({ commit, dispatch, state }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -702,7 +756,7 @@ export default new Vuex.Store({
         // );
         return emp.methods.settleExpired().send(
           {
-            from: store.state.account,
+            from: state.account,
             gas: 200000,
           },
           async (error: any, txHash: string) => {
@@ -1020,6 +1074,9 @@ export default new Vuex.Store({
     },
     empState(state) {
       return state.empState;
+    },
+    userPositions(state) {
+      return state.userPositions;
     },
   },
 });

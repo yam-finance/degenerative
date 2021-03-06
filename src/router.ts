@@ -7,7 +7,6 @@ import About from "@/views/About.vue";
 import Positions from "@/views/Positions.vue";
 import LearnMore from "@/views/LearnMore.vue";
 import NotFound from "@/views/NotFound.vue";
-import Account from "@/views/Account.vue";
 
 Vue.use(VueRouter);
 
@@ -32,11 +31,6 @@ const routes: Array<RouteConfig> = [
     name: "Learn More",
     component: LearnMore,
   },
-  //   {
-  //     path: "/account",
-  //     name: "Account",
-  //     component: Account,
-  //   },
   {
     path: "/positions",
     name: "Positions",

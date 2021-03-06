@@ -39,6 +39,7 @@ Vue.component("Card", () => import("@/components/Card.vue"));
 Vue.component("GasStats", () => import("@/components/ugas/GasStats.vue"));
 Vue.component("CardLink", () => import("@/components/CardLink.vue"));
 Vue.component("Button", () => import("@/components/Button.vue"));
+Vue.component("Table", () => import("@/components/Table.vue"));
 Vue.component("chart", ECharts);
 Vue.component("VuePicker", VuePicker);
 Vue.component("VuePickerOption", VuePickerOption);
