@@ -44,7 +44,7 @@
 
         <Space size="md" />
 
-        <Container :size="440">
+        <Container :size="600">
           <div class="asset-info">
             <span>
               <span v-if="!tokenSelected">
@@ -87,7 +87,7 @@
 
         <Space size="10" class="flex" />
 
-        <Container id="thebox-nav" :size="440">
+        <Container id="thebox-nav" :size="600">
           <div class="row row-item-col">
             <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
               >Step by Step User Guide</a
@@ -102,7 +102,7 @@
 
         <Space size="10" class="flex" />
 
-        <Container v-if="!showMedian" :size="440">
+        <Container v-if="!showMedian" :size="600">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
@@ -199,27 +199,41 @@
                     <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
                   </vue-picker>
                 </div>
-                <input
-                  v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'"
-                  id
-                  class="numeric setvalue"
-                  type="number"
-                  name
-                  v-model="tokenAmt"
-                  v-on:keyup="tokenHandler"
-                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
-                />
-                <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
-                  id
-                  class="numeric setvalue"
-                  type="number"
-                  name
-                  v-model="collatAmt"
-                  v-on:keyup="collatHandler"
-                  :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
-                />
+                <div v-if="tokenSelected && navAct != 'deposit' && navAct != 'withdraw' && navAct !== 'lptrade'" class="input-container">
+                  <label class="input-label">Amount: </label>
+                  <div class="input-row">
+                    <div class="input-group">
+                      <input class="text-input" id type="number" name v-model="tokenAmt" v-on:keyup="tokenHandler" :placeholder="'0.00'" />
+                      <span class="input-addon">{{ tokenSelected }}</span>
+                    </div>
+                    <div v-if="navAct != 'redeem'" class="input-modifier" id="toggle-button">
+                      <ToggleButton label="Adjust to GCR" defaultState="true" v-on:change="handleAdjustToGcr" />
+                      <!--<input type="checkbox" v-model="adjustToGcr" @change="handleAdjustToGcr()" />
+                      <label for="checkbox">Adjust To GCR</label>-->
+                    </div>
+                  </div>
+                </div>
+                <div v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'" class="input-container">
+                  <label class="input-label">Collateral: </label>
+                  <div class="input-row">
+                    <div class="input-group">
+                      <input
+                        class="text-input"
+                        id
+                        type="number"
+                        name
+                        v-model="collatAmt"
+                        v-on:keyup="collatHandler"
+                        :placeholder="'0.00'"
+                        :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
+                      />
+                      <span class="input-addon">WETH</span>
+                    </div>
+                    <div class="input-modifier">
+                      <button id="max-button" style="width: 100%" @click="onPressMax">MAX</button>
+                    </div>
+                  </div>
+                </div>
                 <!-- to add max button -->
                 <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
                 Info ▼
@@ -535,6 +549,7 @@ export default {
       pricedTxCR: 0,
       gcr: 0,
       price: 0,
+      adjustToGcr: false,
       collReq: new BigNumber(0),
       existingColl: new BigNumber(0),
       existingTokens: new BigNumber(0),
@@ -1563,6 +1578,19 @@ export default {
       this.runChecks();
       console.log("toNavAct", on);
     },
+    onPressMax() {
+      this.collatAmt = this.balanceWETH;
+      this.handleAdjustToGcr();
+    },
+    handleAdjustToGcr() {
+      if (this.collatAmt) {
+        this.collatHandler();
+        this.tokenHandler();
+      } else {
+        this.tokenHandler();
+        this.collatHandler();
+      }
+    },
     displayAssetStats() {
       this.showInfo = !this.showInfo;
 
@@ -1573,10 +1601,15 @@ export default {
       }
     },
     tokenHandler() {
-      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      if (this.adjustToGcr) {
+        this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      }
       this.posUpdateHandler();
     },
     collatHandler() {
+      if (this.adjustToGcr) {
+        this.tokenAmt = (this.collatAmt / (this.gcr * this.price)).toFixed(4);
+      }
       this.posUpdateHandler();
     },
     async posUpdateHandler() {
@@ -1710,6 +1743,7 @@ div.error {
   z-index: 0;
 }
 #inputbox {
+  background: var(--back-act);
 }
 .tabs {
   border-radius: 10px 10px 0px 0px;
@@ -1780,8 +1814,8 @@ div.error {
   width: 100%;
   border: 0px;
   background: white;
-  height: 50px;
-  padding: 20px;
+  //height: 50px;
+  padding: 10px;
 }
 .setvalue {
   width: 100%;
@@ -1804,6 +1838,77 @@ div.error {
     color: #0000001c;
   }
 }
+// ---------------------------------------------------
+.input-container {
+  margin: 10px;
+}
+.input-row {
+  @media screen and (max-width: 600px) {
+    display: grid;
+  }
+  display: flex;
+  align-items: center;
+}
+.input-label {
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+.input-group {
+  @media screen and (max-width: 600px) {
+    display: grid;
+  }
+  flex: 2;
+  display: flex;
+  align-items: center;
+  flex-basis: 200px;
+}
+.text-input {
+  flex: 3;
+  padding: 6px 12px;
+  border: 0px;
+  margin: 0;
+  background: var(--back-act);
+  color: var(--primary);
+  font-size: 22px;
+  // font-family: "Share Tech Mono", monospace;
+  font-family: "Inconsolata", monospace;
+  &::placeholder {
+    color: #0000001c;
+    opacity: 1;
+  }
+  &:-ms-input-placeholder {
+    color: #0000001c;
+  }
+  &::-ms-input-placeholder {
+    color: #0000001c;
+  }
+}
+.input-addon {
+  flex: 1;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: right;
+  //border: 1px solid #ccc;
+  border: none;
+  font-weight: 400;
+  //vertical-align: middle;
+}
+.input-modifier {
+  flex: 2;
+}
+#max-button {
+  cursor: pointer;
+  margin: 5px;
+  padding: 3px;
+  color: #fff;
+  border: none;
+  background-color: var(--primary);
+  border-radius: 8px;
+}
+#toggle-button {
+  margin: auto;
+}
+// ---------------------------------------------------
 .dropdown {
   border-radius: 0px 0px 10px 10px;
 
