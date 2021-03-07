@@ -603,14 +603,18 @@ const emplistDataBackup = {
 };
 
 export async function getDevMiningEmps() {
-  const assets = Assets;
-  const data = [assets["ugas"][1].emp.address, assets["ugas"][2].emp.address, assets["ugas"][3].emp.address, assets["ustonks"][0].emp.address];
+  const assets: any = Assets;
+  if (!assets) {
+    const data = [assets["ugas"][1].emp.address, assets["ugas"][2].emp.address, assets["ugas"][3].emp.address, assets["ustonks"][0].emp.address];
 
-  const umadata: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
-  const empWhitelistUpdated = mergeUnique(umadata.empWhitelist, data);
-  umadata.empWhitelist = empWhitelistUpdated;
-  return umadata;
-  // return emplistDataBackup;
+    const umadata: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+    const empWhitelistUpdated = mergeUnique(umadata.empWhitelist, data);
+    umadata.empWhitelist = empWhitelistUpdated;
+    return umadata;
+    // return emplistDataBackup;
+  } else {
+    return -1;
+  }
 }
 
 export const get30DMedian = async () => {
