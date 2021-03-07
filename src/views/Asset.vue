@@ -1257,6 +1257,7 @@ export default {
       }
       const price = await this.lastPrice(this.tokenSelected);
       const asset = {
+        assetName: this.assetName,
         assetInstance: this.asset[this.tokenSelected],
         assetPrice: price,
       };

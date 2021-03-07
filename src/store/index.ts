@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Web3 from "web3";
 import BigNumber from "bignumber.js";
+import moment from "moment";
 import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
@@ -31,7 +32,7 @@ import EMPContract from "@/utils/abi/emp.json";
 import UNIContract from "@/utils/abi/uni.json";
 import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
-import { UMA, USDC, WETH } from "@/utils/addresses";
+import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -942,15 +943,11 @@ export default new Vuex.Store({
       return result;
     },
 
-    // { address: string; addressEMP: string; addressLP: string; addressPrice: number }
-    getMiningRewards: async ({ commit, dispatch }, payload: { assetInstance: any; assetPrice: number }) => {
+    getMiningRewards: async ({ commit, dispatch }, payload: { assetName: string; assetInstance: any; assetPrice: number }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
 
-      // assetInstance: this.asset[this.tokenSelected].token.address,
-      // addressEMP: this.asset[this.tokenSelected].emp.address,
-      // addressLP: this.asset[this.tokenSelected].pool.address,
       try {
         // console.log("getContractInfo", await getContractInfo(UGASJAN21));
         // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
@@ -977,37 +974,67 @@ export default new Vuex.Store({
         for (let i = 0; i < estimateDevMiningRewards.length; i++) {
           rewards[estimateDevMiningRewards[i][0]] = estimateDevMiningRewards[i][1];
         }
-        let base;
+        const baseGeneral = new BigNumber(10).pow(18);
+        const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
+        let baseCollateral;
         const web3 = new Web3(Vue.prototype.$provider);
         const contractLp = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.assetInstance.pool.address);
         const contractLpCall = await contractLp.methods.getReserves().call();
         const ethPrice = await getPriceByContract(WETH);
         const umaPrice = await getPriceByContract(UMA);
+        const yamPrice = await getPriceByContract(YAM);
         // const tokenPrice = await getPriceByContract(payload.address);
 
-        // temp WETH
+        // temp pricing
         let tokenPrice;
         if (payload.assetInstance.collateral === "USDC") {
-          base = new BigNumber(10).pow(6);
+          baseCollateral = new BigNumber(10).pow(6);
           tokenPrice = payload.assetPrice * 1;
           // } else if(payload.assetInstance.collateral === "YAM"){
           //   tokenPrice = payload.assetPrice * yamPrice;
         } else {
-          base = new BigNumber(10).pow(18);
+          baseCollateral = new BigNumber(10).pow(18);
           tokenPrice = payload.assetPrice * ethPrice;
         }
         console.debug("tokenPrice", tokenPrice);
 
-        // apr additional rewards
+        const current = moment().unix();
+        const week1Until = 1615665600;
+        const week2Until = 1616270400;
+        const yamRewards = 0;
+        const umaRewards = rewards[payload.assetInstance.emp.address];
+        let yamWeekRewards = 0;
+        let umaWeekRewards = 0;
+        if (payload.assetName === "UGAS" && payload.assetInstance.cycle === "JUN" && payload.assetInstance.year === "21") {
+          if (current < week1Until) {
+            yamWeekRewards += 5000;
+          } else if (current < week2Until) {
+            yamWeekRewards += 10000;
+          }
+        } else if (payload.assetName === "USTONKS" && payload.assetInstance.cycle === "APR" && payload.assetInstance.year === "21") {
+          if (current < week1Until) {
+            umaWeekRewards += 5000;
+            yamWeekRewards += 5000;
+          } else if (current < week2Until) {
+            umaWeekRewards += 10000;
+            yamWeekRewards += 10000;
+          }
+        }
 
-        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
-        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
-        const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
+        const normalRewards = umaRewards * umaPrice + yamRewards * yamPrice;
+        const weekRewards = umaWeekRewards * umaPrice + yamWeekRewards * yamPrice;
+        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
+        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
+        const calcAsset = assetReserve0 * tokenPrice;
+        const calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        const assetReserveValue = calcAsset + calcCollateral;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((rewards[payload.assetInstance.emp.address] * 52 * umaPrice * 0.82) / assetReserveValue) * 100) / 2;
-        console.debug("aprCalculate %", aprCalculate);
-        return mixin.methods.numeral(aprCalculate);
+        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100) / 2;
+        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100) / 2;
+        const totalAprCalculation = aprCalculate + aprCalculateExtra;
+        console.debug("aprCalculate %", totalAprCalculation);
+        return totalAprCalculation;
       } catch (e) {
         console.error("error", e);
         return 0;

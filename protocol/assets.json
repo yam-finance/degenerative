@@ -63,9 +63,49 @@
         "extra": 0
       }
     },
-    {}
+    {
+      "name": "June",
+      "cycle": "JUN",
+      "year": "21",
+      "collateral": "WETH",
+      "token": {
+        "address": "0xa6b9d7e3d76cf23549293fb22c488e0ea591a44e",
+        "decimals": 18
+      },
+      "emp": {
+        "address": "0x4e8d60a785c2636a63c5bd47c7050d21266c8b43",
+        "new": true
+      },
+      "pool": {
+        "address": "0x2b5dfb7874f685bea30b7d8426c9643a4bcf5873"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    }
   ],
   "ustonks": [
-    {}
+    {
+      "name": "April",
+      "cycle": "APR",
+      "year": "21",
+      "collateral": "USDC",
+      "token": {
+        "address": "0xec58d3aefc9aaa2e0036fa65f70d569f49d9d1ed",
+        "decimals": 6
+      },
+      "emp": {
+        "address": "0x4f1424cef6ace40c0ae4fc64d74b734f1eaf153c",
+        "new": true
+      },
+      "pool": {
+        "address": "0xedf187890af846bd59f560827ebd2091c49b75df"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    }
   ]
 }
