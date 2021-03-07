@@ -24,8 +24,11 @@ export const OutsideClick = {
         if (!isClickedElementExcluded) {
           // Get the element using the reference name.
           const excludedElement = vnode.context.$refs[refName];
-          // Check if this excluded element is the same element that was just clicked.
-          isClickedElementExcluded = excludedElement.contains(e.target);
+
+          if (typeof excludedElement != "undefined") {
+            // Check if this excluded element is the same element that was just clicked.
+            isClickedElementExcluded = excludedElement.contains(e.target);
+          }
         }
       });
 
