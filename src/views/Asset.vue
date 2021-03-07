@@ -26,10 +26,7 @@
 
       <Space size="20" />
 
-      <button class="gas-detail-button" @click="displayAssetStats">{{ showInfoButtonText }}</button>
-      <Space class="mobile-display" size="10" />
-
-      <GasStats class="gas-cards" v-show="showInfo" ref="gasStats" />
+      <GasStats ref="gasStats" />
 
       <Space class="desktop-display" size="md" />
       <Space class="mobile-display" size="10" />
@@ -526,8 +523,6 @@ export default {
       navAct: "mint",
       info: true,
       tokenSelected: null,
-      showInfo: false,
-      showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       tokenAmt: null,
       collatAmt: null,
@@ -1563,15 +1558,6 @@ export default {
       this.runChecks();
       console.log("toNavAct", on);
     },
-    displayAssetStats() {
-      this.showInfo = !this.showInfo;
-
-      if (this.showInfo) {
-        this.showInfoButtonText = "Close Gas Info";
-      } else {
-        this.showInfoButtonText = "Gas Info";
-      }
-    },
     tokenHandler() {
       this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
       this.posUpdateHandler();
@@ -1675,11 +1661,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.gas-cards {
-  @media (min-width: 800px) {
-    display: flex !important;
-  }
-}
 .desktop-display {
   display: inline-block !important;
 
@@ -1966,26 +1947,6 @@ div.error {
   &.tutorial {
     background: #6799e5;
     color: #fff;
-  }
-}
-
-.gas-detail-button {
-  display: none;
-  cursor: pointer;
-  background: var(--back-wallet);
-  border-radius: 5px;
-  border: none;
-  padding: 0px 10px;
-  height: 36px;
-  color: var(--text-wallet);
-  font-size: 14px;
-
-  &:hover {
-    box-shadow: 0px 2px 3px var(--back-wallet-hover);
-  }
-
-  @media (max-width: 800px) {
-    display: inline-block;
   }
 }
 
