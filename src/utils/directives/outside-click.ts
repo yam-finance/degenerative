@@ -5,6 +5,11 @@ import Vue from "vue";
 // Reference to the document's click handler.
 let handleOutsideClick;
 
+function isVisible(el) {
+  const { display, visibility } = window.getComputedStyle(el);
+  return display !== "none" && visibility !== "hidden";
+}
+
 export const OutsideClick = {
   // Called only once, when the directive is first bound to the element.
   // el: The element the directive is bound to.
@@ -13,29 +18,31 @@ export const OutsideClick = {
   bind(el, binding, vnode) {
     // Click / Touchstart handler.
     handleOutsideClick = e => {
-      e.stopPropagation();
+      if (isVisible(el)) {
+        e.stopPropagation();
 
-      // Get excluded elements and the name of the handler method.
-      const { handler, exclude } = binding.value;
+        // Get excluded elements and the name of the handler method.
+        const { handler, exclude } = binding.value;
 
-      let isClickedElementExcluded = false;
+        let isClickedElementExcluded = false;
 
-      exclude.forEach(refName => {
-        if (!isClickedElementExcluded) {
-          // Get the element using the reference name.
-          const excludedElement = vnode.context.$refs[refName];
+        exclude.forEach(refName => {
+          if (!isClickedElementExcluded) {
+            // Get the element using the reference name.
+            const excludedElement = vnode.context.$refs[refName];
 
-          if (typeof excludedElement != "undefined") {
-            // Check if this excluded element is the same element that was just clicked.
-            isClickedElementExcluded = excludedElement.contains(e.target);
+            if (typeof excludedElement != "undefined") {
+              // Check if this excluded element is the same element that was just clicked.
+              isClickedElementExcluded = excludedElement.contains(e.target);
+            }
           }
-        }
-      });
+        });
 
-      // Check if the clicked element is not the dropdown element and was not excluded.
-      if (!el.contains(e.target) && !isClickedElementExcluded) {
-        // Call the outside-click handler.
-        vnode.context[handler]();
+        // Check if the clicked element is not the dropdown element and was not excluded.
+        if (!el.contains(e.target) && !isClickedElementExcluded) {
+          // Call the outside-click handler.
+          vnode.context[handler]();
+        }
       }
     };
 
