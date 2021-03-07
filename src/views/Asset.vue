@@ -1084,6 +1084,8 @@ export default {
         return;
       }
 
+      const assetInstance = this.asset[this.tokenSelected];
+
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
@@ -1119,15 +1121,13 @@ export default {
         } else if (this.currPos && this.currPos.rawCollateral == 0) {
           this.hasError = true;
           this.currentError = "No open position. Mint tokens first";
-        } else if ((this.asset[this.tokenSelected].collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
+        } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError =
             "Not enough " +
-            this.asset[this.tokenSelected].collateral +
+            assetInstance.collateral +
             "." +
-            (this.asset[this.tokenSelected].collateral === "WETH"
-              ? " Please wrap ETH below."
-              : " Please buy " + this.asset[this.tokenSelected].collateral + ".");
+            (assetInstance.collateral === "WETH" ? " Please wrap ETH below." : " Please buy " + assetInstance.collateral + ".");
         }
       } else if (this.navAct == "mint") {
         this.currLiqPrice();
@@ -1141,15 +1141,13 @@ export default {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
           return;
-        } else if ((this.asset[this.tokenSelected].collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
+        } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
           this.hasError = true;
           this.currentError =
             "Not enough " +
-            this.asset[this.tokenSelected].collateral +
+            assetInstance.collateral +
             "." +
-            (this.asset[this.tokenSelected].collateral === "WETH"
-              ? " Please wrap ETH below."
-              : " Please buy " + this.asset[this.tokenSelected].collateral + ".");
+            (assetInstance.collateral === "WETH" ? " Please wrap ETH below." : " Please buy " + assetInstance.collateral + ".");
           return;
         }
         const thisError = "Collateral Ratio below global minimum";
@@ -1226,6 +1224,8 @@ export default {
         .times(k.rawTotalPositionCollateral.dividedBy(colDec[this.asset[this.tokenSelected].collateral]));
       const totalTokens = k.totalTokensOutstanding.div(assetInstance.token.decimals);
       this.gcr = totalTokens > 0 ? (totalColl / totalTokens / this.price).toFixed(4) : 0;
+      console.log("this.gcr", this.gcr);
+
       this.collReq = k.collateralRequirement;
       this.getAssetInstanceBalance();
       this.posUpdateHandler();
@@ -1516,6 +1516,8 @@ export default {
       if (this.price == 0) {
         await this.lastPrice();
       }
+      console.log("this.tokenAmt", this.tokenAmt);
+      console.log("this.collatAmt", this.collatAmt);
       const resultantCR = this.tokenAmt > 0 ? Number(this.collatAmt) / Number(this.tokenAmt) : 0;
       this.pricedTxCR = this.price !== 0 ? (resultantCR / this.price).toFixed(4) : 0;
       const newCollat = Number(this.collatAmt) + Number(this.existingColl);
