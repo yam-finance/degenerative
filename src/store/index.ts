@@ -1021,12 +1021,19 @@ export default new Vuex.Store({
           }
         }
 
+        let calcAsset = 0;
+        let calcCollateral = 0;
         const normalRewards = umaRewards * umaPrice + yamRewards * yamPrice;
         const weekRewards = umaWeekRewards * umaPrice + yamWeekRewards * yamPrice;
         const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
-        const calcAsset = assetReserve0 * tokenPrice;
-        const calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        if (payload.assetName === "USTONKS") {
+          calcAsset = assetReserve1 * tokenPrice;
+          calcCollateral = assetReserve0 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        } else {
+          calcAsset = assetReserve0 * tokenPrice;
+          calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        }
         const assetReserveValue = calcAsset + calcCollateral;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
