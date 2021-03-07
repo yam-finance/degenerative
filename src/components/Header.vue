@@ -13,6 +13,7 @@
         <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
           <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
+          <a>{{ $t("message") }}</a>
           <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
           <!-- <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a> -->
           <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Docs</a>
@@ -22,6 +23,8 @@
 
         <div class="flex vert">
           <!-- <Swipe></Swipe> -->
+          <LanguageSwitch />
+          <Space />
           <button id="wallet" @click="auth" :class="{ connected: $auth.isAuthenticated }">
             <span v-if="!$auth.isAuthenticated">Connect Wallet</span>
             <span v-if="$auth.isAuthenticated">Connected</span>

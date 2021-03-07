@@ -26,6 +26,7 @@ import "echarts/lib/component/dataZoom";
 import "echarts/lib/component/toolbox";
 import "echarts/lib/component/tooltip";
 import "@invisiburu/vue-picker/dist/vue-picker.min.css";
+import i18n from "./plugins/i18n";
 
 Vue.mixin(mixins);
 Vue.use(VueMeta, { keyName: "head" });
@@ -39,6 +40,7 @@ Vue.component("Card", () => import("@/components/Card.vue"));
 Vue.component("GasStats", () => import("@/components/ugas/GasStats.vue"));
 Vue.component("CardLink", () => import("@/components/CardLink.vue"));
 Vue.component("Button", () => import("@/components/Button.vue"));
+Vue.component("LanguageSwitch", () => import("@/components/LanguageSwitch.vue"));
 Vue.component("chart", ECharts);
 Vue.component("VuePicker", VuePicker);
 Vue.component("VuePickerOption", VuePickerOption);
@@ -57,6 +59,7 @@ Vue.prototype.moment = moment;
 new Vue({
   router,
   store,
+  i18n,
   // apollo: Vue.prototype.gql.provider,
   render: h => h(App),
 }).$mount("#app");

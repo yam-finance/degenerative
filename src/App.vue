@@ -20,6 +20,8 @@
 </style>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "App",
   head: {
@@ -27,5 +29,12 @@ export default {
     titleTemplate: "%s - Degenerative",
   },
   methods: {},
+  computed: mapState(["lang"]),
+  watch: {
+    lang() {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      // this.$router.replace({ params: { lang: this.lang } }).catch(() => {});
+    },
+  },
 };
 </script>
