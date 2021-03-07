@@ -28,9 +28,6 @@
 
       <GasStats ref="gasStats" />
 
-      <Space class="desktop-display" size="md" />
-      <Space class="mobile-display" size="10" />
-
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
           Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out our
@@ -1661,20 +1658,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.desktop-display {
-  display: inline-block !important;
-
-  @media (max-width: 800px) {
-    display: none !important;
-  }
-}
-.mobile-display {
-  display: none !important;
-
-  @media (max-width: 800px) {
-    display: inline-block !important;
-  }
-}
 .hideDropdown {
   display: none;
 }

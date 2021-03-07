@@ -1,8 +1,8 @@
 <template>
   <div>
     <button class="gas-detail-button" @click="displayAssetStats">{{ showInfoButtonText }}</button>
+    <Space class="mobile-display" size="10" />
     <div v-show="showInfo" class="gas-cards flex-container">
-      <Space class="mobile-display" size="10" />
       <Card>
         <div class="flex" style="align-items:center;">
           <div style="width:0px; flex:1 1 0%;">
@@ -207,6 +207,8 @@
         </div>
       </div>
     </div>
+    <Space class="desktop-display" size="md" />
+    <Space class="mobile-display" size="10" />
   </div>
 </template>
 
@@ -327,6 +329,13 @@ ul {
 }
 .primary {
   color: var(--primary);
+}
+.desktop-display {
+  display: inline-block !important;
+
+  @media (max-width: 800px) {
+    display: none !important;
+  }
 }
 .mobile-display {
   display: none !important;
