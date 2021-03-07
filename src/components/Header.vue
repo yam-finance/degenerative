@@ -8,13 +8,12 @@
             <div class="label">Degenerative</div>
           </div>
         </router-link>
-        <!-- <div class="router-links"><span>(Alpha)</span></div> -->
         <SpacePush />
         <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
-          <router-link @click.native="respNavClick" to="/assets/ugas">uGAS</router-link>
-          <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
-          <!-- <a @click="respNavClick" href="https://discord.gg/fbHX7NRa52" target="_blank">Chat</a> -->
+          <router-link @click.native="respNavClick" to="/assets">Assets</router-link>
+          <router-link @click.native="respNavClick" to="/asset/ugas">uGAS</router-link>
+          <router-link @click.native="respNavClick" to="/asset/ustonks">uSTONKS</router-link>
           <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Docs</a>
           <div @click="respNavClose" class="resp-links-close">Close</div>
           <Space />
@@ -26,7 +25,6 @@
             <span v-if="!$auth.isAuthenticated">Connect Wallet</span>
             <span v-if="$auth.isAuthenticated">Connected</span>
           </button>
-
           <!-- <button id="wallet" @click="logout">Reset Instance</button> -->
         </div>
 

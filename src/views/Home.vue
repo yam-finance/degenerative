@@ -13,12 +13,11 @@
             </p>
             <p class="justify">
               Introducing uGas, a synthetic futures contract that settles to the 30-Day Median Gas Price at the end of each month. If you’re just dying to try
-              it, click here to <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">learn more</a>.
+              it, click here to <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank">learn more</a>.
               <br />
               <br />
-              <a href="https://degenerative.finance/assets/ugas">Mint and Stake uGAS!</a>
             </p>
-            <router-link class="grph" to="/assets/ugas">Launch</router-link>
+            <router-link class="grph" to="/assets">Launch</router-link>
           </div>
         </div>
       </Container>

@@ -149,6 +149,26 @@ h4 {
   }
 }
 
+.asset-detail-switch {
+  cursor: pointer;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 2px;
+  padding: 0px 10px;
+  font-size: 22px;
+  font-weight: normal;
+  height: 36px;
+  &.info {
+    background: var(--primary);
+    color: #fff;
+  }
+  &.tutorial {
+    background: #6799e5;
+    color: #fff;
+  }
+}
+
 @media only screen and (max-width: 1400px) {
   body {
     background: var(--back-gradient);
@@ -202,7 +222,7 @@ h4 {
     border: none;
     padding: 0px;
     border-radius: 0px 0px 10px 10px;
-    box-shadow: 0px 5px 15px -5px #00000017;
+    box-shadow: 0px 15px 25px -5px #0000003d;
   }
 }
 .vue-picker__opener {
