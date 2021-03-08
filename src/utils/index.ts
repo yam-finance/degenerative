@@ -13,6 +13,7 @@ import duration from "dayjs/plugin/duration";
 import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
 import { JsonTxResult } from "../interfaces/degenerative.i";
+import Assets from "../../protocol/assets.json";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
@@ -493,7 +494,7 @@ export async function getPriceByContract(address: string, toCurrency?: string) {
   return result && result.market_data && result.market_data.current_price[toCurrency || "usd"];
 }
 
-export function DevMiningCalculator({ provider, getPrice, empAbi }) {
+export function devMiningCalculator({ provider, getPrice, empAbi }) {
   const web3 = new Web3(provider);
   const { utils, BigNumber, FixedNumber } = ethers;
   const { parseEther } = utils;
@@ -554,6 +555,31 @@ export function DevMiningCalculator({ provider, getPrice, empAbi }) {
   };
 }
 
+export function formAssetName(assetName, assetInstance) {
+  if (assetName && assetInstance) {
+    return assetName.toUpperCase() + assetInstance.cycle + assetInstance.year;
+  } else {
+    return "not found";
+  }
+  // UGASJAN21
+}
+
+function mergeUnique(arr1, arr2) {
+  return arr1.concat(
+    arr2.filter(function(item) {
+      return arr1.indexOf(item) === -1;
+    })
+  );
+}
+
+// to reinit
+// export async function getTokenPrice(token) {
+//   const ethUnitPrice: any = getUniPrice(WETH, DAI);
+//   let tokenPrice: any = getUniPrice(token, WETH);
+//   tokenPrice = tokenPrice * ethUnitPrice;
+//   return tokenPrice;
+// }
+
 const emplistDataBackup = {
   empWhitelist: [
     "0x3a93E863cb3adc5910E6cea4d51f132E8666654F",
@@ -565,36 +591,34 @@ const emplistDataBackup = {
     "0x267D46e71764ABaa5a0dD45260f95D9c8d5b8195",
     "0x2862A798B3DeFc1C24b9c0d241BEaF044C45E585",
     "0xd81028a6fbAAaf604316F330b20D24bFbFd14478",
+    "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+    "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
     "0x7c4090170aeADD54B1a0DbAC2C8D08719220A435",
     "0xaD3cceebeFfCdC3576dE56811d0A6D164BF9A5A1",
     "0xC843538d70ee5d28C5A80A75bb94C28925bB1cf2",
     "0xeFA41F506EAA5c24666d4eE40888bA18FA60a1c7",
     "0xaB3Aa2768Ba6c5876B2552a6F9b70E54aa256175",
-    EMPFEB,
-    EMPMAR,
   ],
   totalReward: 50000,
 };
 
-// export async function getUniPrice(pairA, pairB) {
-//   return 1;
-// }
-
-// to reinit
-// export async function getTokenPrice(token) {
-//   const ethUnitPrice: any = getUniPrice(WETH, DAI);
-//   let tokenPrice: any = getUniPrice(token, WETH);
-//   tokenPrice = tokenPrice * ethUnitPrice;
-//   return tokenPrice;
-// }
-
 export async function getDevMiningEmps() {
-  // const data: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
-  // return data;
-  return emplistDataBackup;
+  const assets: any = Assets;
+  if (assets) {
+    const data = [assets["ugas"][1].emp.address, assets["ugas"][2].emp.address, assets["ugas"][3].emp.address, assets["ustonks"][0].emp.address];
+
+    const umadata: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+    const empWhitelistUpdated = mergeUnique(umadata.empWhitelist, data);
+    umadata.empWhitelist = empWhitelistUpdated;
+    return umadata;
+    // return emplistDataBackup;
+  } else {
+    return -1;
+  }
 }
 
 export const get30DMedian = async () => {
   const data: any = await requestHttp("https://ugasapi.yam.finance/median");
-  return data.slice(Math.max(data.length - 10, 0));
+  // return data.slice(Math.max(data.length - 20, 0));
+  return data;
 };

@@ -21,12 +21,12 @@
             },
             {
               "internalType": "address",
-              "name": "tokenAddress",
+              "name": "finderAddress",
               "type": "address"
             },
             {
               "internalType": "address",
-              "name": "finderAddress",
+              "name": "tokenFactoryAddress",
               "type": "address"
             },
             {
@@ -36,13 +36,23 @@
             },
             {
               "internalType": "address",
-              "name": "financialProductLibraryAddress",
+              "name": "excessTokenBeneficiary",
               "type": "address"
             },
             {
               "internalType": "bytes32",
               "name": "priceFeedIdentifier",
               "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "syntheticName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "syntheticSymbol",
+              "type": "string"
             },
             {
               "components": [
@@ -82,7 +92,7 @@
                 }
               ],
               "internalType": "struct FixedPoint.Unsigned",
-              "name": "disputeBondPercentage",
+              "name": "disputeBondPct",
               "type": "tuple"
             },
             {
@@ -94,7 +104,7 @@
                 }
               ],
               "internalType": "struct FixedPoint.Unsigned",
-              "name": "sponsorDisputeRewardPercentage",
+              "name": "sponsorDisputeRewardPct",
               "type": "tuple"
             },
             {
@@ -106,7 +116,7 @@
                 }
               ],
               "internalType": "struct FixedPoint.Unsigned",
-              "name": "disputerDisputeRewardPercentage",
+              "name": "disputerDisputeRewardPct",
               "type": "tuple"
             }
           ],
@@ -342,19 +352,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "paidToLiquidator",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "paidToDisputer",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "paidToSponsor",
+          "name": "withdrawalAmount",
           "type": "uint256"
         },
         {
@@ -453,31 +451,6 @@
         }
       ],
       "name": "RegularFeesPaid",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "sponsor",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "numTokensRepaid",
-          "type": "uint256"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "newTokenCount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Repay",
       "type": "event"
     },
     {
@@ -625,25 +598,6 @@
       ],
       "name": "Withdrawal",
       "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_collateralAddress",
-          "type": "address"
-        }
-      ],
-      "name": "_getSyntheticDecimals",
-      "outputs": [
-        {
-          "internalType": "uint8",
-          "name": "decimals",
-          "type": "uint8"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
     },
     {
       "inputs": [],
@@ -905,7 +859,7 @@
     },
     {
       "inputs": [],
-      "name": "disputeBondPercentage",
+      "name": "disputeBondPct",
       "outputs": [
         {
           "internalType": "uint256",
@@ -918,7 +872,7 @@
     },
     {
       "inputs": [],
-      "name": "disputerDisputeRewardPercentage",
+      "name": "disputerDisputeRewardPct",
       "outputs": [
         {
           "internalType": "uint256",
@@ -934,6 +888,19 @@
       "name": "emergencyShutdown",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "excessTokenBeneficiary",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -971,19 +938,6 @@
     },
     {
       "inputs": [],
-      "name": "financialProductLibrary",
-      "outputs": [
-        {
-          "internalType": "contract FinancialProductLibrary",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "finder",
       "outputs": [
         {
@@ -1014,7 +968,7 @@
             }
           ],
           "internalType": "struct FixedPoint.Unsigned",
-          "name": "",
+          "name": "collateralAmount",
           "type": "tuple"
         }
       ],
@@ -1150,63 +1104,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "time",
-          "type": "uint256"
-        }
-      ],
-      "name": "getOutstandingRegularFees",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "regularFee",
-          "type": "tuple"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "latePenalty",
-          "type": "tuple"
-        },
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "totalPaid",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "gulp",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1364,7 +1261,7 @@
             }
           ],
           "internalType": "struct FixedPoint.Unsigned",
-          "name": "",
+          "name": "totalPaid",
           "type": "tuple"
         }
       ],
@@ -1531,26 +1428,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "numTokens",
-          "type": "tuple"
-        }
-      ],
-      "name": "repay",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [],
       "name": "requestTransferPosition",
       "outputs": [],
@@ -1612,7 +1489,7 @@
     },
     {
       "inputs": [],
-      "name": "sponsorDisputeRewardPercentage",
+      "name": "sponsorDisputeRewardPct",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1662,7 +1539,7 @@
             }
           ],
           "internalType": "struct FixedPoint.Unsigned",
-          "name": "",
+          "name": "totalCollateral",
           "type": "tuple"
         }
       ],
@@ -1698,19 +1575,12 @@
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "price",
-          "type": "tuple"
+          "internalType": "contract IERC20",
+          "name": "token",
+          "type": "address"
         }
       ],
-      "name": "transformCollateralRequirement",
+      "name": "trimExcess",
       "outputs": [
         {
           "components": [
@@ -1721,68 +1591,11 @@
             }
           ],
           "internalType": "struct FixedPoint.Unsigned",
-          "name": "",
+          "name": "amount",
           "type": "tuple"
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "price",
-          "type": "tuple"
-        },
-        {
-          "internalType": "uint256",
-          "name": "requestTime",
-          "type": "uint256"
-        }
-      ],
-      "name": "transformPrice",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "rawValue",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct FixedPoint.Unsigned",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "requestTime",
-          "type": "uint256"
-        }
-      ],
-      "name": "transformPriceIdentifier",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1836,80 +1649,13 @@
         {
           "components": [
             {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "payToSponsor",
-              "type": "tuple"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "payToLiquidator",
-              "type": "tuple"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "payToDisputer",
-              "type": "tuple"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "paidToSponsor",
-              "type": "tuple"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "paidToLiquidator",
-              "type": "tuple"
-            },
-            {
-              "components": [
-                {
-                  "internalType": "uint256",
-                  "name": "rawValue",
-                  "type": "uint256"
-                }
-              ],
-              "internalType": "struct FixedPoint.Unsigned",
-              "name": "paidToDisputer",
-              "type": "tuple"
+              "internalType": "uint256",
+              "name": "rawValue",
+              "type": "uint256"
             }
           ],
-          "internalType": "struct Liquidatable.RewardsData",
-          "name": "",
+          "internalType": "struct FixedPoint.Unsigned",
+          "name": "amountWithdrawn",
           "type": "tuple"
         }
       ],
