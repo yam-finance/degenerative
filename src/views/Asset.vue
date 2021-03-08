@@ -6,6 +6,8 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
+          <a class="asset-detail-switch tutorial" href="https://yamfinance.medium.com/9d2622dde72" target="_blank">Guide</a>
+          <Space size="sm" />
           <a class="asset-detail-switch" href="https://docs.degenerative.finance/ugas" target="_blank">Info</a>
           <!-- <button
             class="asset-detail-switch"
@@ -22,24 +24,27 @@
         </h2>
       </Card>
 
-      <Space size="md" />
+      <Space size="20" />
+
+      <GasStats ref="gasStats" />
 
       <div v-if="navPage === 'interact'">
         <div class="warning bold justify">
-          Warning: This is an experimental token — users should proceed with extreme caution. Although the EMP contract has been audited in detail by
-          OpenZeppelin, the application of this contract on a volatile price identifier such as Ethereum gas prices is novel and unpredictable in a live market.
-          Users should take time to understand the token and ask questions on the Yam Discord.
+          Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out our
+          handy Step by step
+          <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">User Guide</a> for in depth instructions. And stop by the
+          <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
         </div>
 
         <Space size="md" />
 
-        <Container :size="440" class="maker">
+        <Container :size="440">
           <div class="asset-info">
             <span>
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
-                    content: 'Select token to continue',
+                    content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
                   >Asset Price</b
@@ -54,7 +59,7 @@
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
-                    content: 'Select token to continue',
+                    content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
                   >APR</b
@@ -72,7 +77,26 @@
               </span>
             </span>
           </div>
+        </Container>
 
+        <Space size="10" class="flex" />
+
+        <Container id="thebox-nav" :size="440">
+          <div class="row row-item-col">
+            <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
+              >Step by Step User Guide</a
+            >
+            <Space size="10" />
+            <div @click="showMedianToggle" class="item button">
+              <span v-if="!showMedian">Median Chart</span>
+              <span v-if="showMedian">Back</span>
+            </div>
+          </div>
+        </Container>
+
+        <Space size="10" class="flex" />
+
+        <Container v-if="!showMedian" :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
@@ -134,7 +158,7 @@
                     @click="toWithdrawType('instant')"
                     :class="{ active: withdrawType === 'instant' }"
                     v-tooltip="{
-                      content: '<b>Instant Withdraw</b>: Withdraw up to the current GCR.',
+                      content: '<b>Instant Withdraw</b>: Withdraw up to the current Global collateral ratio (GCR).',
                       delay: { show: 150, hide: 100 },
                     }"
                   >
@@ -154,7 +178,7 @@
                     @click="toWithdrawType('existing')"
                     :class="{ active: withdrawType === 'existing' }"
                     v-tooltip="{
-                      content: '<b>Withdraw</b>: After a withdrawal request passes, you can withdraw collateral here.',
+                      content: '<b>Withdraw</b>: After a <u>withdrawal request</u> passes, you can withdraw collateral here.',
                       delay: { show: 150, hide: 100 },
                     }"
                   >
@@ -329,7 +353,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Price at which your position can be liquidated',
+                content: 'Asset price at which your position will be liquidated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -381,59 +405,50 @@
             <label
               v-if="tokenSelected"
               v-tooltip="{
-                content: 'Total WETH locked as collateral',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Position Collateral (WETH):
-              <b>{{ currCollat ? currCollat : "0" }}</b>
-            </label>
-            <label
-              v-if="tokenSelected"
-              v-tooltip="{
                 content: 'Total minted uTokens in this position',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Position Outstanding ({{ tokenSelected }}):
+              Position Outstanding {{ tokenSelected }}:
               <b>{{ currTokens ? currTokens : "0" }}</b>
             </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
-                content: 'Current liquidation price of your position',
+                content: 'Total WETH locked as collateral',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Current Liquidation Price:
-              <b>{{ currLiquidationPrice ? currLiquidationPrice : "0" }}</b>
+              Position Collateral WETH:
+              <b>{{ currCollat ? currCollat : "0" }}</b>
             </label>
           </div>
         </Container>
-      </div>
 
-      <div v-if="navPage === 'info'">
-        <!-- <div id>
-          <la-cartesian
-            narrow
-            :bound="[n => n - 40, n => n + 40]"
-            :data="chartOptionsMedianValues"
-            :width="800 - 60"
-            :height="300 - 60"
-          >
-            <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
-              <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
-                <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">{{ props.value }}</text>
-              </g>
-            </la-line>
-            <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="12"></la-x-axis>
-            <la-y-axis prop="value"></la-y-axis>
-          </la-cartesian>
-        </div>-->
-        <CardLink title="Learn More about uGAS" link="https://docs.degenerative.finance/ugas" />
+        <Container v-if="showMedian" :size="440">
+          <div>
+            <la-cartesian
+              class="mobile-median-chart"
+              narrow
+              :bound="[n => n - 40, n => n + 40]"
+              :data="chartOptionsMedianValues"
+              :width="460 - 60"
+              :height="250 - 60"
+            >
+              <la-line dot animated curve :width="2" prop="value" color="var(--primary)">
+                <g slot-scope="props" fill="rgb(255 74 74 / 50%)" :font-size="12">
+                  <text :x="props.x" :y="props.y" text-anchor="middle" dy="-.5em">{{ props.value }}</text>
+                </g>
+              </la-line>
+              <la-x-axis prop="name" color="rgb(0 0 0 / 40%)" font-weight="bold" :font-size="10"></la-x-axis>
+              <la-y-axis prop="value" :font-size="10"></la-y-axis>
+            </la-cartesian>
+            <h4 class="center">Gas Median Chart</h4>
+          </div>
+        </Container>
+        <!-- <CardLink title="Learn More about uGAS" link="https://docs.degenerative.finance/ugas" /> -->
       </div>
     </Container>
   </div>
@@ -454,6 +469,7 @@ import {
   getPriceByContract,
   DevMiningCalculator,
   getTokenPrice,
+  get30DMedian,
 } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
@@ -518,7 +534,9 @@ export default {
       currentError: null,
       currPos: null,
       currEMP: null,
+      showMedian: false,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
+      medianData: [],
       chartOptionsCandle: {},
       balanceWETH: 0,
       balanceUGAS: 0,
@@ -620,8 +638,10 @@ export default {
     await this.initAsset();
     await this.lastPrice();
     await this.initChart();
+    await this.initMedianChart();
     await this.getWETHBalance();
     await this.checkUpdateApprovals();
+    await this.$refs.gasStats.getAccountStats();
   },
   computed: {
     account() {
@@ -682,6 +702,8 @@ export default {
     ]),
     ...mapGetters(["empState"]),
     async initAsset() {
+      this.medianData = await get30DMedian();
+
       if (this.tokenSelected) {
         this.fetchApprovalAll();
       }
@@ -820,7 +842,7 @@ export default {
         dataZoom: [
           {
             type: "inside",
-            start: 45,
+            start: 75,
             end: 100,
           },
           {
@@ -860,14 +882,15 @@ export default {
         ],
       };
     },
-    initInfoChart() {
-      this.chartOptionsMedianValues = [];
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      for (let i = 0; i < months.length; i++) {
-        this.chartOptionsMedianValues.push({
-          name: months[i],
-          value: Math.floor(Math.random() * (420 - 25 + 1) + 25),
-        });
+    initMedianChart() {
+      if (this.medianData.length >= 1) {
+        this.chartOptionsMedianValues = [];
+        for (let i = 0; i < this.medianData.length; i++) {
+          this.chartOptionsMedianValues.push({
+            name: this.moment(this.medianData[i].timestamp).format("MM/DD"),
+            value: Number(parseFloat(this.medianData[i].price / 10 ** 9).toFixed(0)),
+          });
+        }
       }
     },
     checkTime() {
@@ -886,7 +909,7 @@ export default {
       }
       return false;
     },
-    checkNewWithdraw() {
+    checkRequestWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos) {
         const tn = new Date().getTime() / 1000;
@@ -899,27 +922,6 @@ export default {
         } else if (tn + Number(this.currEMP.withdrawalLiveness) > Number(this.currEMP.expierationTimestamp)) {
           this.hasError = true;
           this.currentError = "Request expires post-expiry, wait for contract to expire";
-        } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
-            new BigNumber(this.currPos.tokensOutstanding) /
-            this.price <
-          this.gcr
-        ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
-          console.log("numerator", numerator);
-          console.log("denom", this.currPos.tokensOutstanding);
-          const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
-          console.log(
-            "HERE",
-            newcr.toString(),
-            new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(ethDecs),
-            this.currPos.tokensOutstanding,
-            this.gcr
-          );
-          this.hasError = true;
-          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
@@ -1114,7 +1116,7 @@ export default {
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
         } else if (this.withdrawType == "new") {
-          this.checkNewWithdraw();
+          this.checkRequestWithdraw();
         } else {
           this.checkInstantWithdraw();
         }
@@ -1181,7 +1183,7 @@ export default {
         this.actName = "Request Withdraw";
         this.hasError = false;
         this.currentError = "";
-        this.checkNewWithdraw();
+        this.checkRequestWithdraw();
       } else if (on == "existing") {
         this.actName = "Withdraw";
         this.hasError = false;
@@ -1537,7 +1539,7 @@ export default {
     toNavPage(on) {
       this.navPage = on;
       if (this.navPage === "info") {
-        this.initInfoChart();
+        this.initMedianChart();
       }
       console.log("toNavPage", on);
     },
@@ -1648,13 +1650,14 @@ export default {
       const wrap = await this.unwrapETH({ amount: amount });
       console.log("unwrapETH", wrap);
     },
+    showMedianToggle() {
+      console.log("showMedian", this.showMedian);
+      this.showMedian = !this.showMedian;
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
-.maker {
-  zoom: 1;
-}
 .hideDropdown {
   display: none;
 }
@@ -1920,6 +1923,14 @@ div.error {
   font-size: 22px;
   font-weight: normal;
   height: 36px;
+  &.info {
+    background: var(--primary);
+    color: #fff;
+  }
+  &.tutorial {
+    background: #6799e5;
+    color: #fff;
+  }
 }
 
 .echarts,
@@ -1976,6 +1987,32 @@ div.error {
   }
 }
 
+#thebox-nav {
+  .button {
+    cursor: pointer;
+    background: #f2eeef;
+    color: #e57067;
+    border-radius: 5px;
+    padding: 5px 10px;
+    position: relative;
+    font-weight: bold;
+    font-size: 14px;
+    &.link {
+      &:after {
+        content: url("../assets/external.svg");
+        width: 24px;
+        height: 24px;
+        margin: 0px 0 0 5px;
+        opacity: 0.4;
+        display: inline-block;
+        position: absolute;
+        top: 3px;
+        right: 4px;
+      }
+    }
+  }
+}
+
 .settling {
   display: flex;
   width: 100%;
@@ -1992,7 +2029,7 @@ div.error {
 }
 
 .wrapeth {
-  background: #a5cdf9;
+  background: #c5c5c5;
 }
 
 .row {
@@ -2000,10 +2037,18 @@ div.error {
   width: 100%;
 
   @media (max-width: 540px) {
+    &.row-item-col {
+      flex-direction: column;
+      div.item,
+      .flexitem {
+        width: 100%;
+      }
+    }
     flex-flow: row nowrap; // update
     align-items: center;
   }
-  div.item {
+  div.item,
+  .flexitem {
     flex: 1 1 0%;
   }
 }
@@ -2012,7 +2057,7 @@ div.error {
   text-shadow: 0px 1px 1px #de1d73;
 }
 .unitemp {
-  color: #fe187f;
+  color: #e07593; // #fe187f
   font-size: 52px;
   @media (max-width: 540px) {
     margin-bottom: 16px;
@@ -2041,7 +2086,7 @@ div.error {
   }
 }
 .asset-info {
-  margin: 0px 20px 10px 20px;
+  margin: 0px 20px 0px 20px;
   display: flex;
   justify-content: space-between;
 }
@@ -2049,5 +2094,13 @@ div.error {
   font-size: 13px;
   padding: 0px 10px;
   color: #0000005e;
+  a {
+    color: var(--primary);
+  }
+}
+.mobile-median-chart {
+  @media (max-width: 540px) {
+    left: -60px;
+  }
 }
 </style>
