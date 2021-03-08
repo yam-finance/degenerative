@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <Header />
-    <Space size="sm" style="display:flex" />
     <router-view />
     <SpacePush />
     <!-- <Space size="sm" style="display:flex" /> -->
