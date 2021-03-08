@@ -15,7 +15,11 @@
       <Space size="20" />
 
       <div v-if="$route.params.key === 'ugas'">
-        <GasStats ref="gasStats" />
+        <button class="gas-detail-button" @click="displayAssetStats">{{ showInfoButtonText }}</button>
+        <Space class="mobile-display" size="10" />
+        <GasStats class="gas-cards" v-show="showInfo" ref="gasStats" />
+        <Space class="desktop-display" size="md" />
+        <Space class="mobile-display" size="10" />
       </div>
 
       <div v-if="navPage === 'interact'">
@@ -518,6 +522,8 @@ export default {
       navAct: "mint",
       info: true,
       tokenSelected: null,
+      showInfo: false,
+      showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       tokenAmt: null,
       collatAmt: null,
@@ -667,7 +673,7 @@ export default {
         return;
       }
       const assetInstance = this.asset[this.tokenSelected];
-      const base = new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals));
+      const base = new BigNumber(10).pow(new BigNumber(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
       this.tokenBalance = await this.getUserAssetTokenBalance({ assetInstance: assetInstance });
       this.tokenBalance = new BigNumber(this.tokenBalance).div(base).toFixed(4);
     },
@@ -685,33 +691,11 @@ export default {
       const assetChart = await getUniswapDataDaily(this.asset[this.tokenSelected].token.address, from); // Daily
       // console.log("UGASJAN21 assetChart", assetChart);
 
-      const medianGasValues = [];
-      const medianGasNames = [];
       const tempChartData = [];
       const tempChartTWAPData = [];
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      for (const element of this.chartOptionsMedianValues) {
-        const ts = Date.parse(element.name);
-        const dateObject = new Date(ts);
-        const monthIndex = dateObject.getMonth();
-        const monthName = months[monthIndex];
-        const day = dateObject.getDate();
-        const timestampDate = monthName + ", " + day;
-        medianGasNames.push(timestampDate);
-      }
-
       for (const element of assetChart) {
         tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
         tempChartTWAPData.push(element.twapETH);
-
-        if (medianGasNames.includes(element.timestampDate)) {
-          const index = medianGasNames.indexOf(element.timestampDate);
-          const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
-          medianGasValues.push(valueToBeAdded);
-        } else {
-          medianGasValues.push(null);
-        }
       }
 
       // chart: uniswap data
@@ -841,20 +825,6 @@ export default {
             },
             lineStyle: {
               width: 1,
-              opacity: 0.6,
-            },
-          },
-          {
-            name: "Gas Median",
-            type: "line",
-            data: medianGasValues,
-            smooth: false,
-            symbolSize: 3,
-            itemStyle: {
-              color: redColor,
-            },
-            lineStyle: {
-              width: 2,
               opacity: 0.6,
             },
           },
@@ -1049,7 +1019,7 @@ export default {
     updateCR(removeTokens = false, removeCollateral = false) {
       if (this.currPos && this.tokenSelected) {
         const assetInstance = this.asset[this.tokenSelected];
-        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(assetInstance.token.decimals));
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
         const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
         let totalTokens;
         let totalCollat;
@@ -1077,7 +1047,7 @@ export default {
       this.updateCR(removeTokens, removeCollateral);
       if (this.currPos && this.tokenSelected) {
         const assetInstance = this.asset[this.tokenSelected];
-        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(assetInstance.token.decimals));
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
         const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
         let totalTokens;
         let totalCollat;
@@ -1114,7 +1084,7 @@ export default {
       }
 
       const assetInstance = this.asset[this.tokenSelected];
-      const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(assetInstance.token.decimals));
+      const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
       const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
       this.currLiquidationPrice = getLiquidationPrice(
         col,
@@ -1254,7 +1224,7 @@ export default {
       this.currPos = pos;
       if (this.currPos) {
         this.currTokens = new BigNumber(this.currPos.tokensOutstanding)
-          .div(assetInstance.token.decimals)
+          .div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)))
           .toFixed(4)
           .toString();
         this.currCollat = new BigNumber(this.currPos.rawCollateral)
@@ -1266,7 +1236,7 @@ export default {
       const totalColl = k.cumulativeFeeMultiplier
         .div(colDec[this.asset[this.tokenSelected].collateral])
         .times(k.rawTotalPositionCollateral.dividedBy(colDec[this.asset[this.tokenSelected].collateral]));
-      const totalTokens = k.totalTokensOutstanding.div(assetInstance.token.decimals);
+      const totalTokens = k.totalTokensOutstanding.div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
       this.gcr = totalTokens > 0 ? (totalColl / totalTokens / this.price).toFixed(4) : 0;
       console.log("this.gcr", this.gcr);
 
@@ -1376,7 +1346,7 @@ export default {
             this.mint({
               assetInstance: assetInstance,
               collat: new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]).toFixed(),
-              tokens: new BigNumber(this.tokenAmt).times(assetInstance.token.decimals).toFixed(),
+              tokens: new BigNumber(this.tokenAmt).times(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))).toFixed(),
             })
               .then(async e => {
                 console.log("mint", e[1]);
@@ -1496,7 +1466,10 @@ export default {
             } else {
               console.log("redeem");
               this.isPending = true;
-              this.redeem({ assetInstance: assetInstance, tokens: new BigNumber(this.tokenAmt).times(assetInstance.token.decimals).toString() })
+              this.redeem({
+                assetInstance: assetInstance,
+                tokens: new BigNumber(this.tokenAmt).times(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))).toString(),
+              })
                 .then(e => {
                   this.isPending = false;
                   if (e[1] && e[1] != "") {
@@ -1539,6 +1512,15 @@ export default {
       }
       this.runChecks();
       console.log("toNavAct", on);
+    },
+    displayAssetStats() {
+      this.showInfo = !this.showInfo;
+
+      if (this.showInfo) {
+        this.showInfoButtonText = "Close Gas Info";
+      } else {
+        this.showInfoButtonText = "Gas Info";
+      }
     },
     tokenHandler() {
       this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
@@ -1653,6 +1635,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.gas-cards {
+  @media (min-width: 800px) {
+    display: flex !important;
+  }
+}
+
 .hideDropdown {
   display: none;
 }
@@ -1886,23 +1874,23 @@ div.error {
   height: 200px;
 }
 
-.asset-detail-switch {
+.gas-detail-button {
+  display: none;
   cursor: pointer;
-  color: #fff;
-  background: var(--primary);
+  background: var(--back-wallet);
+  border-radius: 5px;
   border: none;
-  border-radius: 2px;
   padding: 0px 10px;
-  font-size: 22px;
-  font-weight: normal;
   height: 36px;
-  &.info {
-    background: var(--primary);
-    color: #fff;
+  color: var(--text-wallet);
+  font-size: 14px;
+
+  &:hover {
+    box-shadow: 0px 2px 3px var(--back-wallet-hover);
   }
-  &.tutorial {
-    background: #6799e5;
-    color: #fff;
+
+  @media (max-width: 800px) {
+    display: inline-block;
   }
 }
 
