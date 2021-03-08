@@ -15,11 +15,7 @@
       <Space size="20" />
 
       <div v-if="$route.params.key === 'ugas'">
-        <button class="gas-detail-button" @click="displayAssetStats">{{ showInfoButtonText }}</button>
-        <Space class="mobile-display" size="10" />
-        <GasStats class="gas-cards" v-show="showInfo" ref="gasStats" />
-        <Space class="desktop-display" size="md" />
-        <Space class="mobile-display" size="10" />
+        <GasStats ref="gasStats" />
       </div>
 
       <div v-if="navPage === 'interact'">
@@ -522,8 +518,6 @@ export default {
       navAct: "mint",
       info: true,
       tokenSelected: null,
-      showInfo: false,
-      showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       tokenAmt: null,
       collatAmt: null,
@@ -1546,15 +1540,6 @@ export default {
       this.runChecks();
       console.log("toNavAct", on);
     },
-    displayAssetStats() {
-      this.showInfo = !this.showInfo;
-
-      if (this.showInfo) {
-        this.showInfoButtonText = "Close Gas Info";
-      } else {
-        this.showInfoButtonText = "Gas Info";
-      }
-    },
     tokenHandler() {
       this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
       this.posUpdateHandler();
@@ -1668,12 +1653,6 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.gas-cards {
-  @media (min-width: 800px) {
-    display: flex !important;
-  }
-}
-
 .hideDropdown {
   display: none;
 }
@@ -1907,23 +1886,23 @@ div.error {
   height: 200px;
 }
 
-.gas-detail-button {
-  display: none;
+.asset-detail-switch {
   cursor: pointer;
-  background: var(--back-wallet);
-  border-radius: 5px;
+  color: #fff;
+  background: var(--primary);
   border: none;
+  border-radius: 2px;
   padding: 0px 10px;
+  font-size: 22px;
+  font-weight: normal;
   height: 36px;
-  color: var(--text-wallet);
-  font-size: 14px;
-
-  &:hover {
-    box-shadow: 0px 2px 3px var(--back-wallet-hover);
+  &.info {
+    background: var(--primary);
+    color: #fff;
   }
-
-  @media (max-width: 800px) {
-    display: inline-block;
+  &.tutorial {
+    background: #6799e5;
+    color: #fff;
   }
 }
 
