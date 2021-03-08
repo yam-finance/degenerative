@@ -1,13 +1,16 @@
 <template>
   <div class="home">
+    <img class="banner" src="../assets/graphics/degen_city.png" alt="" />
     <Container :size="900">
-      <img class="banner" src="../assets/graphics/degen_city.png" alt="" />
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
       </div>
       <div class="row">
         <div class="col">
+          <div style="margin-left: auto; margin-right: auto;">
+            <router-link class="grph" to="/assets/ustonks">uSTONKS</router-link>
+          </div>
           <p>
             Introducing uSTONKS, a synthetic that tracks the ten most bullish Wall Street Bets stocks and captures the sentiment of the r/WSB community.
           </p>
@@ -21,6 +24,9 @@
         </div>
 
         <div class="col">
+          <div style="margin-left: auto; margin-right: auto;">
+            <router-link class="grph" to="/assets/ugas">uGAS</router-link>
+          </div>
           <p>
             Check out uGAS, our synthetic futures contract that settles to the 30-Day Median Ethereum Gas Price.
           </p>
@@ -95,11 +101,11 @@
 <style lang="scss" scoped>
 .home {
   max-width: 900px;
+  margin: auto;
 }
 .banner {
   padding-bottom: 20px;
   width: 100%;
-  margin: auto;
 }
 .home-columns {
   display: flex;
