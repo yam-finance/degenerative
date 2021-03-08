@@ -691,11 +691,33 @@ export default {
       const assetChart = await getUniswapDataDaily(this.asset[this.tokenSelected].token.address, from); // Daily
       // console.log("UGASJAN21 assetChart", assetChart);
 
+      const medianGasValues = [];
+      const medianGasNames = [];
       const tempChartData = [];
       const tempChartTWAPData = [];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      for (const element of this.chartOptionsMedianValues) {
+        const ts = Date.parse(element.name);
+        const dateObject = new Date(ts);
+        const monthIndex = dateObject.getMonth();
+        const monthName = months[monthIndex];
+        const day = dateObject.getDate();
+        const timestampDate = monthName + ", " + day;
+        medianGasNames.push(timestampDate);
+      }
+
       for (const element of assetChart) {
         tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
         tempChartTWAPData.push(element.twapETH);
+
+        if (medianGasNames.includes(element.timestampDate)) {
+          const index = medianGasNames.indexOf(element.timestampDate);
+          const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
+          medianGasValues.push(valueToBeAdded);
+        } else {
+          medianGasValues.push(null);
+        }
       }
 
       // chart: uniswap data
@@ -825,6 +847,20 @@ export default {
             },
             lineStyle: {
               width: 1,
+              opacity: 0.6,
+            },
+          },
+          {
+            name: "Gas Median",
+            type: "line",
+            data: medianGasValues,
+            smooth: false,
+            symbolSize: 3,
+            itemStyle: {
+              color: redColor,
+            },
+            lineStyle: {
+              width: 2,
               opacity: 0.6,
             },
           },
