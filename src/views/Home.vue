@@ -49,11 +49,11 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_create.png" />
-              <h3>Create</h3>
+              <img src="../assets/graphics/graphic_liquidity.png" />
+              <h3>Mint + LP</h3>
               <div class="text justify">
-                Deposit ETH as collateral to mint uGAS tokens. Each uGas token represents 1,000,000 gas and expires at 00:00 UTC on the 1st day of the following
-                month. You can withdraw collateral at any time as long as the Minimum Collateral Ratio is maintained.
+                Mint and deposit synthetic tokens in the corresponding Uniswap pool to earn UMA and Yam liquidity provider rewards. To qualify, users must both
+                mint and deposit their synth tokens. Tokens which are traded and then deposited will not qualify.
               </div>
             </div>
 
@@ -73,11 +73,11 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_liqudity.png" />
-              <h3>Provide Liquidity</h3>
+              <img src="../assets/graphics/graphic_create.png" />
+              <h3>Go Short</h3>
               <div class="text justify">
-                Mint and deposit your uGAS tokens in the Uniswap uGAS/ETH LP to earn UMA liquidity provider rewards. To qualify, users must both mint and
-                deposit their uGAS tokens. Tokens which are traded and then deposited will not qualify.
+                Deposit collateral to mint synth tokens and sell them on Uniswap. After the synth token price has fallen, buy back your position and unlock the
+                collateral.
               </div>
             </div>
 
@@ -87,8 +87,8 @@
               <img src="../assets/graphics/graphic_redeem.png" />
               <h3>Redeem</h3>
               <div class="text justify">
-                Redeem your uGAS tokens upon expiry for ETH. The settlement price for uGAS is based on the rolling 30-day median price of all Ethereum
-                transactions.
+                If you minted the synth, you can redeem at any time before or after expiry to retrieve your collateral. We give you full flexibility to make
+                sure you can do with your collateral whatever you like.
               </div>
             </div>
           </div>
@@ -129,16 +129,14 @@
 }
 
 .large-title {
-  @media (max-width: 420px) {
-    font-size: 24px;
-  }
+  font-size: 24px;
 }
 
 .getdegenerative {
   padding-bottom: 20px;
 
   .large-title {
-    font-size: 54px;
+    font-size: 48px;
   }
   .subtitle {
     font-size: 28px;
