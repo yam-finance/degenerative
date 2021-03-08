@@ -1183,7 +1183,9 @@ export default {
         //   this.currentError = "Insufficient";
         //   return;
         // }
-        if (this.tokenAmt && this.tokenAmt < 5) {
+        let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
+        minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
+        if (this.tokenAmt && this.tokenAmt < minTokens) {
           this.hasError = true;
           this.currentError = "Minimum mint amount is 5";
           return;
