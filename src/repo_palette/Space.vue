@@ -49,5 +49,6 @@ export default {
 <style lang="scss" scoped>
 .style {
   display: inline-block;
+  flex: 0 0 auto;
 }
 </style>
