@@ -11,9 +11,9 @@
         <SpacePush />
         <div class="router-links">
           <router-link @click.native="respNavClick" to="/">Home</router-link>
-          <router-link @click.native="respNavClick" to="/assets">Assets</router-link>
-          <router-link @click.native="respNavClick" to="/asset/ugas">uGAS</router-link>
+          <!-- <router-link @click.native="respNavClick" to="/assets">Assets</router-link> -->
           <router-link @click.native="respNavClick" to="/asset/ustonks">uSTONKS</router-link>
+          <router-link @click.native="respNavClick" to="/asset/ugas">uGAS</router-link>
           <a @click="respNavClick" href="https://docs.degenerative.finance" target="_blank">Docs</a>
           <div @click="respNavClose" class="resp-links-close">Close</div>
           <Space />
