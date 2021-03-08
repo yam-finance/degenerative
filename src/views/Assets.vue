@@ -1,5 +1,6 @@
 <template>
   <div class="assets">
+    <Space size="sm" style="display:flex" />
     <Container :size="900">
       <Card>
         <h2 class="flex">

@@ -74,20 +74,21 @@ a,
 button {
   &.grph {
     cursor: pointer;
-    display: inline-block;
+    display: block;
     text-align: center;
     border-radius: 100px;
-    font-size: 22px;
+    font-size: 20px;
     color: #fff;
     // background: radial-gradient(174.47% 188.91% at 1.84% 10%, #ff7575 20%, #ec0e5c 80%), rgb(237, 238, 242);
     background: var(--primary);
     box-shadow: rgb(15 10 12 / 18%) 8px 8px 18px 0px, rgba(255, 255, 255, 0.075) 8px -8px 16px 0px;
-    min-width: 190px;
-    padding: 10px 20px;
+    min-width: 140px;
+    padding: 8px 15px;
     border: none;
-    margin: 20px 0px;
+    margin: 25px auto;
     font-weight: 100;
     transition: all 0.1s linear;
+    width: 75%;
     &:hover {
       box-shadow: none;
     }
@@ -166,6 +167,21 @@ h4 {
   &.tutorial {
     background: #6799e5;
     color: #fff;
+  }
+}
+
+.desktop-display {
+  display: inline-block !important;
+
+  @media (max-width: 800px) {
+    display: none !important;
+  }
+}
+.mobile-display {
+  display: none !important;
+
+  @media (max-width: 800px) {
+    display: inline-block !important;
   }
 }
 

@@ -1,5 +1,6 @@
 <template>
   <div class="assets">
+    <Space size="sm" style="display:flex" />
     <Container :size="900">
       <Card>
         <h2 class="flex">
@@ -22,11 +23,24 @@
       </div>
 
       <div v-if="navPage === 'interact'">
-        <div class="warning bold justify">
-          Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out our
-          handy Step by step
-          <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">User Guide</a> for in depth instructions. And stop by the
-          <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
+        <div class="warning justify">
+          <div>
+            Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out
+            our handy Step by step <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">User Guide</a> for in depth
+            instructions. And stop by the <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
+          </div>
+
+          <div v-if="$route.params.key === 'ustonks'">
+            <br />
+            <b>uSTONKS NFT Giveaway</b> <span>The first 100 users to Mint $10K USDC worth of uSTONKS, then LP uSTONKS/USDC for 3 weeks qualify.</span>
+            <br />
+            <span><b>uSTONKS-APR21</b> is a synthetic that will expire at 4:00PM EST on April 30th.</span>
+          </div>
+
+          <div v-if="$route.params.key === 'ugas'">
+            <br />
+            <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
+          </div>
         </div>
 
         <Space size="md" />
@@ -1623,20 +1637,7 @@ export default {
     display: flex !important;
   }
 }
-.desktop-display {
-  display: inline-block !important;
 
-  @media (max-width: 800px) {
-    display: none !important;
-  }
-}
-.mobile-display {
-  display: none !important;
-
-  @media (max-width: 800px) {
-    display: inline-block !important;
-  }
-}
 .hideDropdown {
   display: none;
 }
