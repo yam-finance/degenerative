@@ -596,5 +596,6 @@ export async function getDevMiningEmps() {
 
 export const get30DMedian = async () => {
   const data: any = await requestHttp("https://ugasapi.yam.finance/median");
-  return data.slice(Math.max(data.length - 10, 0));
+  // return data.slice(Math.max(data.length - 20, 0));
+  return data;
 };
