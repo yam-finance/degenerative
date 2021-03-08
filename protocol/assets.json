@@ -5,7 +5,6 @@
       "cycle": "JAN",
       "year": "21",
       "collateral": "WETH",
-      "minMint": 5,
       "token": {
         "address": "0x3d995510f8d82c2ea341845932b5ddde0bead9a3",
         "decimals": 18
@@ -27,7 +26,6 @@
       "cycle": "FEB",
       "year": "21",
       "collateral": "WETH",
-      "minMint": 5,
       "token": {
         "address": "0x81fab276aec924fbde190cf379783526d413cf70",
         "decimals": 18
@@ -49,7 +47,6 @@
       "cycle": "MAR",
       "year": "21",
       "collateral": "WETH",
-      "minMint": 5,
       "token": {
         "address": "0x4e110603e70b0b5f1c403ee543b37e1f1244cf28",
         "decimals": 18
@@ -71,7 +68,6 @@
       "cycle": "JUN",
       "year": "21",
       "collateral": "WETH",
-      "minMint": 5,
       "token": {
         "address": "0xa6b9d7e3d76cf23549293fb22c488e0ea591a44e",
         "decimals": 18
@@ -95,7 +91,6 @@
       "cycle": "APR",
       "year": "21",
       "collateral": "USDC",
-      "minMint": 1,
       "token": {
         "address": "0xec58d3aefc9aaa2e0036fa65f70d569f49d9d1ed",
         "decimals": 6

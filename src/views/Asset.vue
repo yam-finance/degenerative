@@ -693,26 +693,30 @@ export default {
       const tempChartTWAPData = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-      for (const element of this.chartOptionsMedianValues) {
-        const ts = Date.parse(element.name);
-        const dateObject = new Date(ts);
-        const monthIndex = dateObject.getMonth();
-        const monthName = months[monthIndex];
-        const day = dateObject.getDate();
-        const timestampDate = monthName + ", " + day;
-        medianGasNames.push(timestampDate);
+      if (this.assetName == "UGAS") {
+        for (const element of this.chartOptionsMedianValues) {
+          const ts = Date.parse(element.name);
+          const dateObject = new Date(ts);
+          const monthIndex = dateObject.getMonth();
+          const monthName = months[monthIndex];
+          const day = dateObject.getDate();
+          const timestampDate = monthName + ", " + day;
+          medianGasNames.push(timestampDate);
+        }
       }
 
       for (const element of assetChart) {
         tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
         tempChartTWAPData.push(element.twapETH);
 
-        if (medianGasNames.includes(element.timestampDate)) {
-          const index = medianGasNames.indexOf(element.timestampDate);
-          const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
-          medianGasValues.push(valueToBeAdded);
-        } else {
-          medianGasValues.push(null);
+        if (this.assetName == "UGAS") {
+          if (medianGasNames.includes(element.timestampDate)) {
+            const index = medianGasNames.indexOf(element.timestampDate);
+            const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
+            medianGasValues.push(valueToBeAdded);
+          } else {
+            medianGasValues.push(null);
+          }
         }
       }
 
@@ -1187,7 +1191,7 @@ export default {
         minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
         if (this.tokenAmt && this.tokenAmt < minTokens) {
           this.hasError = true;
-          this.currentError = "Minimum mint amount is 5";
+          this.currentError = "Minimum mint amount is " + minTokens;
           return;
         } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
           this.hasError = true;
