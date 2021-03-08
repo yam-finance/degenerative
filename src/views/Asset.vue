@@ -1234,12 +1234,11 @@ export default {
       }
       this.currEMP = k;
       const totalColl = k.cumulativeFeeMultiplier
-        .div(colDec[this.asset[this.tokenSelected].collateral])
+        .div(10 ** 18)
         .times(k.rawTotalPositionCollateral.dividedBy(colDec[this.asset[this.tokenSelected].collateral]));
       const totalTokens = k.totalTokensOutstanding.div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
       this.gcr = totalTokens > 0 ? (totalColl / totalTokens / this.price).toFixed(4) : 0;
       console.log("this.gcr", this.gcr);
-
       this.collReq = k.collateralRequirement;
       this.getAssetInstanceBalance();
       this.posUpdateHandler();
