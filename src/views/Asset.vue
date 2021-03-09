@@ -44,15 +44,6 @@
         <Container :size="440">
           <div class="asset-info" :class="{ 'apr-info': tokenSelected }">
             <span :class="{ 'apr-block': tokenSelected }">
-              <span v-if="!tokenSelected">
-                <b
-                  v-tooltip="{
-                    content: 'Select asset first.',
-                    delay: { show: 150, hide: 100 },
-                  }"
-                  >APR</b
-                >
-              </span>
               <span
                 v-if="tokenSelected"
                 v-tooltip="{
@@ -88,6 +79,15 @@
                 {{ price && price > 0 ? (asset[tokenSelected].collateral == "WETH" ? numeral(price, "0.0000a") : numeral(price, "0.00a")) : "..." }}
                 {{ asset[tokenSelected].collateral }}
               </span>
+            </span>
+            <span v-if="!tokenSelected">
+              <b
+                v-tooltip="{
+                  content: 'Select asset first.',
+                  delay: { show: 150, hide: 100 },
+                }"
+                >APR</b
+              >
             </span>
             <span>
               <div v-if="$route.params.key === 'ugas'">
