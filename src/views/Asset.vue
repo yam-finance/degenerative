@@ -782,11 +782,17 @@ export default {
         }
       }
 
-      for (const element of assetChart) {
-        tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
-        tempChartTWAPData.push(element.twapETH);
+      if (this.assetName == "USTONKS") {
+        for (const element of assetChart) {
+          console.log(element.timestampDate, element.open, element.close, element.open, element.close);
+          tempChartData.push([element.timestampDate, element.open, element.close, element.open, element.close]);
+        }
+      }
 
-        if (this.assetName == "UGAS") {
+      if (this.assetName == "UGAS") {
+        for (const element of assetChart) {
+          tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
+          tempChartTWAPData.push(element.twapETH);
           if (medianGasNames.includes(element.timestampDate)) {
             const index = medianGasNames.indexOf(element.timestampDate);
             const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
