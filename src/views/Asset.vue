@@ -35,6 +35,7 @@
 
           <div v-if="$route.params.key === 'ugas'">
             <br />
+            <span><b>uGAS-Mar21</b> is a 30 day contract that will expire at 4:00PM EST on March 31st.</span>
             <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
           </div>
         </div>
@@ -281,7 +282,12 @@
                       <a
                         target="_blank"
                         class="clicklptrade"
-                        :href="'https://app.uniswap.org/#/add/ETH/' + asset[tokenSelected].token.address"
+                        :href="
+                          'https://app.uniswap.org/#/add/' +
+                            (asset[tokenSelected].collateral == 'WETH' ? 'ETH' : USDC) +
+                            '/' +
+                            asset[tokenSelected].token.address
+                        "
                         v-tooltip="{
                           content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
                           delay: { show: 150, hide: 100 },
@@ -320,12 +326,8 @@
               <Space size="16" />
 
               <div class="item">
-                <button v-if="!tokenSelected || asset[tokenSelected].collateral === 'WETH'" class="button wrapeth" @click="toggleWrap">Wrap ETH</button>
-                <a
-                  v-if="tokenSelected && asset[tokenSelected].collateral !== 'WETH'"
-                  class="button buyusdc"
-                  :href="'https://app.uniswap.org/#/swap?outputCurrency=' + USDC"
-                  target="_blank"
+                <button v-if="assetName == 'UGAS'" class="button wrapeth" @click="toggleWrap">Wrap ETH</button>
+                <a v-if="assetName == 'USTONKS'" class="button buyusdc" :href="'https://app.uniswap.org/#/swap?outputCurrency=' + USDC" target="_blank"
                   >Buy USDC</a
                 >
               </div>
