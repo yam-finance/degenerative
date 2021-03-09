@@ -622,3 +622,18 @@ export const get30DMedian = async () => {
   // return data.slice(Math.max(data.length - 20, 0));
   return data;
 };
+
+export const getCurrentTWAP = async () => {
+  const web3 = new Web3();
+  const data: any = await requestHttp("https://ugasapi.yam.finance/current-twap");
+  const currentTWAP = new BigNumber(web3.utils.fromWei(data.price.toString(), "ether")).decimalPlaces(4);
+
+  return currentTWAP;
+};
+
+export const getIndexFromSpreadsheet = async () => {
+  const data: any = await requestHttp("https://ugasapi.yam.finance/current-index");
+  const indexValue = new BigNumber(data.price).decimalPlaces(2);
+
+  return indexValue;
+};
