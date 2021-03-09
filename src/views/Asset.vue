@@ -54,9 +54,19 @@
                 >
               </span>
               <span
-                v-if="tokenSelected"
+                v-if="tokenSelected && $route.params.key === 'ugas'"
                 v-tooltip="{
                   content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                <b>APR:</b>
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
+              </span>
+              <span
+                v-if="tokenSelected && $route.params.key === 'ustonks'"
+                v-tooltip="{
+                  content: 'Earn rewards when you mint and LP ' + assetName + ' on Uniswap.',
                   delay: { show: 150, hide: 100 },
                 }"
               >
@@ -90,7 +100,7 @@
               </span>
             </span>
             <span>
-              <div v-if="$route.params.key === 'ugas'" class="item button">
+              <div v-if="$route.params.key === 'ugas'">
                 <span v-if="!tokenSelected">
                   <b
                     v-tooltip="{
@@ -112,7 +122,7 @@
                   {{ asset[tokenSelected].collateral }}
                 </span>
               </div>
-              <div v-if="$route.params.key === 'ustonks'" class="item button">
+              <div v-if="$route.params.key === 'ustonks'">
                 <span v-if="!tokenSelected">
                   <b
                     v-tooltip="{
