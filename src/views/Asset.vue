@@ -42,8 +42,8 @@
         <Space size="md" />
 
         <Container :size="440">
-          <div class="asset-info">
-            <span>
+          <div class="asset-info" :class="{ 'apr-info': tokenSelected }">
+            <span :class="{ 'apr-block': tokenSelected }">
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
@@ -54,7 +54,7 @@
                 >
               </span>
               <span
-                v-if="tokenSelected && $route.params.key === 'ugas'"
+                v-if="tokenSelected"
                 v-tooltip="{
                   content: 'Earn rewards when you mint and LP ' + assetName + ' on Uniswap.',
                   delay: { show: 150, hide: 100 },
@@ -2156,6 +2156,17 @@ div.error {
   display: flex;
   justify-content: space-between;
 }
+.apr-info {
+  font-size: 36px;
+  text-align: center;
+}
+
+.apr-block {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
 .warning {
   font-size: 13px;
   padding: 0px 10px;
