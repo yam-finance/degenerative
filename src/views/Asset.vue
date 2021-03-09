@@ -50,6 +50,30 @@
                     content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
+                  >APR</b
+                >
+              </span>
+              <span
+                v-if="tokenSelected"
+                v-tooltip="{
+                  content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                <b>APR:</b>
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
+              </span>
+            </span>
+          </div>
+
+          <div class="asset-info">
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select asset first.',
+                    delay: { show: 150, hide: 100 },
+                  }"
                   >Asset Price</b
                 >
               </span>
@@ -69,16 +93,32 @@
                   >APR</b
                 >
               </span>
-              <span
-                v-if="tokenSelected"
-                v-tooltip="{
-                  content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
-                  delay: { show: 150, hide: 100 },
-                }"
-              >
-                <b>APR:</b>
-                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
-              </span>
+              <div v-if="$route.params.key === 'ugas'" class="item button">
+                <span
+                  v-if="tokenSelected"
+                  v-tooltip="{
+                    content: 'uGAS TWAP ' + assetName + ' on Uniswap.',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                >
+                  <b>TWAP Price:</b>
+                  {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
+                  {{ asset[tokenSelected].collateral }}
+                </span>
+              </div>
+              <div v-if="$route.params.key === 'ustonks'" class="item button">
+                <span
+                  v-if="tokenSelected"
+                  v-tooltip="{
+                    content: 'Index Market Price ' + assetName,
+                    delay: { show: 150, hide: 100 },
+                  }"
+                >
+                  <b>Index Price:</b>
+                  {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
+                  {{ asset[tokenSelected].collateral }}
+                </span>
+              </div>
             </span>
           </div>
         </Container>
@@ -90,17 +130,19 @@
             <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
               >Step by Step User Guide</a
             >
+            <!--
             <Space v-if="$route.params.key === 'ugas' || showMedian" size="10" />
             <div v-if="$route.params.key === 'ugas' || showMedian" @click="showMedianToggle" class="item button">
               <span v-if="!showMedian">Median Chart</span>
               <span v-if="showMedian">Back</span>
             </div>
+            -->
           </div>
         </Container>
 
         <Space size="10" class="flex" />
 
-        <Container v-if="!showMedian" :size="440">
+        <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
@@ -456,6 +498,7 @@
           </div>
         </Container>
 
+        <!--
         <Container v-if="showMedian" :size="440">
           <div>
             <la-cartesian
@@ -477,6 +520,7 @@
             <h4 class="center">Gas Median Chart</h4>
           </div>
         </Container>
+        -->
         <!-- <CardLink title="Learn More about Degenerative" link="https://docs.degenerative.finance" /> -->
       </div>
     </Container>
@@ -486,7 +530,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, formAssetName } from "../utils";
+import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, formAssetName } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { WETH, USDC } from "@/utils/addresses";
@@ -534,9 +578,11 @@ export default {
       currentError: null,
       currPos: null,
       currEMP: null,
-      showMedian: false,
+      // showMedian: false,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       medianData: [],
+      currentTWAP: 0,
+      indexPrice: 0,
       chartOptionsCandle: {},
       balanceWETH: 0,
       balanceUSDC: 0,
@@ -638,6 +684,12 @@ export default {
       console.warn("this.asset", this.formAssetName(this.assetName, this.asset[this.tokenSelected]));
 
       this.medianData = await get30DMedian();
+
+      this.currentTWAP = await getCurrentTWAP();
+      console.log(this.currentTWAP);
+
+      this.indexPrice = 2;
+      console.log(this.indexPrice);
 
       if (this.tokenSelected) {
         this.fetchApprovalAll();
@@ -1654,10 +1706,12 @@ export default {
       const wrap = await this.unwrapETH({ amount: amount });
       console.log("unwrapETH", wrap);
     },
+    /*
     showMedianToggle() {
       console.log("showMedian", this.showMedian);
       this.showMedian = !this.showMedian;
     },
+    */
     formAssetName,
   },
 };
