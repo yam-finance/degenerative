@@ -638,8 +638,8 @@ export const getIndexFromSpreadsheet = async () => {
   await doc.loadInfo();
 
   const sheet = await doc.sheetsByIndex[0];
-  await sheet.loadCells("M51");
-  const targetCell = await sheet.getCellByA1("M51");
+  await sheet.loadCells("M50");
+  const targetCell = await sheet.getCellByA1("M50");
   const indexValue = new BigNumber(targetCell.value).decimalPlaces(2);
 
   return indexValue;
