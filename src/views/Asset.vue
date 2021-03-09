@@ -84,7 +84,7 @@
                     content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
-                  >Asset Price</b
+                  >Asset</b
                 >
               </span>
               <span
@@ -107,17 +107,17 @@
                       content: 'Select asset first.',
                       delay: { show: 150, hide: 100 },
                     }"
-                    >TWAP Price</b
+                    >TWAP</b
                   >
                 </span>
                 <span
                   v-if="tokenSelected"
                   v-tooltip="{
-                    content: 'TWAP ' + assetName,
+                    content: 'TWAP price of ' + assetName,
                     delay: { show: 150, hide: 100 },
                   }"
                 >
-                  <b>TWAP Price:</b>
+                  <b>TWAP:</b>
                   {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
                   {{ asset[tokenSelected].collateral }}
                 </span>
@@ -129,7 +129,7 @@
                       content: 'Select asset first.',
                       delay: { show: 150, hide: 100 },
                     }"
-                    >Index Price</b
+                    >Index</b
                   >
                 </span>
                 <span
