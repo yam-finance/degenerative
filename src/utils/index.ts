@@ -14,7 +14,6 @@ import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
 import { JsonTxResult } from "../interfaces/degenerative.i";
 import Assets from "../../protocol/assets.json";
-import { GoogleSpreadsheet } from "google-spreadsheet";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
