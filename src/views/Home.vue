@@ -14,7 +14,7 @@
             Introducing uSTONKS, a synthetic that tracks the ten most bullish Wall Street Bets stocks and captures the sentiment of the r/WSB community.
           </p>
           <p>
-            <b><router-link to="/asset/ustonks">Mint + Stake uSTONKS</router-link></b> – Earn High APR Rewards.
+            <b><router-link to="/asset/ustonks">Mint + LP uSTONKS</router-link></b> – Earn High APR Rewards.
           </p>
           <p>
             Bonus #1: Extra 5,000 $YAM and 5,000 $UMA tokens will be distributed as liquidity mining rewards from March 8th to 14th.
@@ -36,7 +36,7 @@
             Speculate on Ethereum gas prices with a Long or Short uGAS position. uGAS can be used as a hedge against the cost of gas on the Ethereum blockchain.
           </p>
           <p>
-            <b><router-link to="/asset/ugas">Mint + Stake uGAS</router-link></b> – Earn High APR Rewards.
+            <b><router-link to="/asset/ugas">Mint + LP uGAS</router-link></b> – Earn High APR Rewards.
           </p>
           <p>
             Mint uGAS and provide liquidity to the uGAS/ETH pool to earn $YAM & $UMA Rewards.
@@ -55,7 +55,7 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_create.png" />
+              <img src="../assets/graphics/graphic_liquidity.png" />
               <h3>Mint + LP</h3>
               <div class="text justify">
                 Mint and deposit synthetic tokens in the corresponding Uniswap pool to earn UMA and Yam liquidity provider rewards. To qualify, users must both
@@ -69,8 +69,8 @@
               <img src="../assets/graphics/graphic_trade.png" />
               <h3>Trade</h3>
               <div class="text justify">
-                Hold your uGAS tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the uGAS
-                spot price as profit.
+                Hold your synth tokens until the expiry date or trade them on your favorite DEX to pocket the difference between your minting cost and the
+                synthetics spot price as profit.
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
 
           <div class="row">
             <div class="item">
-              <img src="../assets/graphics/graphic_liquidity.png" />
+              <img src="../assets/graphics/graphic_create.png" />
               <h3>Go Short</h3>
               <div class="text justify">
                 Deposit collateral to mint synth tokens and sell them on Uniswap. After the synth token price has fallen, buy back your position and unlock the
@@ -116,6 +116,10 @@
   background: url("../assets/graphics/degen_city.png") center no-repeat;
   height: 563px;
   width: 100%;
+  @media (max-width: 620px) {
+    background-size: 770px;
+    height: 226px;
+  }
 }
 .home-columns {
   display: flex;
