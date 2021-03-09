@@ -1,80 +1,53 @@
 <template>
   <div class="assets">
+    <Space size="sm" style="display:flex" />
     <Container :size="900">
       <Card>
-        <!-- <h2 class="">Asset: {{ $route.params.key.toUpperCase() }}</h2> -->
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <a class="asset-detail-switch tutorial" href="https://yamfinance.medium.com/9d2622dde72" target="_blank">Guide</a>
+          <a class="asset-detail-switch tutorial" :href="`${userGuide}`" target="_blank">Guide</a>
           <Space size="sm" />
-          <a class="asset-detail-switch" href="https://docs.degenerative.finance/ugas" target="_blank">Info</a>
-          <!-- <button
-            class="asset-detail-switch"
-            v-if="navPage === 'interact'"
-            @click="toNavPage('info')"
-            :class="{ active: navPage === 'info' }"
-          >Info</button>
-          <button
-            class="asset-detail-switch"
-            v-if="navPage === 'info'"
-            @click="toNavPage('interact')"
-            :class="{ active: navPage === 'interact' }"
-          >Interact</button>-->
+          <a class="asset-detail-switch" :href="`https://docs.degenerative.finance/synthetics/${$route.params.key}`" target="_blank">Info</a>
         </h2>
       </Card>
 
       <Space size="20" />
 
-      <button class="gas-detail-button" @click="displayAssetStats">{{ showInfoButtonText }}</button>
-      <Space class="mobile-display" size="10" />
-
-      <GasStats class="gas-cards" v-show="showInfo" ref="gasStats" />
-
-      <Space class="desktop-display" size="md" />
-      <Space class="mobile-display" size="10" />
+      <div v-if="$route.params.key === 'ugas'">
+        <GasStats ref="gasStats" />
+      </div>
 
       <div v-if="navPage === 'interact'">
-        <div class="warning bold justify">
-          Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out our
-          handy Step by step
-          <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">User Guide</a> for in depth instructions. And stop by the
-          <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
+        <div class="warning justify">
+          <div>
+            Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out
+            our handy Step by step <a :href="`${userGuide}`">User Guide</a> for in depth instructions. And stop by the
+            <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
+          </div>
+
+          <div v-if="$route.params.key === 'ustonks'">
+            <br />
+            <b>uSTONKS NFT Giveaway</b> <span>The first 100 users to Mint $10K USDC worth of uSTONKS, then LP uSTONKS/USDC for 3 weeks qualify.</span><br />
+            <span><b>uSTONKS-APR21</b> is a synthetic that will expire at 4:00PM EST on April 30th.</span>
+          </div>
+
+          <div v-if="$route.params.key === 'ugas'">
+            <br />
+            <span><b>uGAS-Mar21</b> is a 30 day contract that will expire at 4:00PM EST on March 31st.</span><br />
+            <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
+          </div>
         </div>
 
         <Space size="md" />
 
         <Container :size="440">
-          <div class="asset-info">
-            <span>
-              <span v-if="!tokenSelected">
-                <b
-                  v-tooltip="{
-                    content: 'Select asset first.',
-                    delay: { show: 150, hide: 100 },
-                  }"
-                  >Asset Price</b
-                >
-              </span>
-              <span v-if="tokenSelected">
-                <b>Asset Price:</b>
-                {{ price && price > 0 ? numeral(price, "0.0000a") : "..." }} ETH
-              </span>
-            </span>
-            <span>
-              <span v-if="!tokenSelected">
-                <b
-                  v-tooltip="{
-                    content: 'Select asset first.',
-                    delay: { show: 150, hide: 100 },
-                  }"
-                  >APR</b
-                >
-              </span>
+          <div class="asset-info" :class="{ 'apr-info': tokenSelected }">
+            <span :class="{ 'apr-block': tokenSelected }">
               <span
                 v-if="tokenSelected"
                 v-tooltip="{
-                  content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
+                  content: 'Earn rewards when you mint and LP ' + assetName + ' on Uniswap.',
                   delay: { show: 150, hide: 100 },
                 }"
               >
@@ -83,26 +56,106 @@
               </span>
             </span>
           </div>
+
+          <div class="asset-info">
+            <span>
+              <span v-if="!tokenSelected">
+                <b
+                  v-tooltip="{
+                    content: 'Select asset first.',
+                    delay: { show: 150, hide: 100 },
+                  }"
+                  >Asset</b
+                >
+              </span>
+              <span
+                v-if="tokenSelected"
+                v-tooltip="{
+                  content: 'Asset price of ' + assetName,
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                <b>Asset:</b>
+                {{ price && price > 0 ? (asset[tokenSelected].collateral == "WETH" ? numeral(price, "0.0000a") : numeral(price, "0.00a")) : "..." }}
+                {{ asset[tokenSelected].collateral }}
+              </span>
+            </span>
+            <span v-if="!tokenSelected">
+              <b
+                v-tooltip="{
+                  content: 'Select asset first.',
+                  delay: { show: 150, hide: 100 },
+                }"
+                >APR</b
+              >
+            </span>
+            <span>
+              <div v-if="$route.params.key === 'ugas'">
+                <span v-if="!tokenSelected">
+                  <b
+                    v-tooltip="{
+                      content: 'Select asset first.',
+                      delay: { show: 150, hide: 100 },
+                    }"
+                    >TWAP</b
+                  >
+                </span>
+                <span
+                  v-if="tokenSelected"
+                  v-tooltip="{
+                    content: 'TWAP price of ' + assetName,
+                    delay: { show: 150, hide: 100 },
+                  }"
+                >
+                  <b>TWAP:</b>
+                  {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
+                  {{ asset[tokenSelected].collateral }}
+                </span>
+              </div>
+              <div v-if="$route.params.key === 'ustonks'">
+                <span v-if="!tokenSelected">
+                  <b
+                    v-tooltip="{
+                      content: 'Select asset first.',
+                      delay: { show: 150, hide: 100 },
+                    }"
+                    >Index</b
+                  >
+                </span>
+                <span
+                  v-if="tokenSelected"
+                  v-tooltip="{
+                    content: 'Index market price of ' + assetName,
+                    delay: { show: 150, hide: 100 },
+                  }"
+                >
+                  <b>Index:</b>
+                  {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
+                  {{ asset[tokenSelected].collateral }}
+                </span>
+              </div>
+            </span>
+          </div>
         </Container>
 
         <Space size="10" class="flex" />
 
         <Container id="thebox-nav" :size="440">
           <div class="row row-item-col">
-            <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
-              >Step by Step User Guide</a
-            >
-            <Space size="10" />
-            <div @click="showMedianToggle" class="item button">
+            <a class="flexitem button link" :href="`${userGuide}`" target="_blank">
+              Step by Step User Guide
+            </a>
+            <!-- <Space v-if="$route.params.key === 'ugas' || showMedian" size="10" />
+            <div v-if="$route.params.key === 'ugas' || showMedian" @click="showMedianToggle" class="item button">
               <span v-if="!showMedian">Median Chart</span>
               <span v-if="showMedian">Back</span>
-            </div>
+            </div> -->
           </div>
         </Container>
 
         <Space size="10" class="flex" />
 
-        <Container v-if="!showMedian" :size="440">
+        <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
@@ -191,12 +244,20 @@
                     Withdraw
                   </button>
                 </div>
+                <!-- :value="`${assetName}${token.cycle}${token.year}`" -->
+                <!-- >{{ `${assetName} ${token.name} ${token.year}` }}</vue-picker-option> -->
                 <div class="dropdown">
-                  <vue-picker class="select" v-model="tokenSelected" @change="getEmpState" placeholder="Select uGas Token" autofocus>
-                    <vue-picker-option value>Select uGas Token</vue-picker-option>
-                    <vue-picker-option value="UGASJAN21">uGAS JAN21</vue-picker-option>
-                    <vue-picker-option value="UGASFEB21">uGAS FEB21</vue-picker-option>
-                    <vue-picker-option value="UGASMAR21">uGAS MAR21</vue-picker-option>
+                  <vue-picker class="select" v-model="tokenSelected" @change="getEmpState" placeholder="Select Token" autofocus>
+                    <template #opener>
+                      <span>
+                        <b v-if="!tokenSelected">Select Token</b>
+                        <b v-if="tokenSelected">{{ assetName }} {{ asset[tokenSelected].name }} {{ asset[tokenSelected].year }}</b>
+                      </span>
+                    </template>
+                    <vue-picker-option value>Select Token</vue-picker-option>
+                    <vue-picker-option v-for="(token, index) in asset" :key="`${index}`" :value="`${index}`">{{
+                      assetName + " " + token.name + " " + token.year
+                    }}</vue-picker-option>
                   </vue-picker>
                 </div>
                 <input
@@ -207,7 +268,7 @@
                   name
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
-                  :placeholder="'0.00 ' + (tokenSelected ? tokenSelected + ' ' : '') + 'Tokens'"
+                  :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
                   v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
@@ -217,16 +278,9 @@
                   name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
-                  :placeholder="'0.00 WETH' + (navAct === 'mint' ? ' Collateral' : '')"
+                  :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
                   :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
-                <!-- to add max button -->
-                <!-- <div @click="showDropdown = !showDropdown" class="info-dropdown">
-                Info ▼
-                <div :class="{ hideDropdown: !showDropdown }">
-                  {{ currentInfo }}
-                </div>
-                </div>-->
                 <button
                   id="act"
                   @click="act"
@@ -234,8 +288,9 @@
                     error:
                       hasError == true &&
                       tokenSelected &&
-                      ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
-                        (navAct == 'redeem' && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)),
+                      ((approvals && approvals[formAssetName(assetName, asset[tokenSelected]) + '_' + asset[tokenSelected].collateral] === true) ||
+                        (navAct == 'redeem' &&
+                          approvals['EMP' + formAssetName(assetName, asset[tokenSelected]) + '_' + formAssetName(assetName, asset[tokenSelected])] === true)),
                     notokenselected: !tokenSelected,
                   }"
                   v-if="navAct !== 'lptrade'"
@@ -243,8 +298,9 @@
                     !tokenSelected ||
                       (hasError == true &&
                         tokenSelected &&
-                        ((approvals && approvals[assets[tokenSelected].name + '_WETH'] === true) ||
-                          (navAct == 'redeem' && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)))
+                        ((approvals && approvals[formAssetName(assetName, asset[tokenSelected]) + '_' + asset[tokenSelected].collateral] === true) ||
+                          (navAct == 'redeem' &&
+                            approvals['EMP' + formAssetName(assetName, asset[tokenSelected]) + '_' + formAssetName(assetName, asset[tokenSelected])] === true)))
                   "
                 >
                   <span v-bind:class="{ notokenselectedlabel: !tokenSelected }">
@@ -252,8 +308,10 @@
                       !isPending
                         ? tokenSelected
                           ? approvals
-                            ? approvals[assets[tokenSelected].name + "_WETH"] === true ||
-                              (navAct == "redeem" && approvals[assets[tokenSelected].emp.name + "_" + assets[tokenSelected].name] === true)
+                            ? approvals[formAssetName(assetName, asset[tokenSelected]) + "_" + asset[tokenSelected].collateral] === true ||
+                              (navAct == "redeem" &&
+                                approvals["EMP" + formAssetName(assetName, asset[tokenSelected]) + "_" + formAssetName(assetName, asset[tokenSelected])] ===
+                                  true)
                               ? actName
                               : navAct == "redeem"
                               ? "Approve EMP"
@@ -278,7 +336,12 @@
                       <a
                         target="_blank"
                         class="clicklptrade"
-                        :href="'https://app.uniswap.org/#/add/ETH/' + assets[tokenSelected].address"
+                        :href="
+                          'https://app.uniswap.org/#/add/' +
+                            (asset[tokenSelected].collateral == 'WETH' ? 'ETH' : USDC) +
+                            '/' +
+                            asset[tokenSelected].token.address
+                        "
                         v-tooltip="{
                           content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
                           delay: { show: 150, hide: 100 },
@@ -292,7 +355,7 @@
                       <a
                         target="_blank"
                         class="clicklptrade"
-                        :href="'https://app.uniswap.org/#/swap?outputCurrency=' + assets[tokenSelected].address"
+                        :href="'https://app.uniswap.org/#/swap?outputCurrency=' + asset[tokenSelected].token.address"
                         v-tooltip="{
                           content: 'Click here to buy the ' + assetName + ' asset',
                           delay: { show: 150, hide: 100 },
@@ -317,7 +380,10 @@
               <Space size="16" />
 
               <div class="item">
-                <button class="button wrapeth" @click="toggleWrap">Wrap ETH</button>
+                <button v-if="assetName == 'UGAS'" class="button wrapeth" @click="toggleWrap">Wrap ETH</button>
+                <a v-if="assetName == 'USTONKS'" class="button buyusdc" :href="'https://app.uniswap.org/#/swap?outputCurrency=' + USDC" target="_blank"
+                  >Buy USDC</a
+                >
               </div>
             </div>
             <div class="wrapETH">
@@ -338,7 +404,14 @@
               <button
                 class="button settle"
                 @click="makeApprovalEmp('Settle')"
-                v-if="tokenSelected && settleTime && !(tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true)"
+                v-if="
+                  tokenSelected &&
+                    settleTime &&
+                    !(
+                      tokenSelected &&
+                      approvals['EMP' + formAssetName(assetName, asset[tokenSelected]) + '_' + formAssetName(assetName, asset[tokenSelected])] === true
+                    )
+                "
               >
                 <span v-if="!empPendingApproval">Approve EMP to Settle</span>
                 <beat-loader v-if="empPendingApproval" color="#71571e"></beat-loader>
@@ -346,7 +419,12 @@
               <button
                 class="button settle"
                 @click="settleAsset"
-                v-if="tokenSelected && settleTime && tokenSelected && approvals[assets[tokenSelected].emp.name + '_' + assets[tokenSelected].name] === true"
+                v-if="
+                  tokenSelected &&
+                    settleTime &&
+                    tokenSelected &&
+                    approvals['EMP' + formAssetName(assetName, asset[tokenSelected]) + '_' + formAssetName(assetName, asset[tokenSelected])] === true
+                "
               >
                 <span>Settle</span>
               </button>
@@ -355,7 +433,7 @@
 
           <div class="info" v-if="info">
             <label>
-              <b>{{ tokenSelected ? tokenSelected : "No Synthetic" }} Selected</b>
+              <b>{{ tokenSelected ? formAssetName(assetName, asset[tokenSelected]) : "No Synthetic" }} Selected</b>
             </label>
             <label
               v-tooltip="{
@@ -398,15 +476,16 @@
               Collateral Ratio (Tx):
               <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
-
             <br />
-            <label>
-              Your WETH:
-              <b>{{ balanceWETH ? balanceWETH : "0" }}</b>
-            </label>
+            <label v-if="assetName == 'UGAS'"
+              >Your WETH: <b>{{ balanceWETH ? numeral(Number(balanceWETH), "0.0000a") : "0" }}</b></label
+            >
+            <label v-if="assetName !== 'UGAS'"
+              >Your USDC: <b>{{ balanceUSDC ? numeral(Number(balanceUSDC), "0.00a") : "0" }}</b></label
+            >
             <label v-if="tokenSelected">
-              Your {{ tokenSelected }}:
-              <b>{{ balanceUGAS ? balanceUGAS : "0" }}</b>
+              Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
+              <b>{{ tokenBalance ? tokenBalance : "0" }}</b>
             </label>
             <label
               v-if="tokenSelected"
@@ -416,23 +495,24 @@
                 placement: 'left-center',
               }"
             >
-              Position Outstanding {{ tokenSelected }}:
+              Position Outstanding {{ formAssetName(assetName, asset[tokenSelected]) }}:
               <b>{{ currTokens ? currTokens : "0" }}</b>
             </label>
             <label
               v-if="tokenSelected"
               v-tooltip="{
-                content: 'Total WETH locked as collateral',
+                content: 'Total locked as collateral',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Position Collateral WETH:
+              Position Collateral {{ asset[tokenSelected].collateral }}:
               <b>{{ currCollat ? currCollat : "0" }}</b>
             </label>
           </div>
         </Container>
 
+        <!--
         <Container v-if="showMedian" :size="440">
           <div>
             <la-cartesian
@@ -454,7 +534,8 @@
             <h4 class="center">Gas Median Chart</h4>
           </div>
         </Container>
-        <!-- <CardLink title="Learn More about uGAS" link="https://docs.degenerative.finance/ugas" /> -->
+        -->
+        <!-- <CardLink title="Learn More about Degenerative" link="https://docs.degenerative.finance" /> -->
       </div>
     </Container>
   </div>
@@ -463,63 +544,32 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import {
-  approve,
-  decToBn,
-  getLiquidationPrice,
-  getTWAPData,
-  getUniswapDataHourly,
-  getUniswapDataDaily,
-  splitChartData,
-  getContractInfo,
-  getPriceByContract,
-  DevMiningCalculator,
-  getTokenPrice,
-  get30DMedian,
-} from "../utils";
+import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, getIndexFromSpreadsheet, formAssetName } from "../utils";
 import BigNumber from "bignumber.js";
-import { getOffchainPriceFromTokenSymbol, getPricefeedParamsFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
-import { ChainId, Tokenl, Fetcher } from "@uniswap/sdk";
-import {
-  WETH,
-  DAI,
-  EMPJAN,
-  EMPFEB,
-  EMPMAR,
-  UGASJAN21,
-  UGASFEB21,
-  UGASMAR21,
-  UGASJAN21LP,
-  UGASFEB21LP,
-  UGASMAR21LP,
-  USDC,
-  UMA,
-  UGASAPR21,
-  UGASAPR21LP,
-  EMPAPR,
-} from "@/utils/addresses";
+import { getOffchainPriceFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
+import { WETH, USDC } from "@/utils/addresses";
 import EMPContract from "@/utils/abi/emp.json";
+import Assets from "../../protocol/assets.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
-const empDecs = new BigNumber(10).pow(new BigNumber(18));
+const usdcDecs = new BigNumber(10).pow(new BigNumber(6));
+// const empDecs = new BigNumber(10).pow(new BigNumber(18));
 
-const aprFrozenData = {
-  // UGASJAN21: [34.29, 11.43],
-  UGASJAN21: [0, 0],
-  UGASFEB21: [0, 0],
-  UGASMAR21: [0, 0],
-  UGASAPR21: [0, 0],
+const colDec = {
+  WETH: new BigNumber(10).pow(new BigNumber(18)),
+  USDC: new BigNumber(10).pow(new BigNumber(6)),
 };
 
 export default {
   name: "Asset",
   head: {
     title: "Asset",
-    meta: [{ name: "description", content: "Degenerative uGas Asset." }],
+    meta: [{ name: "description", content: "Degenerative Asset." }],
   },
   data() {
     return {
-      assetName: "uGAS", // move to dynamic ref object
+      asset: {},
+      assetName: null,
       navPage: "interact",
       actName: "Mint",
       withdrawType: "new",
@@ -542,89 +592,19 @@ export default {
       currentError: null,
       currPos: null,
       currEMP: null,
-      showMedian: false,
+      // showMedian: false,
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       medianData: [],
+      currentTWAP: 0,
+      indexPrice: 0,
       chartOptionsCandle: {},
       balanceWETH: 0,
-      balanceUGAS: 0,
+      balanceUSDC: 0,
+      tokenBalance: 0,
       assetChartData: null,
       isPending: false,
       empPendingApproval: false,
-      assets: {
-        UGASJAN21: {
-          name: "UGASJAN21",
-          address: UGASJAN21,
-          pool: UGASJAN21LP,
-          apr: {
-            value: 0,
-            add: false,
-            extra: 0,
-            force: 0,
-          },
-          emp: {
-            name: "EMPJAN",
-            address: EMPJAN,
-            settleTime: 0,
-          },
-        },
-        UGASFEB21: {
-          name: "UGASFEB21",
-          address: UGASFEB21,
-          pool: UGASFEB21LP,
-          apr: {
-            value: 0,
-            add: false,
-            extra: aprFrozenData["UGASJAN21"][0],
-            force: -1,
-          },
-          emp: {
-            name: "EMPFEB",
-            address: EMPFEB,
-            settleTime: 25,
-          },
-        },
-        UGASMAR21: {
-          name: "UGASMAR21",
-          address: UGASMAR21,
-          pool: UGASMAR21LP,
-          apr: {
-            value: 0,
-            add: false,
-            extra: aprFrozenData["UGASJAN21"][1] + aprFrozenData["UGASFEB21"][0],
-            force: -1,
-          },
-          emp: {
-            name: "EMPMAR",
-            address: EMPMAR,
-            settleTime: 25,
-          },
-        },
-        UGASAPR21: {
-          name: "UGASAPR21",
-          address: UGASAPR21,
-          pool: UGASAPR21LP,
-          apr: {
-            value: 0,
-            add: false,
-            extra: aprFrozenData["UGASFEB21"][1] + aprFrozenData["UGASMAR21"][0],
-            force: -1,
-          },
-          emp: {
-            name: "EMPAPR",
-            address: EMPAPR,
-            settleTime: 25,
-          },
-        },
-      },
-      approvals: {
-        EMPFEB_WETH: false,
-        EMPJAN_WETH: false,
-        EMPMAR_WETH: false,
-        EMPMAR_UGASMAR21: false,
-        EMPJAN_UGASJAN21: false,
-        EMPFEB_UGASFEB21: false,
-      },
+      approvals: {},
       showWrapETH: false,
       approvalsUpdate: 0,
       amountToWrap: 0,
@@ -640,20 +620,30 @@ export default {
       aprAssetValueC: 0.25,
       settleTime: false,
       chartDisplay: false,
+      USDC: USDC,
     };
   },
   async mounted() {
     await this.initAsset();
-    await this.lastPrice();
-    await this.initChart();
-    await this.initMedianChart();
-    await this.getWETHBalance();
-    await this.checkUpdateApprovals();
-    await this.$refs.gasStats.getAccountStats();
   },
   computed: {
     account() {
       return store.state.account;
+    },
+    userGuide() {
+      let guide;
+      switch (this.$route.params.key) {
+        case "ustonks":
+          guide = "https://yamfinance.medium.com/degenerative-finance-ustonks-user-guide-415cbb6abf45";
+          break;
+        case "ugas":
+          guide = "https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72";
+          break;
+        default:
+          guide = "";
+          break;
+      }
+      return guide;
     },
   },
   watch: {
@@ -661,11 +651,11 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-      this.fetchApprovalAll();
       this.resetNumbers();
       this.initChart();
+      this.fetchApprovalAll();
       this.getEmpState();
-      this.settleTimeCheck();
+      this.settleTimeCheckExpired();
       this.getRewards();
     },
     navAct: function(newVal, oldVal) {
@@ -676,13 +666,16 @@ export default {
     },
     account(newAccount, oldAccount) {
       this.resetNumbers();
-      this.settleTimeCheck();
+      this.settleTimeCheckExpired();
       this.updateUserInfo();
     },
     // make account switch
     approvalsUpdate(newApprovals, oldApprovals) {
       this.fetchApprovalAll();
-      this.settleTimeCheck();
+      this.settleTimeCheckExpired();
+    },
+    $route: async function(newVal, oldVal) {
+      await this.initAsset();
     },
   },
   components: {},
@@ -698,8 +691,9 @@ export default {
       "withdraw",
       "redeem",
       "settle",
-      "getUserWETHBalance",
-      "getUserUGasBalance",
+      "getUserBalanceWETH",
+      "getUserBalanceUSDC",
+      "getUserAssetTokenBalance",
       "makeContractApproval",
       "fetchContractApproval",
       "wrapETH",
@@ -708,9 +702,19 @@ export default {
       "getMiningRewards",
       "getUniPrice",
     ]),
-    ...mapGetters(["empState"]),
+    ...mapGetters(["empStateOld", "empState"]),
     async initAsset() {
+      console.warn("init", this.$route.params.key);
+
+      this.tokenSelected = null;
+      this.asset = Assets[this.$route.params.key];
+      this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
+
+      console.warn("this.asset", this.formAssetName(this.assetName, this.asset[this.tokenSelected]));
+
       this.medianData = await get30DMedian();
+      this.currentTWAP = await getCurrentTWAP();
+      this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
         this.fetchApprovalAll();
@@ -721,23 +725,33 @@ export default {
         this.getRewards();
       }, this.periodicalChecksTime * 1000);
 
-      // const from = 1606742010;
-      // const hourly = await getUniswapDataHourly(UGASJAN21, from);
-      // console.log("UGASJAN21 getUniswapDataHourly", hourly);
-      // const daily = await getUniswapDataDaily(UGASJAN21, from);
-      // console.log("UGASJAN21 getUniswapDataDaily", daily);
-      // this.assetChartData = daily;
+      await this.lastPrice();
+      await this.initChart();
+      await this.initMedianChart();
+      await this.getUserBalances();
+      await this.checkUpdateApprovals();
+      if (this.$refs.gasStats && this.$route.params.key == "ugas") {
+        await this.$refs.gasStats.getAccountStats();
+      }
     },
-    async getWETHBalance() {
-      this.balanceWETH = await this.getUserWETHBalance();
+    async getUserBalances() {
+      this.balanceWETH = await this.getUserBalanceWETH();
       this.balanceWETH = new BigNumber(this.balanceWETH).div(ethDecs).toFixed(4);
+
+      this.balanceUSDC = await this.getUserBalanceUSDC();
+      this.balanceUSDC = new BigNumber(this.balanceUSDC).div(usdcDecs).toFixed(4);
     },
-    async getUGasBalance() {
-      this.balanceUGAS = await this.getUserUGasBalance({ contract: this.empAddr()[0] });
-      this.balanceUGAS = new BigNumber(this.balanceUGAS).div(empDecs).toFixed(4);
+    async getAssetInstanceBalance() {
+      if (!this.tokenSelected) {
+        return;
+      }
+      const assetInstance = this.asset[this.tokenSelected];
+      const base = new BigNumber(10).pow(new BigNumber(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+      this.tokenBalance = await this.getUserAssetTokenBalance({ assetInstance: assetInstance });
+      this.tokenBalance = new BigNumber(this.tokenBalance).div(base).toFixed(4);
     },
     async initChart() {
-      if (!this.tokenSelected || !this.assets[this.tokenSelected].address) {
+      if (!this.tokenSelected || !this.asset[this.tokenSelected].token.address) {
         return;
       }
       const redColor = "#ad3c3c";
@@ -747,14 +761,40 @@ export default {
       const twapLineColor = "#333";
       const from = 1606742010; // NOV: 1606742010 - test: 1604150010
       // const assetChart = await getUniswapDataHourly(this.assets[this.tokenSelected], from); // Hourly
-      const assetChart = await getUniswapDataDaily(this.assets[this.tokenSelected].address, from); // Daily
+      const assetChart = await getUniswapDataDaily(this.asset[this.tokenSelected].token.address, from); // Daily
       // console.log("UGASJAN21 assetChart", assetChart);
 
+      const medianGasValues = [];
+      const medianGasNames = [];
       const tempChartData = [];
       const tempChartTWAPData = [];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      if (this.assetName == "UGAS") {
+        for (const element of this.chartOptionsMedianValues) {
+          const ts = Date.parse(element.name);
+          const dateObject = new Date(ts);
+          const monthIndex = dateObject.getMonth();
+          const monthName = months[monthIndex];
+          const day = dateObject.getDate();
+          const timestampDate = monthName + ", " + day;
+          medianGasNames.push(timestampDate);
+        }
+      }
+
       for (const element of assetChart) {
         tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
         tempChartTWAPData.push(element.twapETH);
+
+        if (this.assetName == "UGAS") {
+          if (medianGasNames.includes(element.timestampDate)) {
+            const index = medianGasNames.indexOf(element.timestampDate);
+            const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
+            medianGasValues.push(valueToBeAdded);
+          } else {
+            medianGasValues.push(null);
+          }
+        }
       }
 
       // chart: uniswap data
@@ -766,7 +806,7 @@ export default {
 
       this.chartOptionsCandle = {
         title: {
-          text: this.assets[this.tokenSelected].name,
+          text: formAssetName(this.assetName, this.asset[this.tokenSelected]),
           top: 5,
           left: 45,
           textStyle: {
@@ -775,7 +815,7 @@ export default {
           },
         },
         // legend: {
-        //   data: ["uGAS"],
+        //   data: ["Asset"],
         // },
         tooltip: {
           show: true,
@@ -791,7 +831,7 @@ export default {
         },
         grid: {
           top: "4%",
-          left: "12%", // 6
+          left: "12%",
           bottom: "14%",
           right: "4%",
         },
@@ -863,7 +903,7 @@ export default {
         ],
         series: [
           {
-            name: "uGas",
+            // name: this.$route.params.key.toUpperCase(),
             type: "candlestick",
             data: this.assetChartData.values,
             itemStyle: {
@@ -884,6 +924,20 @@ export default {
             },
             lineStyle: {
               width: 1,
+              opacity: 0.6,
+            },
+          },
+          {
+            name: "Gas Median",
+            type: "line",
+            data: medianGasValues,
+            smooth: false,
+            symbolSize: 3,
+            itemStyle: {
+              color: redColor,
+            },
+            lineStyle: {
+              width: 2,
               opacity: 0.6,
             },
           },
@@ -935,8 +989,8 @@ export default {
     },
     checkWithdraw() {
       this.updateLiqPrice(false, true);
-      if (this.currPos) {
-        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(ethDecs);
+      if (this.currPos && this.tokenSelected) {
+        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(colDec[this.asset[this.tokenSelected].collateral]);
         const tn = new Date().getTime() / 1000;
         if (Number(this.currPos.withdrawalRequestPassTimestamp) == 0) {
           this.hasError = true;
@@ -948,21 +1002,22 @@ export default {
           this.hasError = true;
           this.currentError = "Withdrawal still pending approval";
         } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
+          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
           this.gcr
         ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
+          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]);
           console.log("numerator", numerator);
           console.log("denom", this.currPos.tokensOutstanding);
           const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
+            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
+            new BigNumber(this.currPos.tokensOutstanding);
           console.log(
             "HERE",
             newcr.toString(),
             new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(ethDecs),
+            new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]),
             this.currPos.tokensOutstanding,
             this.gcr
           );
@@ -973,7 +1028,7 @@ export default {
     },
     checkInstantWithdraw() {
       this.updateLiqPrice(false, true);
-      if (this.currPos) {
+      if (this.currPos && this.tokenSelected) {
         const tn = new Date().getTime() / 1000;
         if (this.checkHasPending()) {
           this.hasError = true;
@@ -982,21 +1037,22 @@ export default {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
         } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) /
+          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
           this.gcr
         ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs);
+          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]);
           console.log("numerator", numerator);
           console.log("denom", this.currPos.tokensOutstanding);
           const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(ethDecs)) / new BigNumber(this.currPos.tokensOutstanding);
+            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
+            new BigNumber(this.currPos.tokensOutstanding);
           console.log(
             "HERE",
             newcr.toString(),
             new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(ethDecs),
+            new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]),
             this.currPos.tokensOutstanding,
             this.gcr
           );
@@ -1005,20 +1061,36 @@ export default {
         }
       }
     },
-    async settleTimeCheck() {
-      if (this.tokenSelected) {
-        await this.getEmpState();
-        console.log("settleTimeCheck", store.state.empState);
+    async settleTimeCheckExpired() {
+      if (!this.tokenSelected) {
+        return;
+      }
+      const assetInstance = this.asset[this.tokenSelected];
+      await this.getEmpState();
+      if (assetInstance.emp.new) {
+        console.log("settleTimeCheckExpired empState", store.state.empState);
         if (store.state.empState && store.state.empState.isExpired) {
           this.settleTime = true;
+          this.asset[this.tokenSelected].expired = true;
         } else {
           this.settleTime = false;
+          this.asset[this.tokenSelected].expired = false;
+        }
+      } else {
+        console.log("settleTimeCheckExpired empStateOld", store.state.empStateOld);
+        if (store.state.empStateOld && store.state.empStateOld.isExpired) {
+          this.settleTime = true;
+          this.asset[this.tokenSelected].expired = true;
+        } else {
+          this.settleTime = false;
+          this.asset[this.tokenSelected].expired = false;
         }
       }
+
       // const settleDayAfter = this.assets[this.tokenSelected].emp.settleTime || 0; // after every xth day of the month enable settle
       // // we can have this set custom by asset, see assets in data()
       // const current = this.moment().format("DD");
-      // console.log("settleTimeCheck", current);
+      // console.log("settleTimeCheckExpired", current);
       // if (current < settleDayAfter) {
       //   console.log("settleTime is not due yet");
       //   this.settleTime = false;
@@ -1028,10 +1100,15 @@ export default {
       // }
     },
     async settleAsset() {
+      if (!this.tokenSelected) {
+        return;
+      }
+
       console.log("settleAsset");
+      const assetInstance = this.asset[this.tokenSelected];
       this.empPendingApproval = true;
       this.settle({
-        contract: this.empAddr()[0],
+        assetInstance: assetInstance,
       })
         .then(async e => {
           console.log("settle", e[1]);
@@ -1053,9 +1130,10 @@ export default {
         });
     },
     updateCR(removeTokens = false, removeCollateral = false) {
-      if (this.currPos) {
-        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
-        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
+      if (this.currPos && this.tokenSelected) {
+        const assetInstance = this.asset[this.tokenSelected];
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+        const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
         let totalTokens;
         let totalCollat;
         if (!removeTokens) {
@@ -1080,9 +1158,10 @@ export default {
     },
     updateLiqPrice(removeTokens = false, removeCollateral = false) {
       this.updateCR(removeTokens, removeCollateral);
-      if (this.currPos) {
-        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
-        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
+      if (this.currPos && this.tokenSelected) {
+        const assetInstance = this.asset[this.tokenSelected];
+        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+        const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
         let totalTokens;
         let totalCollat;
         if (!removeTokens) {
@@ -1095,31 +1174,48 @@ export default {
         } else {
           totalCollat = this.collatAmt ? col - Number(this.collatAmt) : col;
         }
-        this.liquidationPrice = getLiquidationPrice(totalCollat, totalTokens, this.collReq.div(ethDecs), isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
-      } else {
         this.liquidationPrice = getLiquidationPrice(
-          this.tokenAmt ? this.tokenAmt : 0,
-          this.collatAmt ? this.collatAmt : 0,
-          this.collReq.div(ethDecs),
+          totalCollat,
+          totalTokens,
+          this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
           isPricefeedInvertedFromTokenSymbol("uGAS")
         ).toFixed(4);
+      } else {
+        if (this.tokenSelected) {
+          this.liquidationPrice = getLiquidationPrice(
+            this.tokenAmt ? this.tokenAmt : 0,
+            this.collatAmt ? this.collatAmt : 0,
+            this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+            isPricefeedInvertedFromTokenSymbol("uGAS")
+          ).toFixed(4);
+        }
       }
     },
     currLiqPrice() {
-      if (this.currPos) {
-        const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(empDecs));
-        const col = Number(new BigNumber(this.currPos.rawCollateral).div(ethDecs));
-        this.currLiquidationPrice = getLiquidationPrice(col, pos, this.collReq.div(ethDecs), isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
+      if (!this.tokenSelected || !this.currPos) {
+        return;
       }
+
+      const assetInstance = this.asset[this.tokenSelected];
+      const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+      const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
+      this.currLiquidationPrice = getLiquidationPrice(
+        col,
+        pos,
+        this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+        isPricefeedInvertedFromTokenSymbol("uGAS")
+      ).toFixed(4);
     },
     runChecks() {
+      if (!this.tokenSelected) {
+        return;
+      }
+
+      const assetInstance = this.asset[this.tokenSelected];
+
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
-        // const pricedResultantCR = latestPrice !== 0 ? (resultantCR / latestPrice).toFixed(4) : "0";
-        // const resultantCRBelowRequirement = parseFloat(pricedResultantCR) >= 0 && parseFloat(pricedResultantCR) < collReqFromWei;
-        // const withdrawAboveBalance = collateralToWithdraw > posColl;
-
         this.currLiqPrice();
         if (this.withdrawType == "existing") {
           this.checkWithdraw();
@@ -1152,9 +1248,13 @@ export default {
         } else if (this.currPos && this.currPos.rawCollateral == 0) {
           this.hasError = true;
           this.currentError = "No open position. Mint tokens first";
-        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
+        } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
           this.hasError = true;
-          this.currentError = "Not enough WETH. Please wrap ETH below";
+          this.currentError =
+            "Not enough " +
+            assetInstance.collateral +
+            "." +
+            (assetInstance.collateral === "WETH" ? " Please wrap ETH below." : " Please buy " + assetInstance.collateral + ".");
         }
       } else if (this.navAct == "mint") {
         this.currLiqPrice();
@@ -1164,13 +1264,19 @@ export default {
         //   this.currentError = "Insufficient";
         //   return;
         // }
-        if (this.tokenAmt && this.tokenAmt < 5) {
+        let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
+        minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
+        if (this.tokenAmt && this.tokenAmt < minTokens) {
           this.hasError = true;
-          this.currentError = "Minimum mint amount is 5";
+          this.currentError = "Minimum mint amount is " + minTokens;
           return;
-        } else if (Number(this.balanceWETH) < Number(this.collatAmt)) {
+        } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
           this.hasError = true;
-          this.currentError = "Not enough WETH. Please wrap ETH below";
+          this.currentError =
+            "Not enough " +
+            assetInstance.collateral +
+            "." +
+            (assetInstance.collateral === "WETH" ? " Please wrap ETH below." : " Please buy " + assetInstance.collateral + ".");
           return;
         }
         const thisError = "Collateral Ratio below global minimum";
@@ -1204,159 +1310,103 @@ export default {
         this.checkInstantWithdraw();
       }
     },
-    empAddr() {
-      switch (this.tokenSelected) {
-        case "UGASJAN21":
-          return [EMPJAN, UGASJAN21];
-        case "UGASFEB21":
-          return [EMPFEB, UGASFEB21];
-        case "UGASMAR21":
-          return [EMPMAR, UGASMAR21];
-        default:
-          return "";
-      }
-    },
     async getPosition() {
-      const pos = await this.getPositionData(this.empAddr()[0]);
+      if (!this.tokenSelected) {
+        return;
+      }
+      const pos = await this.getPositionData(this.asset[this.tokenSelected]);
       return pos;
     },
     async getEmpState() {
-      const contractAddr = this.empAddr()[0];
-      console.log("contractAddr", contractAddr);
+      if (!this.tokenSelected) {
+        return;
+      }
 
+      const assetInstance = this.asset[this.tokenSelected];
+      console.log("assetInstance", assetInstance);
       let k;
       let pos;
       if (this.price == 0) {
-        const res = await Promise.all([this.setEMPState(contractAddr), this.lastPrice(), this.getPosition()]);
+        const res = await Promise.all([this.setEMPState(assetInstance), this.lastPrice(), this.getPosition()]);
         k = res[0];
         this.price = res[1];
         pos = res[2];
       } else {
-        const res = await Promise.all([this.setEMPState(contractAddr), this.getPosition()]);
+        const res = await Promise.all([this.setEMPState(assetInstance), this.getPosition()]);
         k = res[0];
         pos = res[1];
       }
       this.currPos = pos;
       if (this.currPos) {
         this.currTokens = new BigNumber(this.currPos.tokensOutstanding)
-          .div(empDecs)
+          .div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)))
           .toFixed(4)
           .toString();
         this.currCollat = new BigNumber(this.currPos.rawCollateral)
-          .div(ethDecs)
+          .div(colDec[this.asset[this.tokenSelected].collateral])
           .toFixed(4)
           .toString();
       }
       this.currEMP = k;
-      const totalColl = k.cumulativeFeeMultiplier.div(ethDecs).times(k.rawTotalPositionCollateral.dividedBy(ethDecs));
-      const totalTokens = k.totalTokensOutstanding.div(empDecs);
+      const totalColl = k.cumulativeFeeMultiplier
+        .div(10 ** 18)
+        .times(k.rawTotalPositionCollateral.dividedBy(colDec[this.asset[this.tokenSelected].collateral]));
+      const totalTokens = k.totalTokensOutstanding.div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
       this.gcr = totalTokens > 0 ? (totalColl / totalTokens / this.price).toFixed(4) : 0;
+      console.log("this.gcr", this.gcr);
       this.collReq = k.collateralRequirement;
-      this.getUGasBalance();
+      this.getAssetInstanceBalance();
       this.posUpdateHandler();
       this.updateUserInfo();
     },
     async getRewards() {
-      if (this.tokenSelected) {
-        const dayAfter = 7;
-        const current = this.moment().format("DD");
-        // if (current > dayAfter) {
-        //   console.debug("Coming Month");
-        //   const currentMonth = await this.getCurrentMonthRewards();
-        //   this.getComingMonthRewards(currentMonth);
-        // } else {
-        console.debug("Now");
-        const currentMonth = await this.getCurrentMonthRewards();
-        // }
+      if (!this.tokenSelected) {
+        return;
       }
-    },
-    async getActualMonthRewards() {
-      const current = this.moment()
-        .format("MMM")
-        .toUpperCase();
-      const actualMonthAsset = this.assets[this.assetName.toUpperCase() + current + "21"].name;
-      console.log("-------------------", actualMonthAsset);
-      const price = await this.lastPrice(actualMonthAsset);
-      const asset = {
-        address: this.assets[actualMonthAsset].address,
-        addressEMP: this.assets[actualMonthAsset].emp.address,
-        addressLP: this.assets[actualMonthAsset].pool,
-        addressPrice: price,
-      };
-      const resultBase = await this.getMiningRewards(asset);
-      this.assets[actualMonthAsset].apr.value = resultBase;
-      // const aprExtra = this.assets[actualMonthAsset].apr.extra;
-      const result = this.numeral(Number(resultBase), "0.00a");
-      return { actualMonthAsset: actualMonthAsset, actualMonthAPR: result };
+
+      // const dayAfter = 7;
+      // const current = this.moment().format("DD");
+      // if (current > dayAfter) {
+      //   console.debug("Coming Month");
+      //   const currentMonth = await this.getCurrentMonthRewards();
+      //   this.getComingMonthRewards(currentMonth);
+      // } else {
+      this.aprAssetValue = await this.getCurrentMonthRewards();
+      console.debug("aprAssetValue", this.aprAssetValue);
+      // }
     },
     async getCurrentMonthRewards() {
+      if (!this.tokenSelected || !this.asset[this.tokenSelected]) {
+        return;
+      }
+      await this.getEmpState();
+      if (this.asset[this.tokenSelected].expired) {
+        return -1;
+      }
       const price = await this.lastPrice(this.tokenSelected);
       const asset = {
-        address: this.assets[this.tokenSelected].address,
-        addressEMP: this.assets[this.tokenSelected].emp.address,
-        addressLP: this.assets[this.tokenSelected].pool,
-        addressPrice: price,
+        assetName: this.assetName,
+        assetInstance: this.asset[this.tokenSelected],
+        assetPrice: price,
       };
       const resultBase = await this.getMiningRewards(asset);
       let result;
-      if (this.assets[this.tokenSelected].apr.force >= 0) {
-        result = Number(this.assets[this.tokenSelected].apr.force);
+      if (this.asset[this.tokenSelected] && this.asset[this.tokenSelected].apr) {
+        if (this.asset[this.tokenSelected].apr.force >= 0) {
+          result = Number(this.asset[this.tokenSelected].apr.force);
+        } else {
+          this.asset[this.tokenSelected].apr.value = resultBase;
+          const aprExtra = this.asset[this.tokenSelected].apr.extra;
+          result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
+        }
+        return result && result !== 0 ? result : -1;
       } else {
-        this.assets[this.tokenSelected].apr.value = resultBase;
-        const aprExtra = this.assets[this.tokenSelected].apr.extra;
-        result = this.numeral(Number(resultBase) + (aprExtra ? aprExtra : 0), "0.00a");
-      }
-      this.aprAssetValue = result && result !== 0 ? result : -1;
-      console.debug("aprAssetValue", this.aprAssetValue);
-      return result;
-    },
-    async getComingMonthRewards() {
-      const current = this.moment()
-        .format("MMM")
-        .toLowerCase();
-      console.debug("current", current);
-      const indexNav = (obj, currentKey, direction) => {
-        return Object.keys(obj)[Object.keys(obj).indexOf(currentKey) + direction];
-      };
-      if (this.assets[this.tokenSelected].name.toLowerCase().includes(current.toLowerCase())) {
-        const firstNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 1);
-        const secondNext = indexNav(this.assets, this.assets[this.tokenSelected].name, 2);
-        console.log("1 firstNext", firstNext);
-        console.log("1 secondNext", secondNext);
-        console.debug("asset", this.assets[this.tokenSelected].name);
-        const currentAPR = this.assets[this.tokenSelected].apr.value;
-        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
-          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + currentAPR * this.aprAssetValueB;
-          this.assets[firstNext].apr.add = true;
-        }
-        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
-          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + currentAPR * this.aprAssetValueC;
-          this.assets[secondNext].apr.add = true;
-        }
-        // console.debug("rate moved 1", firstNext, currentAPR * this.aprAssetValueB);
-      } else {
-        const { actualMonthAsset, actualMonthAPR } = await this.getActualMonthRewards();
-        const firstNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 1);
-        const secondNext = indexNav(this.assets, this.assets[actualMonthAsset].name, 2);
-        console.log("2 firstNext", firstNext);
-        console.log("2 secondNext", secondNext);
-        const currentAPR = this.assets[this.tokenSelected].apr.value;
-        const current = this.moment()
-          .format("MMM")
-          .toUpperCase();
-        // this.assets[this.assetName.toUpperCase() + current + "21"].apr = xxxx;
-        if (this.assets[firstNext] && !this.assets[firstNext].apr.add) {
-          this.assets[firstNext].apr.extra = this.assets[firstNext].apr.extra + actualMonthAPR * this.aprAssetValueB;
-          this.assets[firstNext].apr.add = true;
-        }
-        if (this.assets[secondNext] && !this.assets[secondNext].apr.add) {
-          this.assets[secondNext].apr.extra = this.assets[secondNext].apr.extra + actualMonthAPR * this.aprAssetValueC;
-          this.assets[secondNext].apr.add = true;
-        }
-        // console.debug("rate moved 2", firstNext, currentAPR * this.aprAssetValueB);
+        return -1;
       }
     },
     async resetNumbers() {
+      // this.asset = {},
+      // this.assetName = null,
       this.price = 0;
       this.aprAssetValue = 0;
       this.settleTime = false;
@@ -1365,12 +1415,10 @@ export default {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
       if (specificTokenSelected) {
         // this.price = await getOffchainPriceFromTokenSymbol("uGAS");
-        const price = Number((await this.getUniPrice({ tokenA: this.assets[specificTokenSelected].address, tokenB: WETH })).toString()) || 0;
-        // const price2 = Number((await this.getUniPrice({ tokenA: WETH, tokenB: USDC })).toString()) || 0;
-        // this.price = (new BigNumber(price).multipliedBy(price2)).toString();
-        // this.price = price * price2;
+        const assetInstance = this.asset[this.tokenSelected];
+        const tokenB = this.assetName == "UGAS" ? WETH : USDC;
+        const price = Number((await this.getUniPrice({ tokenA: assetInstance.token.address, tokenB: tokenB })).toString()) || 0;
         this.price = price;
-
         console.log("token price", this.price);
         return this.price;
       }
@@ -1379,9 +1427,13 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-      if (!this.approvals[this.assets[this.tokenSelected].name + "_WETH"] && this.actName !== "Redeem") {
+      const assetInstance = this.asset[this.tokenSelected];
+      const assetTokenName = formAssetName(this.assetName, assetInstance);
+      const appEmpId = "EMP" + assetTokenName + "_" + assetTokenName;
+      const appColId = assetTokenName + "_" + assetInstance.collateral;
+      if (!this.approvals[appColId] && this.actName !== "Redeem") {
         this.isPending = true;
-        this.makeApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH)
+        this.makeApproval(appColId, this.asset[this.tokenSelected].emp.address, assetInstance.collateral === "WETH" ? WETH : USDC)
           .then(async e => {
             console.log("approve", e[1]);
             this.isPending = false;
@@ -1406,9 +1458,9 @@ export default {
             console.log("mint");
             this.isPending = true;
             this.mint({
-              contract: this.empAddr()[0],
-              collat: new BigNumber(this.collatAmt).times(ethDecs).toFixed(),
-              tokens: new BigNumber(this.tokenAmt).times(empDecs).toFixed(),
+              assetInstance: assetInstance,
+              collat: new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]).toFixed(),
+              tokens: new BigNumber(this.tokenAmt).times(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))).toFixed(),
             })
               .then(async e => {
                 console.log("mint", e[1]);
@@ -1432,7 +1484,10 @@ export default {
           case "Deposit":
             console.log("deposit");
             this.isPending = true;
-            this.deposit({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+            this.deposit({
+              assetInstance: assetInstance,
+              collat: new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]).toString(),
+            })
               .then(async e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1453,7 +1508,10 @@ export default {
           case "Request Withdraw":
             console.log("req withdraw");
             this.isPending = true;
-            this.requestWithdrawal({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+            this.requestWithdrawal({
+              assetInstance: assetInstance,
+              collat: new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]).toString(),
+            })
               .then(async e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1474,7 +1532,7 @@ export default {
           case "Withdraw":
             console.log("withdraw");
             this.isPending = true;
-            this.withdrawRequestFinalize({ contract: this.empAddr()[0] })
+            this.withdrawRequestFinalize({ assetInstance: assetInstance })
               .then(e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1495,7 +1553,10 @@ export default {
           case "Instant Withdraw":
             console.log("instant withdraw");
             this.isPending = true;
-            this.withdraw({ contract: this.empAddr()[0], collat: new BigNumber(this.collatAmt).times(ethDecs).toString() })
+            this.withdraw({
+              assetInstance: assetInstance,
+              collat: new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]).toString(),
+            })
               .then(e => {
                 this.isPending = false;
                 if (e[1] && e[1] != "") {
@@ -1514,12 +1575,15 @@ export default {
               });
             break;
           case "Redeem":
-            if (!this.approvals[this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name]) {
+            if (!this.approvals[appEmpId]) {
               this.makeApprovalEmp("Redeem");
             } else {
               console.log("redeem");
               this.isPending = true;
-              this.redeem({ contract: this.empAddr()[0], tokens: new BigNumber(this.tokenAmt).times(empDecs).toString() })
+              this.redeem({
+                assetInstance: assetInstance,
+                tokens: new BigNumber(this.tokenAmt).times(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))).toString(),
+              })
                 .then(e => {
                   this.isPending = false;
                   if (e[1] && e[1] != "") {
@@ -1542,7 +1606,7 @@ export default {
       this.getEmpState();
     },
     async updateUserInfo() {
-      await Promise.all([this.getWETHBalance(), this.getUGasBalance(), this.getPosition(), this.checkUpdateApprovals()]);
+      await Promise.all([this.getUserBalances(), this.getAssetInstanceBalance(), this.getPosition(), this.checkUpdateApprovals()]);
     },
     toNavPage(on) {
       this.navPage = on;
@@ -1563,15 +1627,6 @@ export default {
       this.runChecks();
       console.log("toNavAct", on);
     },
-    displayAssetStats() {
-      this.showInfo = !this.showInfo;
-
-      if (this.showInfo) {
-        this.showInfoButtonText = "Close Gas Info";
-      } else {
-        this.showInfoButtonText = "Gas Info";
-      }
-    },
     tokenHandler() {
       this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
       this.posUpdateHandler();
@@ -1583,6 +1638,8 @@ export default {
       if (this.price == 0) {
         await this.lastPrice();
       }
+      console.log("this.tokenAmt", this.tokenAmt);
+      console.log("this.collatAmt", this.collatAmt);
       const resultantCR = this.tokenAmt > 0 ? Number(this.collatAmt) / Number(this.tokenAmt) : 0;
       this.pricedTxCR = this.price !== 0 ? (resultantCR / this.price).toFixed(4) : 0;
       const newCollat = Number(this.collatAmt) + Number(this.existingColl);
@@ -1601,10 +1658,14 @@ export default {
       }
     },
     async fetchApprovalAll() {
+      const assetInstance = this.asset[this.tokenSelected];
+      const assetTokenName = formAssetName(this.assetName, assetInstance);
+      const appEmpId = "EMP" + assetTokenName + "_" + assetTokenName;
+      const appColId = assetTokenName + "_" + assetInstance.collateral;
       if (this.navAct == "redeem") {
-        this.fetchApproval(this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name, this.empAddr()[0], this.empAddr()[1]);
+        this.fetchApproval(appEmpId, assetInstance.emp.address, assetInstance.token.address);
       } else {
-        this.fetchApproval(this.assets[this.tokenSelected].name + "_WETH", this.empAddr()[0], WETH);
+        this.fetchApproval(appColId, assetInstance.emp.address, assetInstance.collateral === "WETH" ? WETH : USDC);
       }
     },
     async checkUpdateApprovals() {
@@ -1615,14 +1676,17 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
-
+      const assetInstance = this.asset[this.tokenSelected];
+      const assetTokenName = formAssetName(this.assetName, assetInstance);
+      const appEmpId = "EMP" + assetTokenName + "_" + assetTokenName;
+      const appColId = assetTokenName + "_" + assetInstance.collateral;
       if (from === "Redeem") {
         this.isPending = true;
       }
       if (from === "Settle") {
         this.empPendingApproval = true;
       }
-      this.makeApproval(this.assets[this.tokenSelected].emp.name + "_" + this.assets[this.tokenSelected].name, this.empAddr()[0], this.empAddr()[1])
+      this.makeApproval(appEmpId, assetInstance.emp.address, assetInstance.token.address)
         .then(async e => {
           console.log("approve", e[1]);
           if (from === "Redeem") {
@@ -1667,33 +1731,17 @@ export default {
       const wrap = await this.unwrapETH({ amount: amount });
       console.log("unwrapETH", wrap);
     },
+    /*
     showMedianToggle() {
       console.log("showMedian", this.showMedian);
       this.showMedian = !this.showMedian;
     },
+    */
+    formAssetName,
   },
 };
 </script>
 <style lang="scss" scoped>
-.gas-cards {
-  @media (min-width: 800px) {
-    display: flex !important;
-  }
-}
-.desktop-display {
-  display: inline-block !important;
-
-  @media (max-width: 800px) {
-    display: none !important;
-  }
-}
-.mobile-display {
-  display: none !important;
-
-  @media (max-width: 800px) {
-    display: inline-block !important;
-  }
-}
 .hideDropdown {
   display: none;
 }
@@ -1713,7 +1761,6 @@ div.error {
 }
 .tabs {
   border-radius: 10px 10px 0px 0px;
-  // border-radius: 10px;
   overflow: hidden;
   white-space: nowrap;
   button {
@@ -1791,7 +1838,6 @@ div.error {
   height: 50px;
   padding: 10px;
   font-size: 22px;
-  // font-family: "Share Tech Mono", monospace;
   font-family: "Inconsolata", monospace;
   &::placeholder {
     color: #0000001c;
@@ -1809,12 +1855,11 @@ div.error {
 
   .select {
     font-family: "Inconsolata", monospace;
-    // background: #ffeded;
   }
 }
 #thebox {
   box-shadow: 0px 4px 10px 2px #00000014;
-  box-shadow: 0px 4px 10px 2px #ca625a14; // #e5706714
+  box-shadow: 0px 4px 10px 2px #ca625a14;
   border-radius: 10px;
   z-index: 1;
 }
@@ -1824,8 +1869,10 @@ div.error {
 
   .button {
     cursor: pointer;
+    display: block;
     color: #fff;
     border: none;
+    text-align: center;
     border-radius: 8px;
     padding: 2px 20px;
     width: 100%;
@@ -1856,36 +1903,16 @@ div.error {
   font-size: 14px;
   color: #e57067;
   width: 100%;
-  // width: 98%;
 }
 .assetchart-wrapper {
   width: 100%;
-  // width: 98%;
   background: #f9f8f8;
   border-right: 1px solid #f2edee;
   border-left: 1px solid #f2edee;
   padding-top: 20px;
   margin: 0 auto;
   margin-bottom: -10px;
-  // display: none;
-  // &.show {
-  //   display: block;
-  // }
-  // transform: perspective(10em) rotateX(-5deg);
-  // animation: animate-down 0.4s 1 ease-in;
 }
-
-// @keyframes animate-down {
-//   from {
-//     margin-bottom: -200px;
-//     // transform: perspective(0em) rotateX(0deg);
-//   }
-
-//   to {
-//     margin-bottom: -10px;
-//     // transform: perspective(10em) rotateX(-5deg);
-//   }
-// }
 
 #act {
   cursor: pointer;
@@ -1902,7 +1929,6 @@ div.error {
 
   &:active {
     background: #f2edef;
-    // background: darken($primary, 10%);
   }
   &.error {
     cursor: not-allowed;
@@ -1966,26 +1992,6 @@ div.error {
   &.tutorial {
     background: #6799e5;
     color: #fff;
-  }
-}
-
-.gas-detail-button {
-  display: none;
-  cursor: pointer;
-  background: var(--back-wallet);
-  border-radius: 5px;
-  border: none;
-  padding: 0px 10px;
-  height: 36px;
-  color: var(--text-wallet);
-  font-size: 14px;
-
-  &:hover {
-    box-shadow: 0px 2px 3px var(--back-wallet-hover);
-  }
-
-  @media (max-width: 800px) {
-    display: inline-block;
   }
 }
 
@@ -2085,9 +2091,13 @@ div.error {
 }
 
 .wrapeth {
-  background: #c5c5c5;
+  background: #c0cbf6;
+}
+.buyusdc {
+  background: #65a4e8;
 }
 
+// update
 .row {
   display: flex;
   width: 100%;
@@ -2100,7 +2110,7 @@ div.error {
         width: 100%;
       }
     }
-    flex-flow: row nowrap; // update
+    flex-flow: row nowrap;
     align-items: center;
   }
   div.item,
@@ -2113,7 +2123,7 @@ div.error {
   text-shadow: 0px 1px 1px #de1d73;
 }
 .unitemp {
-  color: #e07593; // #fe187f
+  color: #e07593;
   font-size: 52px;
   @media (max-width: 540px) {
     margin-bottom: 16px;
@@ -2146,6 +2156,17 @@ div.error {
   display: flex;
   justify-content: space-between;
 }
+.apr-info {
+  font-size: 36px;
+  text-align: center;
+}
+
+.apr-block {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
 .warning {
   font-size: 13px;
   padding: 0px 10px;

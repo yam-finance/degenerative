@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Web3 from "web3";
 import BigNumber from "bignumber.js";
+import moment from "moment";
 import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
@@ -16,7 +17,7 @@ import {
   approve,
   getTWAP,
   getAllowance,
-  DevMiningCalculator,
+  devMiningCalculator,
   getPriceByContract,
   getDevMiningEmps,
 } from "@/utils";
@@ -26,12 +27,12 @@ import { provider } from "web3-core";
 import config from "@/config";
 import store from "@/store";
 import YAMContract from "@/utils/abi/yam.json";
+import EMPContractOld from "@/utils/abi/empold.json";
 import EMPContract from "@/utils/abi/emp.json";
 import UNIContract from "@/utils/abi/uni.json";
 import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
-import UGASJAN21LPContract from "@/utils/abi/assets/ugas_lp_jan.json";
-import { UMA, WETH } from "@/utils/addresses";
+import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
 
 Vue.use(Vuex);
@@ -53,9 +54,13 @@ const defaultState = () => {
       UGASJAN21_WETH: false,
       UGASFEB21_WETH: false,
       UGASMAR21_WETH: false,
-      EMPJAN_UGASJAN21: false,
-      EMPFEB_UGASFEB21: false,
-      EMPMAR_UGASMAR21: false,
+      UGASJUN21_WETH: false,
+      USTONKSAPR21_USDC: false,
+      EMPUGASJAN21_UGASJAN21: false,
+      EMPUGASFEB21_UGASFEB21: false,
+      EMPUGASMAR21_UGASMAR21: false,
+      EMPUGASJUN21_UGASJUN21: false,
+      EMPUSTONKSAPR21_USTONKSAPR21: false,
     },
     web3: {
       core: null,
@@ -63,7 +68,7 @@ const defaultState = () => {
       web3Instance: null,
       network: config.networks["1"],
     },
-    empState: {
+    empStateOld: {
       expirationTimestamp: new BigNumber(0),
       collateralCurrency: "",
       priceIdentifier: "",
@@ -72,6 +77,28 @@ const defaultState = () => {
       disputeBondPct: new BigNumber(0),
       disputerDisputeRewardPct: new BigNumber(0),
       sponsorDisputeRewardPct: new BigNumber(0),
+      minSponsorTokens: new BigNumber(0),
+      timerAddress: "",
+      cumulativeFeeMultiplier: new BigNumber(0),
+      rawTotalPositionCollateral: new BigNumber(0),
+      totalTokensOutstanding: new BigNumber(0),
+      liquidationLiveness: new BigNumber(0),
+      withdrawalLiveness: new BigNumber(0),
+      currentTime: new BigNumber(0),
+      isExpired: false,
+      contractState: 0,
+      finderAddress: "",
+      expiryPrice: new BigNumber(0),
+    },
+    empState: {
+      expirationTimestamp: new BigNumber(0),
+      collateralCurrency: "",
+      priceIdentifier: "",
+      tokenCurrency: "",
+      collateralRequirement: new BigNumber(0),
+      disputeBondPercentage: new BigNumber(0),
+      disputerDisputeRewardPercentage: new BigNumber(0),
+      sponsorDisputeRewardPercentage: new BigNumber(0),
       minSponsorTokens: new BigNumber(0),
       timerAddress: "",
       cumulativeFeeMultiplier: new BigNumber(0),
@@ -148,6 +175,10 @@ export default new Vuex.Store({
     ON_ACCOUNT_CHANGED(state, data) {
       state.account = data.account;
       console.debug("ON_ACCOUNT_CHANGED", data);
+    },
+    EMP_STATE_OLD(state, data) {
+      state.empStateOld = data;
+      console.debug("EMP_STATE_OLD", data);
     },
     EMP_STATE(state, data) {
       state.empState = data;
@@ -282,9 +313,14 @@ export default new Vuex.Store({
       return balance;
     },
 
-    getEMP: ({ commit, dispatch }, payload: { address: string }) => {
+    getEMP: ({ commit, dispatch }, payload: { assetInstance: any }) => {
       const web3 = new Web3(Vue.prototype.$provider);
-      const empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.address);
+      let empContract;
+      if (payload.assetInstance.emp.new) {
+        empContract = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
+      } else {
+        empContract = new web3.eth.Contract((EMPContractOld.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
+      }
       commit("GET_EMP", { currentEMP: empContract });
       return empContract;
     },
@@ -316,7 +352,7 @@ export default new Vuex.Store({
         const res = await uniPair.methods.getReserves().call();
         reserves0 = new BigNumber(res._reserve0);
         reserves1 = new BigNumber(res._reserve1);
-        if (token0 == payload.tokenA) {
+        if (token0 == payload.tokenA || token0.toLowerCase() == USDC) {
           return reserves0.dividedBy(reserves1);
         } else {
           return reserves1.dividedBy(reserves0);
@@ -334,82 +370,135 @@ export default new Vuex.Store({
       return contractWETH;
     },
 
-    getPositionData: async ({ commit, dispatch }, contract: string) => {
+    getPositionData: async ({ commit, dispatch }, assetInstance: any) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: contract });
+      const emp = await dispatch("getEMP", { assetInstance: assetInstance });
       try {
         const pos = await emp.methods.positions(store.state.account).call();
         commit("CURR_POS", pos);
         return pos;
       } catch (e) {
-        console.debug("couldnt get position for: ", contract, " for user: ", store.state.account);
+        console.debug("couldnt get position for: ", assetInstance.emp.address, " for user: ", store.state.account);
       }
     },
 
-    setEMPState: async ({ commit, dispatch }, contract: string) => {
+    setEMPState: async ({ commit, dispatch }, assetInstance: any) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: contract });
-      try {
-        const res = await Promise.all([
-          emp.methods.expirationTimestamp().call(),
-          emp.methods.collateralCurrency().call(),
-          emp.methods.priceIdentifier().call(),
-          emp.methods.tokenCurrency().call(),
-          emp.methods.collateralRequirement().call(),
-          emp.methods.disputeBondPct().call(),
-          emp.methods.disputerDisputeRewardPct().call(),
-          emp.methods.sponsorDisputeRewardPct().call(),
-          emp.methods.minSponsorTokens().call(),
-          emp.methods.timerAddress().call(),
-          emp.methods.cumulativeFeeMultiplier().call(),
-          emp.methods.rawTotalPositionCollateral().call(),
-          emp.methods.totalTokensOutstanding().call(),
-          emp.methods.liquidationLiveness().call(),
-          emp.methods.withdrawalLiveness().call(),
-          emp.methods.getCurrentTime().call(),
-          emp.methods.contractState().call(),
-          emp.methods.finder().call(),
-          emp.methods.expiryPrice().call(),
-        ]);
-        const dat = {
-          expirationTimestamp: new BigNumber(res[0]),
-          collateralCurrency: res[1], // address
-          priceIdentifier: res[2],
-          tokenCurrency: res[3], // address
-          collateralRequirement: new BigNumber(res[4]),
-          disputeBondPct: new BigNumber(res[5]),
-          disputerDisputeRewardPct: new BigNumber(res[6]),
-          sponsorDisputeRewardPct: new BigNumber(res[7]),
-          minSponsorTokens: new BigNumber(res[8]),
-          timerAddress: res[9], // address
-          cumulativeFeeMultiplier: new BigNumber(res[10]),
-          rawTotalPositionCollateral: new BigNumber(res[11]),
-          totalTokensOutstanding: new BigNumber(res[12]),
-          liquidationLiveness: new BigNumber(res[13]),
-          withdrawalLiveness: new BigNumber(res[14]),
-          currentTime: new BigNumber(res[15]),
-          isExpired: Number(res[15]) >= Number(res[0]),
-          contractState: Number(res[16]),
-          finderAddress: res[17], // address
-          expiryPrice: new BigNumber(res[18]),
-        };
-        commit("EMP_STATE", dat);
-        return dat;
-      } catch (e) {
-        console.error("error getting emp state", e);
-        return "bad";
+      const emp = await dispatch("getEMP", { assetInstance: assetInstance });
+      if (assetInstance.emp.new) {
+        try {
+          const res = await Promise.all([
+            emp.methods.expirationTimestamp().call(),
+            emp.methods.collateralCurrency().call(),
+            emp.methods.priceIdentifier().call(),
+            emp.methods.tokenCurrency().call(),
+            emp.methods.collateralRequirement().call(),
+            emp.methods.disputeBondPercentage().call(),
+            emp.methods.disputerDisputeRewardPercentage().call(),
+            emp.methods.sponsorDisputeRewardPercentage().call(),
+            emp.methods.minSponsorTokens().call(),
+            emp.methods.timerAddress().call(),
+            emp.methods.cumulativeFeeMultiplier().call(),
+            emp.methods.rawTotalPositionCollateral().call(),
+            emp.methods.totalTokensOutstanding().call(),
+            emp.methods.liquidationLiveness().call(),
+            emp.methods.withdrawalLiveness().call(),
+            emp.methods.getCurrentTime().call(),
+            emp.methods.contractState().call(),
+            emp.methods.finder().call(),
+            emp.methods.expiryPrice().call(),
+          ]);
+          const dat = {
+            expirationTimestamp: new BigNumber(res[0]),
+            collateralCurrency: res[1], // address
+            priceIdentifier: res[2],
+            tokenCurrency: res[3], // address
+            collateralRequirement: new BigNumber(res[4]),
+            disputeBondPercentage: new BigNumber(res[5]),
+            disputerDisputeRewardPercentage: new BigNumber(res[6]),
+            sponsorDisputeRewardPercentage: new BigNumber(res[7]),
+            minSponsorTokens: new BigNumber(res[8]),
+            timerAddress: res[9], // address
+            cumulativeFeeMultiplier: new BigNumber(res[10]),
+            rawTotalPositionCollateral: new BigNumber(res[11]),
+            totalTokensOutstanding: new BigNumber(res[12]),
+            liquidationLiveness: new BigNumber(res[13]),
+            withdrawalLiveness: new BigNumber(res[14]),
+            currentTime: new BigNumber(res[15]),
+            isExpired: Number(res[15]) >= Number(res[0]),
+            contractState: Number(res[16]),
+            finderAddress: res[17], // address
+            expiryPrice: new BigNumber(res[18]),
+          };
+          commit("EMP_STATE", dat);
+          return dat;
+        } catch (e) {
+          console.error("error getting emp state", e);
+          return "bad";
+        }
+      } else {
+        try {
+          const res = await Promise.all([
+            emp.methods.expirationTimestamp().call(),
+            emp.methods.collateralCurrency().call(),
+            emp.methods.priceIdentifier().call(),
+            emp.methods.tokenCurrency().call(),
+            emp.methods.collateralRequirement().call(),
+            emp.methods.disputeBondPct().call(),
+            emp.methods.disputerDisputeRewardPct().call(),
+            emp.methods.sponsorDisputeRewardPct().call(),
+            emp.methods.minSponsorTokens().call(),
+            emp.methods.timerAddress().call(),
+            emp.methods.cumulativeFeeMultiplier().call(),
+            emp.methods.rawTotalPositionCollateral().call(),
+            emp.methods.totalTokensOutstanding().call(),
+            emp.methods.liquidationLiveness().call(),
+            emp.methods.withdrawalLiveness().call(),
+            emp.methods.getCurrentTime().call(),
+            emp.methods.contractState().call(),
+            emp.methods.finder().call(),
+            emp.methods.expiryPrice().call(),
+          ]);
+          const dat = {
+            expirationTimestamp: new BigNumber(res[0]),
+            collateralCurrency: res[1], // address
+            priceIdentifier: res[2],
+            tokenCurrency: res[3], // address
+            collateralRequirement: new BigNumber(res[4]),
+            disputeBondPct: new BigNumber(res[5]),
+            disputerDisputeRewardPct: new BigNumber(res[6]),
+            sponsorDisputeRewardPct: new BigNumber(res[7]),
+            minSponsorTokens: new BigNumber(res[8]),
+            timerAddress: res[9], // address
+            cumulativeFeeMultiplier: new BigNumber(res[10]),
+            rawTotalPositionCollateral: new BigNumber(res[11]),
+            totalTokensOutstanding: new BigNumber(res[12]),
+            liquidationLiveness: new BigNumber(res[13]),
+            withdrawalLiveness: new BigNumber(res[14]),
+            currentTime: new BigNumber(res[15]),
+            isExpired: Number(res[15]) >= Number(res[0]),
+            contractState: Number(res[16]),
+            finderAddress: res[17], // address
+            expiryPrice: new BigNumber(res[18]),
+          };
+          commit("EMP_STATE_OLD", dat);
+          return dat;
+        } catch (e) {
+          console.error("error getting emp state", e);
+          return "bad";
+        }
       }
     },
 
-    mint: async ({ commit, dispatch }, payload: { contract: string; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+    mint: async ({ commit, dispatch }, payload: { assetInstance: any; collat: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const web3 = new Web3(web3Provider);
@@ -457,11 +546,11 @@ export default new Vuex.Store({
       }
     },
 
-    deposit: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+    deposit: async ({ commit, dispatch }, payload: { assetInstance: any; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const ge = await emp.methods.deposit([payload.collat]).estimateGas(
@@ -502,11 +591,11 @@ export default new Vuex.Store({
       }
     },
 
-    requestWithdrawal: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+    requestWithdrawal: async ({ commit, dispatch }, payload: { assetInstance: any; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const ge = await emp.methods.requestWithdrawal([payload.collat]).estimateGas(
@@ -547,11 +636,11 @@ export default new Vuex.Store({
       }
     },
 
-    withdrawRequestFinalize: async ({ commit, dispatch }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+    withdrawRequestFinalize: async ({ commit, dispatch }, payload: { assetInstance: any; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const ge = await emp.methods.withdrawPassedRequest().estimateGas(
@@ -592,11 +681,11 @@ export default new Vuex.Store({
       }
     },
 
-    withdraw: async ({ commit, dispatch }, payload: { contract: string; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+    withdraw: async ({ commit, dispatch }, payload: { assetInstance: any; collat: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const ge = await emp.methods.withdraw([payload.collat]).estimateGas(
@@ -637,11 +726,11 @@ export default new Vuex.Store({
       }
     },
 
-    redeem: async ({ commit, dispatch }, payload: { contract: string; tokens: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
+    redeem: async ({ commit, dispatch }, payload: { assetInstance: any; tokens: string; onTxHash?: (txHash: string) => void }): Promise<boolean> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         const ge = await emp.methods.redeem([payload.tokens]).estimateGas(
@@ -683,11 +772,11 @@ export default new Vuex.Store({
     },
 
     // settle prep
-    settle: async ({ commit, dispatch }, payload: { contract: string; onTxHash?: (txHash: string) => void }): Promise<any> => {
+    settle: async ({ commit, dispatch }, payload: { assetInstance: any; onTxHash?: (txHash: string) => void }): Promise<any> => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const web3Provider = Vue.prototype.$provider;
         // const ge = await emp.methods.settleExpired().estimateGas(
@@ -729,11 +818,11 @@ export default new Vuex.Store({
     },
     // settle prep
 
-    getUserUGasBalance: async ({ commit, dispatch }, payload: { contract: string }) => {
+    getUserAssetTokenBalance: async ({ commit, dispatch }, payload: { assetInstance: any }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const emp = await dispatch("getEMP", { address: payload.contract });
+      const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const synth = await emp.methods.tokenCurrency().call();
         const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
@@ -805,12 +894,20 @@ export default new Vuex.Store({
       ); // Zeros can be replaced by block numbers if necessary.
       return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
     },
-    getUserWETHBalance: async ({ commit, dispatch }) => {
+    getUserBalanceWETH: async ({ commit, dispatch }) => {
       await sleep(500);
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
       const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
+      return balance;
+    },
+    getUserBalanceUSDC: async ({ commit, dispatch }) => {
+      await sleep(500);
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+      const balance = await getBalance(Vue.prototype.$provider, USDC, store.state.account);
       return balance;
     },
     checkContractApprovals: async ({ commit, dispatch }) => {
@@ -846,20 +943,21 @@ export default new Vuex.Store({
       return result;
     },
 
-    getMiningRewards: async ({ commit, dispatch }, payload: { address: string; addressEMP: string; addressLP: string; addressPrice: number }) => {
+    getMiningRewards: async ({ commit, dispatch }, payload: { assetName: string; assetInstance: any; assetPrice: number }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
+
       try {
         // console.log("getContractInfo", await getContractInfo(UGASJAN21));
         // console.log("getPriceByContract", await getPriceByContract(UGASJAN21));
         const emps = await getDevMiningEmps();
-        const devmining = await DevMiningCalculator({
+        const devmining = await devMiningCalculator({
           provider: Vue.prototype.$provider,
           getPrice: getPriceByContract,
           empAbi: EMPContract.abi,
         });
-        const getEmpInfo: any = await devmining.utils.getEmpInfo(payload.addressEMP);
+        const getEmpInfo: any = await devmining.utils.getEmpInfo(payload.assetInstance.emp.address);
         console.debug("getEmpInfo", {
           size: getEmpInfo.size,
           price: getEmpInfo.price,
@@ -876,27 +974,74 @@ export default new Vuex.Store({
         for (let i = 0; i < estimateDevMiningRewards.length; i++) {
           rewards[estimateDevMiningRewards[i][0]] = estimateDevMiningRewards[i][1];
         }
-        const base = new BigNumber(10).pow(18);
+        const baseGeneral = new BigNumber(10).pow(18);
+        const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
+        let baseCollateral;
         const web3 = new Web3(Vue.prototype.$provider);
-        const contractLp = new web3.eth.Contract((UGASJAN21LPContract.abi as unknown) as AbiItem, payload.addressLP);
+        const contractLp = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.assetInstance.pool.address);
         const contractLpCall = await contractLp.methods.getReserves().call();
         const ethPrice = await getPriceByContract(WETH);
         const umaPrice = await getPriceByContract(UMA);
+        const yamPrice = await getPriceByContract(YAM);
         // const tokenPrice = await getPriceByContract(payload.address);
 
-        // temp WETH
-        const tempFixPriceWithWETH = payload.addressPrice * ethPrice;
-        const tokenPrice = tempFixPriceWithWETH;
-        console.debug("tempFixPriceWithWETH", tempFixPriceWithWETH);
+        // temp pricing
+        let tokenPrice;
+        if (payload.assetInstance.collateral === "USDC") {
+          baseCollateral = new BigNumber(10).pow(6);
+          tokenPrice = payload.assetPrice * 1;
+          // } else if(payload.assetInstance.collateral === "YAM"){
+          //   tokenPrice = payload.assetPrice * yamPrice;
+        } else {
+          baseCollateral = new BigNumber(10).pow(18);
+          tokenPrice = payload.assetPrice * ethPrice;
+        }
+        console.debug("tokenPrice", tokenPrice);
 
-        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(base).toNumber();
-        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(base).toNumber();
-        const assetReserveValue = assetReserve0 * tokenPrice + assetReserve1 * ethPrice;
+        const current = moment().unix();
+        const week1Until = 1615665600;
+        const week2Until = 1616270400;
+        const yamRewards = 0;
+        const umaRewards = rewards[payload.assetInstance.emp.address];
+        let yamWeekRewards = 0;
+        let umaWeekRewards = 0;
+        if (payload.assetName === "UGAS" && payload.assetInstance.cycle === "JUN" && payload.assetInstance.year === "21") {
+          if (current < week1Until) {
+            yamWeekRewards += 5000;
+          } else if (current < week2Until) {
+            yamWeekRewards += 10000;
+          }
+        } else if (payload.assetName === "USTONKS" && payload.assetInstance.cycle === "APR" && payload.assetInstance.year === "21") {
+          if (current < week1Until) {
+            umaWeekRewards += 5000;
+            yamWeekRewards += 5000;
+          } else if (current < week2Until) {
+            umaWeekRewards += 10000;
+            yamWeekRewards += 10000;
+          }
+        }
+
+        let calcAsset = 0;
+        let calcCollateral = 0;
+        const normalRewards = umaRewards * umaPrice + yamRewards * yamPrice;
+        const weekRewards = umaWeekRewards * umaPrice + yamWeekRewards * yamPrice;
+        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
+        const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
+        if (payload.assetName === "USTONKS") {
+          calcAsset = assetReserve1 * tokenPrice;
+          calcCollateral = assetReserve0 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        } else {
+          calcAsset = assetReserve0 * tokenPrice;
+          calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        }
+        const assetReserveValue = calcAsset + calcCollateral;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((rewards[payload.addressEMP] * 52 * umaPrice * 0.82) / assetReserveValue) * 100) / 2;
-        console.debug("aprCalculate %", aprCalculate);
-        return mixin.methods.numeral(aprCalculate);
+        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100) / 2;
+        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100) / 2;
+        const totalAprCalculation = aprCalculate + aprCalculateExtra;
+        console.debug("aprCalculate %", totalAprCalculation);
+        return totalAprCalculation;
       } catch (e) {
         console.error("error", e);
         return 0;
@@ -1017,6 +1162,9 @@ export default new Vuex.Store({
       const auth = await Vue.prototype.$auth;
       const connector = await auth.getConnector();
       return connector; // move to state
+    },
+    empStateOld(state) {
+      return state.empStateOld;
     },
     empState(state) {
       return state.empState;

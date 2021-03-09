@@ -24,7 +24,12 @@ const routes: Array<RouteConfig> = [
   },
   {
     path: "/assets/:key",
-    name: "Assets",
+    name: "Asset",
+    component: Asset,
+  },
+  {
+    path: "/asset/:key",
+    name: "Asset",
     component: Asset,
   },
   {
@@ -32,11 +37,6 @@ const routes: Array<RouteConfig> = [
     name: "Learn More",
     component: LearnMore,
   },
-  //   {
-  //     path: "/account",
-  //     name: "Account",
-  //     component: Account,
-  //   },
   {
     path: "/positions",
     name: "Positions",

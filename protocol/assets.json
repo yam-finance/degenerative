@@ -1,3 +1,111 @@
-[
-  {}
-]
+{
+  "ugas": [
+    {
+      "name": "January",
+      "cycle": "JAN",
+      "year": "21",
+      "collateral": "WETH",
+      "token": {
+        "address": "0x3d995510f8d82c2ea341845932b5ddde0bead9a3",
+        "decimals": 18
+      },
+      "emp": {
+        "address": "0x516f595978d87b67401dab7afd8555c3d28a3af4",
+        "new": false
+      },
+      "pool": {
+        "address": "0x25fb29d865c1356f9e95d621f21366d3a5db6bb0"
+      },
+      "apr": {
+        "force": 0,
+        "extra": 0
+      }
+    },
+    {
+      "name": "February",
+      "cycle": "FEB",
+      "year": "21",
+      "collateral": "WETH",
+      "token": {
+        "address": "0x81fab276aec924fbde190cf379783526d413cf70",
+        "decimals": 18
+      },
+      "emp": {
+        "address": "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+        "new": false
+      },
+      "pool": {
+        "address": "0x4a8a2ea3718964ed0551a3191c30e49ea38a5ade"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    },
+    {
+      "name": "March",
+      "cycle": "MAR",
+      "year": "21",
+      "collateral": "WETH",
+      "token": {
+        "address": "0x4e110603e70b0b5f1c403ee543b37e1f1244cf28",
+        "decimals": 18
+      },
+      "emp": {
+        "address": "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
+        "new": false
+      },
+      "pool": {
+        "address": "0x683ea972ffa19b7bad6d6be0440e0a8465dba71c"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    },
+    {
+      "name": "June",
+      "cycle": "JUN",
+      "year": "21",
+      "collateral": "WETH",
+      "token": {
+        "address": "0xa6b9d7e3d76cf23549293fb22c488e0ea591a44e",
+        "decimals": 18
+      },
+      "emp": {
+        "address": "0x4e8d60a785c2636a63c5bd47c7050d21266c8b43",
+        "new": true
+      },
+      "pool": {
+        "address": "0x2b5dfb7874f685bea30b7d8426c9643a4bcf5873"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    }
+  ],
+  "ustonks": [
+    {
+      "name": "April",
+      "cycle": "APR",
+      "year": "21",
+      "collateral": "USDC",
+      "token": {
+        "address": "0xec58d3aefc9aaa2e0036fa65f70d569f49d9d1ed",
+        "decimals": 6
+      },
+      "emp": {
+        "address": "0x4f1424cef6ace40c0ae4fc64d74b734f1eaf153c",
+        "new": true
+      },
+      "pool": {
+        "address": "0xedf187890af846bd59f560827ebd2091c49b75df"
+      },
+      "apr": {
+        "force": -1,
+        "extra": 0
+      }
+    }
+  ]
+}
