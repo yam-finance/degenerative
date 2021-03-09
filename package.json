@@ -28,6 +28,7 @@
     "dayjs": "^1.8.16",
     "echarts": "^5.0.0",
     "ethers": "^5.0.23",
+    "google-spreadsheet": "^3.1.15",
     "graphql": "^15.4.0",
     "graphql-tag": "^2.11.0",
     "iview": "^3.5.4",
