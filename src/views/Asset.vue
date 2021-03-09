@@ -6,7 +6,7 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <a class="asset-detail-switch tutorial" href="https://yamfinance.medium.com/9d2622dde72" target="_blank">Guide</a>
+          <a class="asset-detail-switch tutorial" :href="`${userGuide}`" target="_blank">Guide</a>
           <Space size="sm" />
           <a class="asset-detail-switch" :href="`https://docs.degenerative.finance/synthetics/${$route.params.key}`" target="_blank">Info</a>
         </h2>
@@ -22,8 +22,8 @@
         <div class="warning justify">
           <div>
             Warning: This is an experimental token – users should proceed with extreme caution and take the time to understand the token. Be sure to check out
-            our handy Step by step <a href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72">User Guide</a> for in depth
-            instructions. And stop by the <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
+            our handy Step by step <a :href="`${userGuide}`">User Guide</a> for in depth instructions. And stop by the
+            <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
           </div>
 
           <div v-if="$route.params.key === 'ustonks'">
@@ -153,10 +153,9 @@
 
         <Container id="thebox-nav" :size="440">
           <div class="row row-item-col">
-            <a class="flexitem button link" href="https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72" target="_blank"
-              >Step by Step User Guide</a
-            >
-            <!--
+            <a class="flexitem button link" :href="`${userGuide}`" target="_blank">
+              Step by Step User Guide
+            </a>
             <Space v-if="$route.params.key === 'ugas' || showMedian" size="10" />
             <div v-if="$route.params.key === 'ugas' || showMedian" @click="showMedianToggle" class="item button">
               <span v-if="!showMedian">Median Chart</span>
@@ -642,6 +641,21 @@ export default {
   computed: {
     account() {
       return store.state.account;
+    },
+    userGuide() {
+      let guide;
+      switch (this.$route.params.key) {
+        case "ustonks":
+          guide = "https://yamfinance.medium.com/degenerative-finance-ustonks-user-guide-415cbb6abf45";
+          break;
+        case "ugas":
+          guide = "https://yamfinance.medium.com/degenerative-finance-ugas-user-guide-9d2622dde72";
+          break;
+        default:
+          guide = "";
+          break;
+      }
+      return guide;
     },
   },
   watch: {
