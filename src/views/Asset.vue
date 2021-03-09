@@ -77,8 +77,14 @@
                   >Asset Price</b
                 >
               </span>
-              <span v-if="tokenSelected">
-                <b>Asset Price:</b>
+              <span
+                v-if="tokenSelected"
+                v-tooltip="{
+                  content: 'Asset price of ' + assetName,
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                <b>Asset:</b>
                 {{ price && price > 0 ? (asset[tokenSelected].collateral == "WETH" ? numeral(price, "0.0000a") : numeral(price, "0.00a")) : "..." }}
                 {{ asset[tokenSelected].collateral }}
               </span>
@@ -119,11 +125,11 @@
                 <span
                   v-if="tokenSelected"
                   v-tooltip="{
-                    content: 'Index Market Price ' + assetName,
+                    content: 'Index market price of ' + assetName,
                     delay: { show: 150, hide: 100 },
                   }"
                 >
-                  <b>Index Price:</b>
+                  <b>Index:</b>
                   {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
                   {{ asset[tokenSelected].collateral }}
                 </span>

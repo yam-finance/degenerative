@@ -633,14 +633,8 @@ export const getCurrentTWAP = async () => {
 };
 
 export const getIndexFromSpreadsheet = async () => {
-  const doc = new GoogleSpreadsheet("1ghUzXmKIcxJgfLIymZZ373iUPpVAfWfqZcdv4hCxhKk");
-  await doc.useApiKey("AIzaSyA67a7rX10nA2qAoW5bCvOYXqFkszMbEU0");
-  await doc.loadInfo();
-
-  const sheet = await doc.sheetsByIndex[0];
-  await sheet.loadCells("M50");
-  const targetCell = await sheet.getCellByA1("M50");
-  const indexValue = new BigNumber(targetCell.value).decimalPlaces(2);
+  const data: any = await requestHttp("https://ugasapi.yam.finance/current-index");
+  const indexValue = new BigNumber(data.price).decimalPlaces(2);
 
   return indexValue;
 };
