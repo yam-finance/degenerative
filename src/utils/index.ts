@@ -14,6 +14,7 @@ import erc20 from "@studydefi/money-legos/erc20";
 import { WETH, DAI, EMPFEB, EMPMAR } from "./addresses";
 import { JsonTxResult } from "../interfaces/degenerative.i";
 import Assets from "../../protocol/assets.json";
+import { GoogleSpreadsheet } from "google-spreadsheet";
 
 dayjs.extend(utc);
 dayjs.extend(duration);
@@ -629,4 +630,17 @@ export const getCurrentTWAP = async () => {
   const currentTWAP = new BigNumber(web3.utils.fromWei(data.price.toString(), "ether")).decimalPlaces(4);
 
   return currentTWAP;
+};
+
+export const getIndexFromSpreadsheet = async () => {
+  const doc = new GoogleSpreadsheet("1ghUzXmKIcxJgfLIymZZ373iUPpVAfWfqZcdv4hCxhKk");
+  await doc.useApiKey("AIzaSyA67a7rX10nA2qAoW5bCvOYXqFkszMbEU0");
+  await doc.loadInfo();
+
+  const sheet = await doc.sheetsByIndex[0];
+  await sheet.loadCells("M51");
+  const targetCell = await sheet.getCellByA1("M51");
+  const indexValue = new BigNumber(targetCell.value).decimalPlaces(2);
+
+  return indexValue;
 };

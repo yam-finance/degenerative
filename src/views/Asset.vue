@@ -84,16 +84,16 @@
               </span>
             </span>
             <span>
-              <span v-if="!tokenSelected">
-                <b
-                  v-tooltip="{
-                    content: 'Select asset first.',
-                    delay: { show: 150, hide: 100 },
-                  }"
-                  >APR</b
-                >
-              </span>
               <div v-if="$route.params.key === 'ugas'" class="item button">
+                <span v-if="!tokenSelected">
+                  <b
+                    v-tooltip="{
+                      content: 'Select asset first.',
+                      delay: { show: 150, hide: 100 },
+                    }"
+                    >TWAP Price</b
+                  >
+                </span>
                 <span
                   v-if="tokenSelected"
                   v-tooltip="{
@@ -107,6 +107,15 @@
                 </span>
               </div>
               <div v-if="$route.params.key === 'ustonks'" class="item button">
+                <span v-if="!tokenSelected">
+                  <b
+                    v-tooltip="{
+                      content: 'Select asset first.',
+                      delay: { show: 150, hide: 100 },
+                    }"
+                    >Index Price</b
+                  >
+                </span>
                 <span
                   v-if="tokenSelected"
                   v-tooltip="{
@@ -530,7 +539,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, formAssetName } from "../utils";
+import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, getIndexFromSpreadsheet, formAssetName } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { WETH, USDC } from "@/utils/addresses";
@@ -684,12 +693,8 @@ export default {
       console.warn("this.asset", this.formAssetName(this.assetName, this.asset[this.tokenSelected]));
 
       this.medianData = await get30DMedian();
-
       this.currentTWAP = await getCurrentTWAP();
-      console.log(this.currentTWAP);
-
-      this.indexPrice = 2;
-      console.log(this.indexPrice);
+      this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
         this.fetchApprovalAll();
