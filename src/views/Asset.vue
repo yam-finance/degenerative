@@ -28,14 +28,13 @@
 
           <div v-if="$route.params.key === 'ustonks'">
             <br />
-            <b>uSTONKS NFT Giveaway</b> <span>The first 100 users to Mint $10K USDC worth of uSTONKS, then LP uSTONKS/USDC for 3 weeks qualify.</span>
-            <br />
+            <b>uSTONKS NFT Giveaway</b> <span>The first 100 users to Mint $10K USDC worth of uSTONKS, then LP uSTONKS/USDC for 3 weeks qualify.</span><br />
             <span><b>uSTONKS-APR21</b> is a synthetic that will expire at 4:00PM EST on April 30th.</span>
           </div>
 
           <div v-if="$route.params.key === 'ugas'">
             <br />
-            <span><b>uGAS-Mar21</b> is a 30 day contract that will expire at 4:00PM EST on March 31st.</span>
+            <span><b>uGAS-Mar21</b> is a 30 day contract that will expire at 4:00PM EST on March 31st.</span><br />
             <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
           </div>
         </div>
@@ -43,8 +42,8 @@
         <Space size="md" />
 
         <Container :size="440">
-          <div class="asset-info">
-            <span>
+          <div class="asset-info" :class="{ 'apr-info': tokenSelected }">
+            <span :class="{ 'apr-block': tokenSelected }">
               <span v-if="!tokenSelected">
                 <b
                   v-tooltip="{
@@ -55,17 +54,7 @@
                 >
               </span>
               <span
-                v-if="tokenSelected && $route.params.key === 'ugas'"
-                v-tooltip="{
-                  content: 'Earn UMA rewards when you mint and LP ' + assetName + ' on Uniswap.',
-                  delay: { show: 150, hide: 100 },
-                }"
-              >
-                <b>APR:</b>
-                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
-              </span>
-              <span
-                v-if="tokenSelected && $route.params.key === 'ustonks'"
+                v-if="tokenSelected"
                 v-tooltip="{
                   content: 'Earn rewards when you mint and LP ' + assetName + ' on Uniswap.',
                   delay: { show: 150, hide: 100 },
@@ -156,12 +145,11 @@
             <a class="flexitem button link" :href="`${userGuide}`" target="_blank">
               Step by Step User Guide
             </a>
-            <Space v-if="$route.params.key === 'ugas' || showMedian" size="10" />
+            <!-- <Space v-if="$route.params.key === 'ugas' || showMedian" size="10" />
             <div v-if="$route.params.key === 'ugas' || showMedian" @click="showMedianToggle" class="item button">
               <span v-if="!showMedian">Median Chart</span>
               <span v-if="showMedian">Back</span>
-            </div>
-            -->
+            </div> -->
           </div>
         </Container>
 
@@ -2168,6 +2156,17 @@ div.error {
   display: flex;
   justify-content: space-between;
 }
+.apr-info {
+  font-size: 36px;
+  text-align: center;
+}
+
+.apr-block {
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
 .warning {
   font-size: 13px;
   padding: 0px 10px;
