@@ -355,7 +355,11 @@
                       <a
                         target="_blank"
                         class="clicklptrade"
-                        :href="'https://app.uniswap.org/#/swap?outputCurrency=' + asset[tokenSelected].token.address"
+                        :href="
+                          `https://app.uniswap.org/#/swap?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
+                            asset[tokenSelected].token.address
+                          }`
+                        "
                         v-tooltip="{
                           content: 'Click here to buy the ' + assetName + ' asset',
                           delay: { show: 150, hide: 100 },
