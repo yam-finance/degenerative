@@ -44,15 +44,6 @@
         <Container :size="440">
           <div class="asset-info" :class="{ 'apr-info': tokenSelected }">
             <span :class="{ 'apr-block': tokenSelected }">
-              <span v-if="!tokenSelected">
-                <b
-                  v-tooltip="{
-                    content: 'Select asset first.',
-                    delay: { show: 150, hide: 100 },
-                  }"
-                  >APR</b
-                >
-              </span>
               <span
                 v-if="tokenSelected"
                 v-tooltip="{
@@ -88,6 +79,15 @@
                 {{ price && price > 0 ? (asset[tokenSelected].collateral == "WETH" ? numeral(price, "0.0000a") : numeral(price, "0.00a")) : "..." }}
                 {{ asset[tokenSelected].collateral }}
               </span>
+            </span>
+            <span v-if="!tokenSelected">
+              <b
+                v-tooltip="{
+                  content: 'Select asset first.',
+                  delay: { show: 150, hide: 100 },
+                }"
+                >APR</b
+              >
             </span>
             <span>
               <div v-if="$route.params.key === 'ugas'">
@@ -782,11 +782,17 @@ export default {
         }
       }
 
-      for (const element of assetChart) {
-        tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
-        tempChartTWAPData.push(element.twapETH);
+      if (this.assetName == "USTONKS") {
+        for (const element of assetChart) {
+          console.log(element.timestampDate, element.open, element.close, element.open, element.close);
+          tempChartData.push([element.timestampDate, element.open, element.close, element.open, element.close]);
+        }
+      }
 
-        if (this.assetName == "UGAS") {
+      if (this.assetName == "UGAS") {
+        for (const element of assetChart) {
+          tempChartData.push([element.timestampDate, element.openETH, element.closeETH, element.openETH, element.closeETH]);
+          tempChartTWAPData.push(element.twapETH);
           if (medianGasNames.includes(element.timestampDate)) {
             const index = medianGasNames.indexOf(element.timestampDate);
             const valueToBeAdded = this.chartOptionsMedianValues[index].value / 1000;
