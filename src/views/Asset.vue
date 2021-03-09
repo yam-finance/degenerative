@@ -97,7 +97,7 @@
                 <span
                   v-if="tokenSelected"
                   v-tooltip="{
-                    content: 'uGAS TWAP ' + assetName + ' on Uniswap.',
+                    content: 'TWAP ' + assetName,
                     delay: { show: 150, hide: 100 },
                   }"
                 >
