@@ -190,12 +190,14 @@
                 Deposit
               </button>
               <button
+                id="disabled-button"
                 @click="toNavAct('withdraw')"
                 :class="{ active: navAct === 'withdraw' }"
                 v-tooltip="{
-                  content: '<b>Withdraw</b>: Withdraw collateral from a position.',
+                  content: '<b>CURRENTLY DISABLED<b> <br> <b>Withdraw</b>: Withdraw collateral from a position.',
                   delay: { show: 150, hide: 100 },
                 }"
+                disabled
               >
                 Withdraw
               </button>
@@ -1769,11 +1771,17 @@ div.error {
 }
 #inputbox {
 }
+#disabled-button {
+  color: #000000;
+}
 .tabs {
   border-radius: 10px 10px 0px 0px;
   overflow: hidden;
   white-space: nowrap;
   button {
+    .disabled {
+      color: #000000;
+    }
     cursor: pointer;
     width: calc(100% / 4);
     border: none;
