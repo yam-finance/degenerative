@@ -1179,21 +1179,7 @@ export default {
     },
     updateLiqPrice(removeTokens = false, removeCollateral = false) {
       this.updateCR(removeTokens, removeCollateral);
-      const currentAsset = this.asset[this.tokenSelected].collateral;
-      let colDecimal = 0;
-
-      if (currentAsset == USDC) {
-        colDecimal = colDec.USDC;
-      } else {
-        colDecimal = colDec.WETH;
-      }
-
-      // console.log(this.collReq / colDecimal);
-
-      // this.collReq / new BigNumber(10).pow(new BigNumber(18))
-      // or
-      // this.collReq / colDecimal)
-      const crThreshold = this.collReq / colDecimal;
+      const crThreshold = this.collReq / colDec.WETH;
 
       if (this.currPos && this.tokenSelected) {
         const assetInstance = this.asset[this.tokenSelected];
