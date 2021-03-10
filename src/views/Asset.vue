@@ -1179,6 +1179,22 @@ export default {
     },
     updateLiqPrice(removeTokens = false, removeCollateral = false) {
       this.updateCR(removeTokens, removeCollateral);
+      const currentAsset = this.asset[this.tokenSelected].collateral;
+      let colDecimal = 0;
+
+      if (currentAsset == USDC) {
+        colDecimal = colDec.USDC;
+      } else {
+        colDecimal = colDec.WETH;
+      }
+
+      // console.log(this.collReq / colDecimal);
+
+      // this.collReq / new BigNumber(10).pow(new BigNumber(18))
+      // or
+      // this.collReq / colDecimal)
+      const crThreshold = this.collReq / colDecimal;
+
       if (this.currPos && this.tokenSelected) {
         const assetInstance = this.asset[this.tokenSelected];
         const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
@@ -1195,18 +1211,13 @@ export default {
         } else {
           totalCollat = this.collatAmt ? col - Number(this.collatAmt) : col;
         }
-        this.liquidationPrice = getLiquidationPrice(
-          totalCollat,
-          totalTokens,
-          this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
-          isPricefeedInvertedFromTokenSymbol("uGAS")
-        ).toFixed(4);
+        this.liquidationPrice = getLiquidationPrice(totalCollat, totalTokens, crThreshold, isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
       } else {
         if (this.tokenSelected) {
           this.liquidationPrice = getLiquidationPrice(
             this.tokenAmt ? this.tokenAmt : 0,
             this.collatAmt ? this.collatAmt : 0,
-            this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+            crThreshold,
             isPricefeedInvertedFromTokenSymbol("uGAS")
           ).toFixed(4);
         }
