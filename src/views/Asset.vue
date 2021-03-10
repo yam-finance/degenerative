@@ -345,7 +345,7 @@
                     <span class="unicorn">🦄</span>
                   </h2>
                   <div class="row">
-                    <div class="item" v-if="$route.params.key === 'ugas'">
+                    <div class="item">
                       <a
                         target="_blank"
                         class="clicklptrade"
@@ -356,25 +356,7 @@
                             asset[tokenSelected].token.address
                         "
                         v-tooltip="{
-                          content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
-                          delay: { show: 150, hide: 100 },
-                          placement: 'bottom-center',
-                        }"
-                        >LP</a
-                      >
-                    </div>
-                    <div class="item" v-if="$route.params.key === 'ustonks'">
-                      <a
-                        target="_blank"
-                        class="clicklptrade"
-                        :href="
-                          'https://app.uniswap.org/#/add/' +
-                            (asset[tokenSelected].collateral == 'WETH' ? 'ETH' : USDC) +
-                            '/' +
-                            asset[tokenSelected].token.address
-                        "
-                        v-tooltip="{
-                          content: 'Click here to add liquidity on ' + assetName + '/USDC LP',
+                          content: 'Click here to add liquidity on ' + assetName + '/' + asset[tokenSelected].collateral + ' LP',
                           delay: { show: 150, hide: 100 },
                           placement: 'bottom-center',
                         }"
