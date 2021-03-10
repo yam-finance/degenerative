@@ -190,10 +190,23 @@
                 Deposit
               </button>
               <button
+                v-if="$route.params.key === 'ugas'"
                 @click="toNavAct('withdraw')"
                 :class="{ active: navAct === 'withdraw' }"
                 v-tooltip="{
                   content: '<b>Withdraw</b>: Withdraw collateral from a position.',
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                Withdraw
+              </button>
+              <button
+                v-if="$route.params.key === 'ustonks'"
+                @click="toNavAct('withdraw')"
+                :class="{ active: navAct === 'withdraw' }"
+                v-tooltip="{
+                  content:
+                    '<b>Withdraw</b>: Withdraw collateral from a position. You can Request Withdraw if withdrawing the USDC makes your Collateral Ratio lower than the current Global Collateral Ratio. There is a 2 hour wait before the withdraw is available to ensure that you do not withdraw below the Minimum Collateral Ratio. Only use this option if you are familiar with the degenerative.finance interface and mechanism!',
                   delay: { show: 150, hide: 100 },
                 }"
               >
