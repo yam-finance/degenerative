@@ -343,7 +343,7 @@
                             asset[tokenSelected].token.address
                         "
                         v-tooltip="{
-                          content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
+                          content: 'Click here to add liquidity on ' + assetName + '/' + asset[tokenSelected].collateral + ' LP',
                           delay: { show: 150, hide: 100 },
                           placement: 'bottom-center',
                         }"
@@ -355,7 +355,11 @@
                       <a
                         target="_blank"
                         class="clicklptrade"
-                        :href="'https://app.uniswap.org/#/swap?outputCurrency=' + asset[tokenSelected].token.address"
+                        :href="
+                          `https://app.uniswap.org/#/swap?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
+                            asset[tokenSelected].token.address
+                          }`
+                        "
                         v-tooltip="{
                           content: 'Click here to buy the ' + assetName + ' asset',
                           delay: { show: 150, hide: 100 },
@@ -485,7 +489,7 @@
             >
             <label v-if="tokenSelected">
               Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
-              <b>{{ tokenBalance ? tokenBalance : "0" }}</b>
+              <b>{{ tokenBalance ? numeral(Number(tokenBalance), "0.00a") : "0" }}</b>
             </label>
             <label
               v-if="tokenSelected"
@@ -704,13 +708,9 @@ export default {
     ]),
     ...mapGetters(["empStateOld", "empState"]),
     async initAsset() {
-      console.warn("init", this.$route.params.key);
-
       this.tokenSelected = null;
       this.asset = Assets[this.$route.params.key];
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
-
-      console.warn("this.asset", this.formAssetName(this.assetName, this.asset[this.tokenSelected]));
 
       this.medianData = await get30DMedian();
       this.currentTWAP = await getCurrentTWAP();
@@ -746,9 +746,9 @@ export default {
         return;
       }
       const assetInstance = this.asset[this.tokenSelected];
-      const base = new BigNumber(10).pow(new BigNumber(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+      const base = new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals));
       this.tokenBalance = await this.getUserAssetTokenBalance({ assetInstance: assetInstance });
-      this.tokenBalance = new BigNumber(this.tokenBalance).div(base).toFixed(4);
+      this.tokenBalance = new BigNumber(this.tokenBalance).div(base);
     },
     async initChart() {
       if (!this.tokenSelected || !this.asset[this.tokenSelected].token.address) {
@@ -784,7 +784,6 @@ export default {
 
       if (this.assetName == "USTONKS") {
         for (const element of assetChart) {
-          console.log(element.timestampDate, element.open, element.close, element.open, element.close);
           tempChartData.push([element.timestampDate, element.open, element.close, element.open, element.close]);
         }
       }
@@ -990,6 +989,9 @@ export default {
         } else if (tn + Number(this.currEMP.withdrawalLiveness) > Number(this.currEMP.expierationTimestamp)) {
           this.hasError = true;
           this.currentError = "Request expires post-expiry, wait for contract to expire";
+        } else if (this.pricedCR < 1.5) {
+          this.hasError = true;
+          this.currentError = "Withdrawal would put position below Collat Ratio";
         }
       }
     },
