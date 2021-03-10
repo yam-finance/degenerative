@@ -190,14 +190,25 @@
                 Deposit
               </button>
               <button
-                id="disabled-button"
+                v-if="$route.params.key === 'ugas'"
                 @click="toNavAct('withdraw')"
                 :class="{ active: navAct === 'withdraw' }"
                 v-tooltip="{
-                  content: '<b>CURRENTLY DISABLED<b> <br> <b>Withdraw</b>: Withdraw collateral from a position.',
+                  content: '<b>Withdraw</b>: Withdraw collateral from a position.',
                   delay: { show: 150, hide: 100 },
                 }"
-                disabled
+              >
+                Withdraw
+              </button>
+              <button
+                v-if="$route.params.key === 'ustonks'"
+                @click="toNavAct('withdraw')"
+                :class="{ active: navAct === 'withdraw' }"
+                v-tooltip="{
+                  content:
+                    '<b>Withdraw</b>: Withdraw collateral from a position. You can Request Withdraw if withdrawing the USDC makes your Collateral Ratio lower than the current Global Collateral Ratio. There is a 2 hour wait before the withdraw is available to ensure that you do not withdraw below the Minimum Collateral Ratio. Only use this option if you are familiar with the degenerative.finance interface and mechanism!',
+                  delay: { show: 150, hide: 100 },
+                }"
               >
                 Withdraw
               </button>
@@ -334,7 +345,7 @@
                     <span class="unicorn">🦄</span>
                   </h2>
                   <div class="row">
-                    <div class="item">
+                    <div class="item" v-if="$route.params.key === 'ugas'">
                       <a
                         target="_blank"
                         class="clicklptrade"
@@ -346,6 +357,24 @@
                         "
                         v-tooltip="{
                           content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
+                          delay: { show: 150, hide: 100 },
+                          placement: 'bottom-center',
+                        }"
+                        >LP</a
+                      >
+                    </div>
+                    <div class="item" v-if="$route.params.key === 'ustonks'">
+                      <a
+                        target="_blank"
+                        class="clicklptrade"
+                        :href="
+                          'https://app.uniswap.org/#/add/' +
+                            (asset[tokenSelected].collateral == 'WETH' ? 'ETH' : USDC) +
+                            '/' +
+                            asset[tokenSelected].token.address
+                        "
+                        v-tooltip="{
+                          content: 'Click here to add liquidity on ' + assetName + '/USDC LP',
                           delay: { show: 150, hide: 100 },
                           placement: 'bottom-center',
                         }"
@@ -1771,17 +1800,11 @@ div.error {
 }
 #inputbox {
 }
-#disabled-button {
-  color: #000000;
-}
 .tabs {
   border-radius: 10px 10px 0px 0px;
   overflow: hidden;
   white-space: nowrap;
   button {
-    .disabled {
-      color: #000000;
-    }
     cursor: pointer;
     width: calc(100% / 4);
     border: none;
