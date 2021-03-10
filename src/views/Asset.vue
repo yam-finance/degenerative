@@ -693,7 +693,7 @@ export default {
     },
     $route: async function(newVal, oldVal) {
       await this.initAsset();
-    },
+    }
   },
   components: {},
   methods: {
@@ -1198,7 +1198,7 @@ export default {
         this.liquidationPrice = getLiquidationPrice(
           totalCollat,
           totalTokens,
-          this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+          this.collReq.div(colDec.WETH),
           isPricefeedInvertedFromTokenSymbol("uGAS")
         ).toFixed(4);
       } else {
@@ -1206,7 +1206,7 @@ export default {
           this.liquidationPrice = getLiquidationPrice(
             this.tokenAmt ? this.tokenAmt : 0,
             this.collatAmt ? this.collatAmt : 0,
-            this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+            this.collReq.div(colDec.WETH),
             isPricefeedInvertedFromTokenSymbol("uGAS")
           ).toFixed(4);
         }
@@ -1223,7 +1223,7 @@ export default {
       this.currLiquidationPrice = getLiquidationPrice(
         col,
         pos,
-        this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+        this.collReq.div(colDec.WETH),
         isPricefeedInvertedFromTokenSymbol("uGAS")
       ).toFixed(4);
     },
@@ -1431,6 +1431,8 @@ export default {
       this.price = 0;
       this.aprAssetValue = 0;
       this.settleTime = false;
+      this.tokenAmt = null;
+      this.collatAmt = null;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
