@@ -483,17 +483,10 @@
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
 
-            <label
-              v-tooltip="{
-                content: 'Collateral ratio of this particular tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Collateral Ratio (Tx):
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
-            </label>
             <br />
+            <label>
+              <b>Your Account</b>
+            </label>
             <label v-if="assetName == 'UGAS'"
               >Your WETH: <b>{{ balanceWETH ? numeral(Number(balanceWETH), "0.0000a") : "0" }}</b></label
             >
@@ -503,6 +496,12 @@
             <label v-if="tokenSelected">
               Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
               <b>{{ tokenBalance ? numeral(Number(tokenBalance), "0.00a") : "0" }}</b>
+            </label>
+
+
+            <br />
+            <label>
+              <b>Your Position</b>
             </label>
             <label
               v-if="tokenSelected"
@@ -525,6 +524,16 @@
             >
               Position Collateral {{ asset[tokenSelected].collateral }}:
               <b>{{ currCollat ? currCollat : "0" }}</b>
+            </label>
+            <label
+              v-tooltip="{
+                content: 'Collateral ratio of this particular tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Current Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
           </div>
         </Container>
@@ -693,7 +702,7 @@ export default {
     },
     $route: async function(newVal, oldVal) {
       await this.initAsset();
-    },
+    }
   },
   components: {},
   methods: {
@@ -1198,7 +1207,7 @@ export default {
         this.liquidationPrice = getLiquidationPrice(
           totalCollat,
           totalTokens,
-          this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+          this.collReq.div(colDec.WETH),
           isPricefeedInvertedFromTokenSymbol("uGAS")
         ).toFixed(4);
       } else {
@@ -1206,7 +1215,7 @@ export default {
           this.liquidationPrice = getLiquidationPrice(
             this.tokenAmt ? this.tokenAmt : 0,
             this.collatAmt ? this.collatAmt : 0,
-            this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+            this.collReq.div(colDec.WETH),
             isPricefeedInvertedFromTokenSymbol("uGAS")
           ).toFixed(4);
         }
@@ -1223,7 +1232,7 @@ export default {
       this.currLiquidationPrice = getLiquidationPrice(
         col,
         pos,
-        this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+        this.collReq.div(colDec.WETH),
         isPricefeedInvertedFromTokenSymbol("uGAS")
       ).toFixed(4);
     },
@@ -1431,6 +1440,8 @@ export default {
       this.price = 0;
       this.aprAssetValue = 0;
       this.settleTime = false;
+      this.tokenAmt = null;
+      this.collatAmt = null;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
@@ -1649,7 +1660,20 @@ export default {
       console.log("toNavAct", on);
     },
     tokenHandler() {
-      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      const assetInstance = this.asset[this.tokenSelected];
+      let collatAmount = 0;
+      switch (assetInstance.collateral) {
+        case "WETH":
+          collatAmount = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+          break;
+        case "USDC":
+          collatAmount = (this.tokenAmt * this.gcr * this.price + 1).toFixed(0);
+          break;
+        default:
+          console.error("collateral not defined");
+          break;
+      }
+      this.collatAmt = collatAmount;
       this.posUpdateHandler();
     },
     collatHandler() {
