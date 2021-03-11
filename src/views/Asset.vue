@@ -1013,7 +1013,7 @@ export default {
           this.currentError = "Request expires post-expiry, wait for contract to expire";
         } else if (this.pricedCR < 1.5) {
           this.hasError = true;
-          this.currentError = "Withdrawal would put position below Collat Ratio";
+          this.currentError = "Withdrawal request would put Collat Ratio < 1.5x!";
         }
       }
     },
@@ -1661,13 +1661,15 @@ export default {
     },
     tokenHandler() {
       const assetInstance = this.asset[this.tokenSelected];
+      const COLLAT_BUFFER_FACTOR = 1.0 + (25 * (0.01/100)) // 25 bps extra
+
       let collatAmount = 0;
       switch (assetInstance.collateral) {
         case "WETH":
-          collatAmount = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
           break;
         case "USDC":
-          collatAmount = (this.tokenAmt * this.gcr * this.price + 1).toFixed(0);
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
           break;
         default:
           console.error("collateral not defined");
