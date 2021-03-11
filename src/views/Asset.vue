@@ -1301,13 +1301,7 @@ export default {
           this.currentError = "Minimum mint amount is " + minTokens;
           return;
         } else if ((assetInstance.collateral == "WETH" ? Number(this.balanceWETH) : Number(this.balanceUSDC)) < Number(this.collatAmt)) {
-          this.hasError = true;
-          this.currentError =
-            "Not enough " +
-            assetInstance.collateral +
-            "." +
-            (assetInstance.collateral === "WETH" ? " Please wrap ETH below." : " Please buy " + assetInstance.collateral + ".");
-          return;
+          console.log("skipping balance check");
         }
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
