@@ -1013,7 +1013,7 @@ export default {
           this.currentError = "Request expires post-expiry, wait for contract to expire";
         } else if (this.pricedCR < 1.5) {
           this.hasError = true;
-          this.currentError = "Withdrawal would put position below Collat Ratio";
+          this.currentError = "Withdrawal request would put Collat Ratio < 1.5x!";
         }
       }
     },
