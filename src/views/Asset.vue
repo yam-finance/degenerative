@@ -483,17 +483,10 @@
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
 
-            <label
-              v-tooltip="{
-                content: 'Collateral ratio of this particular tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Collateral Ratio (Tx):
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
-            </label>
             <br />
+            <label>
+              <b>Your Account</b>
+            </label>
             <label v-if="assetName == 'UGAS'"
               >Your WETH: <b>{{ balanceWETH ? numeral(Number(balanceWETH), "0.0000a") : "0" }}</b></label
             >
@@ -503,6 +496,12 @@
             <label v-if="tokenSelected">
               Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
               <b>{{ tokenBalance ? numeral(Number(tokenBalance), "0.00a") : "0" }}</b>
+            </label>
+
+
+            <br />
+            <label>
+              <b>Your Position</b>
             </label>
             <label
               v-if="tokenSelected"
@@ -525,6 +524,16 @@
             >
               Position Collateral {{ asset[tokenSelected].collateral }}:
               <b>{{ currCollat ? currCollat : "0" }}</b>
+            </label>
+            <label
+              v-tooltip="{
+                content: 'Collateral ratio of this particular tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Current Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
           </div>
         </Container>
@@ -1004,7 +1013,7 @@ export default {
           this.currentError = "Request expires post-expiry, wait for contract to expire";
         } else if (this.pricedCR < 1.5) {
           this.hasError = true;
-          this.currentError = "Withdrawal would put position below Collat Ratio";
+          this.currentError = "Withdrawal request would put Collat Ratio < 1.5x!";
         }
       }
     },
@@ -1651,7 +1660,22 @@ export default {
       console.log("toNavAct", on);
     },
     tokenHandler() {
-      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      const assetInstance = this.asset[this.tokenSelected];
+      const COLLAT_BUFFER_FACTOR = 1.0 + (25 * (0.01/100)) // 25 bps extra
+
+      let collatAmount = 0;
+      switch (assetInstance.collateral) {
+        case "WETH":
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
+          break;
+        case "USDC":
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
+          break;
+        default:
+          console.error("collateral not defined");
+          break;
+      }
+      this.collatAmt = collatAmount;
       this.posUpdateHandler();
     },
     collatHandler() {
