@@ -454,7 +454,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Asset price at which your position will be liquidated',
+                content: 'Asset price at which your position will be liquidated. <br/> If the asset increases by ' + assetIncrease + '% your position will get liquidated!',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -605,6 +605,7 @@ export default {
       showInfo: false,
       showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
+      assetIncrease: 0,
       tokenAmt: null,
       collatAmt: null,
       pricedCR: 0,
@@ -1439,6 +1440,7 @@ export default {
       // this.assetName = null,
       this.price = 0;
       this.aprAssetValue = 0;
+      this.assetIncrease = 0;
       this.settleTime = false;
       this.tokenAmt = null;
       this.collatAmt = null;
@@ -1677,6 +1679,7 @@ export default {
       }
       this.collatAmt = collatAmount;
       this.posUpdateHandler();
+      this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
     },
     collatHandler() {
       this.posUpdateHandler();
