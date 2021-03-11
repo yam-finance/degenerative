@@ -190,14 +190,25 @@
                 Deposit
               </button>
               <button
-                id="disabled-button"
+                v-if="$route.params.key === 'ugas'"
                 @click="toNavAct('withdraw')"
                 :class="{ active: navAct === 'withdraw' }"
                 v-tooltip="{
-                  content: '<b>CURRENTLY DISABLED<b> <br> <b>Withdraw</b>: Withdraw collateral from a position.',
+                  content: '<b>Withdraw</b>: Withdraw collateral from a position.',
                   delay: { show: 150, hide: 100 },
                 }"
-                disabled
+              >
+                Withdraw
+              </button>
+              <button
+                v-if="$route.params.key === 'ustonks'"
+                @click="toNavAct('withdraw')"
+                :class="{ active: navAct === 'withdraw' }"
+                v-tooltip="{
+                  content:
+                    '<b>Withdraw</b>: Withdraw collateral from a position. You can Request Withdraw if withdrawing the USDC makes your Collateral Ratio lower than the current Global Collateral Ratio. There is a 2 hour wait before the withdraw is available to ensure that you do not withdraw below the Minimum Collateral Ratio. Only use this option if you are familiar with the degenerative.finance interface and mechanism!',
+                  delay: { show: 150, hide: 100 },
+                }"
               >
                 Withdraw
               </button>
@@ -345,7 +356,7 @@
                             asset[tokenSelected].token.address
                         "
                         v-tooltip="{
-                          content: 'Click here to add liquidity on ' + assetName + '/ETH LP',
+                          content: 'Click here to add liquidity on ' + assetName + '/' + asset[tokenSelected].collateral + ' LP',
                           delay: { show: 150, hide: 100 },
                           placement: 'bottom-center',
                         }"
@@ -472,17 +483,10 @@
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
 
-            <label
-              v-tooltip="{
-                content: 'Collateral ratio of this particular tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Collateral Ratio (Tx):
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
-            </label>
             <br />
+            <label>
+              <b>Your Account</b>
+            </label>
             <label v-if="assetName == 'UGAS'"
               >Your WETH: <b>{{ balanceWETH ? numeral(Number(balanceWETH), "0.0000a") : "0" }}</b></label
             >
@@ -491,7 +495,13 @@
             >
             <label v-if="tokenSelected">
               Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
-              <b>{{ tokenBalance ? tokenBalance : "0" }}</b>
+              <b>{{ tokenBalance ? numeral(Number(tokenBalance), "0.00a") : "0" }}</b>
+            </label>
+
+
+            <br />
+            <label>
+              <b>Your Position</b>
             </label>
             <label
               v-if="tokenSelected"
@@ -514,6 +524,16 @@
             >
               Position Collateral {{ asset[tokenSelected].collateral }}:
               <b>{{ currCollat ? currCollat : "0" }}</b>
+            </label>
+            <label
+              v-tooltip="{
+                content: 'Collateral ratio of this particular tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Current Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
           </div>
         </Container>
@@ -682,7 +702,7 @@ export default {
     },
     $route: async function(newVal, oldVal) {
       await this.initAsset();
-    },
+    }
   },
   components: {},
   methods: {
@@ -710,13 +730,9 @@ export default {
     ]),
     ...mapGetters(["empStateOld", "empState"]),
     async initAsset() {
-      console.warn("init", this.$route.params.key);
-
       this.tokenSelected = null;
       this.asset = Assets[this.$route.params.key];
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
-
-      console.warn("this.asset", this.formAssetName(this.assetName, this.asset[this.tokenSelected]));
 
       this.medianData = await get30DMedian();
       this.currentTWAP = await getCurrentTWAP();
@@ -752,9 +768,9 @@ export default {
         return;
       }
       const assetInstance = this.asset[this.tokenSelected];
-      const base = new BigNumber(10).pow(new BigNumber(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
+      const base = new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals));
       this.tokenBalance = await this.getUserAssetTokenBalance({ assetInstance: assetInstance });
-      this.tokenBalance = new BigNumber(this.tokenBalance).div(base).toFixed(4);
+      this.tokenBalance = new BigNumber(this.tokenBalance).div(base);
     },
     async initChart() {
       if (!this.tokenSelected || !this.asset[this.tokenSelected].token.address) {
@@ -790,7 +806,6 @@ export default {
 
       if (this.assetName == "USTONKS") {
         for (const element of assetChart) {
-          console.log(element.timestampDate, element.open, element.close, element.open, element.close);
           tempChartData.push([element.timestampDate, element.open, element.close, element.open, element.close]);
         }
       }
@@ -996,6 +1011,9 @@ export default {
         } else if (tn + Number(this.currEMP.withdrawalLiveness) > Number(this.currEMP.expierationTimestamp)) {
           this.hasError = true;
           this.currentError = "Request expires post-expiry, wait for contract to expire";
+        } else if (this.pricedCR < 1.5) {
+          this.hasError = true;
+          this.currentError = "Withdrawal request would put Collat Ratio < 1.5x!";
         }
       }
     },
@@ -1189,7 +1207,7 @@ export default {
         this.liquidationPrice = getLiquidationPrice(
           totalCollat,
           totalTokens,
-          this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+          this.collReq.div(colDec.WETH),
           isPricefeedInvertedFromTokenSymbol("uGAS")
         ).toFixed(4);
       } else {
@@ -1197,7 +1215,7 @@ export default {
           this.liquidationPrice = getLiquidationPrice(
             this.tokenAmt ? this.tokenAmt : 0,
             this.collatAmt ? this.collatAmt : 0,
-            this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+            this.collReq.div(colDec.WETH),
             isPricefeedInvertedFromTokenSymbol("uGAS")
           ).toFixed(4);
         }
@@ -1214,7 +1232,7 @@ export default {
       this.currLiquidationPrice = getLiquidationPrice(
         col,
         pos,
-        this.collReq.div(colDec[this.asset[this.tokenSelected].collateral]),
+        this.collReq.div(colDec.WETH),
         isPricefeedInvertedFromTokenSymbol("uGAS")
       ).toFixed(4);
     },
@@ -1422,6 +1440,8 @@ export default {
       this.price = 0;
       this.aprAssetValue = 0;
       this.settleTime = false;
+      this.tokenAmt = null;
+      this.collatAmt = null;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
@@ -1640,7 +1660,22 @@ export default {
       console.log("toNavAct", on);
     },
     tokenHandler() {
-      this.collatAmt = (this.tokenAmt * this.gcr * this.price + 0.0001).toFixed(4);
+      const assetInstance = this.asset[this.tokenSelected];
+      const COLLAT_BUFFER_FACTOR = 1.0 + (25 * (0.01/100)) // 25 bps extra
+
+      let collatAmount = 0;
+      switch (assetInstance.collateral) {
+        case "WETH":
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
+          break;
+        case "USDC":
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
+          break;
+        default:
+          console.error("collateral not defined");
+          break;
+      }
+      this.collatAmt = collatAmount;
       this.posUpdateHandler();
     },
     collatHandler() {
@@ -1771,17 +1806,11 @@ div.error {
 }
 #inputbox {
 }
-#disabled-button {
-  color: #000000;
-}
 .tabs {
   border-radius: 10px 10px 0px 0px;
   overflow: hidden;
   white-space: nowrap;
   button {
-    .disabled {
-      color: #000000;
-    }
     cursor: pointer;
     width: calc(100% / 4);
     border: none;

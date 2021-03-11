@@ -825,8 +825,7 @@ export default new Vuex.Store({
       const emp = await dispatch("getEMP", { assetInstance: payload.assetInstance });
       try {
         const synth = await emp.methods.tokenCurrency().call();
-        const balance = await getBalance(Vue.prototype.$provider, synth, store.state.account);
-        console.log("balance", balance);
+        const balance = Number(await getBalance(Vue.prototype.$provider, synth, store.state.account));
         return balance;
       } catch (e) {
         console.log("here");
