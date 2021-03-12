@@ -284,7 +284,7 @@
                   :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && withdrawType != 'existing'"
                   id
                   class="numeric setvalue"
                   type="number"
@@ -292,8 +292,10 @@
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
+                <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
+                  <b>Withdraw {{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
+                </label>
                 <button
                   id="act"
                   @click="act"
@@ -489,8 +491,8 @@
                 placement: 'left-center',
               }"
             >
-              Collateral Ratio (Post-Tx):
-              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+              Current Tx Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
 
             <br />
@@ -542,8 +544,8 @@
                 placement: 'left-center',
               }"
             >
-              Current Collateral Ratio:
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+              Collateral Ratio (Post-Tx):
+              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
           </div>
         </Container>
@@ -1077,7 +1079,9 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if (
+        } 
+        /*
+        else if (
           (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
@@ -1100,6 +1104,7 @@ export default {
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
+        */
       }
     },
     async settleTimeCheckExpired() {
@@ -1322,7 +1327,7 @@ export default {
         }
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
-          if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
+          if (this.pricedTxCR && Number(this.pricedTxCR) < Number(this.gcr)) {
             this.hasError = true;
             this.currentError = thisError;
           } else {
@@ -2255,5 +2260,8 @@ div.error {
   @media (max-width: 540px) {
     left: -60px;
   }
+}
+.withdrawLabel {
+  padding-left: 20px;
 }
 </style>
