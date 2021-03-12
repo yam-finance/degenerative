@@ -294,7 +294,7 @@
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
                 />
                 <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
-                  <b>{{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
+                  <b>Withdraw {{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
                 </label>
                 <button
                   id="act"
