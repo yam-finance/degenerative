@@ -1683,7 +1683,7 @@ export default {
       let collatAmount = 0;
       switch (assetInstance.collateral) {
         case "WETH":
-          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(6);
           break;
         case "USDC":
           collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
