@@ -451,7 +451,7 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+                Your position will be liquidated if price gets to {{ assetIncrease }}%
               </a>
             </div>
           </Container>
@@ -491,6 +491,10 @@
             >
               Collateral Ratio (Post-Tx):
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+            </label>
+
+            <label>
+              <b>Suggestion</b>
             </label>
             <label
               v-if="$route.params.key === 'ustonks'"
@@ -2143,14 +2147,12 @@ div.error {
 #thebox-nav {
   .warning-message {
     cursor: auto;
-    background: #f2eeef;
     color: #e57067;
     text-align: center;
-    border-radius: 5px;
     padding: 5px 10px;
     position: relative;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: normal;
+    font-size: 12px;
   }
   .button {
     cursor: pointer;
