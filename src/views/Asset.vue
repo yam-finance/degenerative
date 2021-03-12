@@ -155,6 +155,16 @@
 
         <Space size="10" class="flex" />
 
+        <Container id="thebox-nav" :size="440" v-if="tokenSelected">
+          <div class="row row-item-col">
+            <a class="flexitem warning-message">
+              Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+            </a>
+          </div>
+        </Container>
+
+        <Space size="10" class="flex" v-if="tokenSelected" />
+
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
@@ -454,7 +464,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Asset price at which your position will be liquidated. <br/> If the asset increases by ' + assetIncrease + '% your position will get liquidated!',
+                content: 'Asset price at which your position will be liquidated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -2100,6 +2110,17 @@ div.error {
 }
 
 #thebox-nav {
+  .warning-message {
+    cursor: pointer;
+    background: #f2eeef;
+    color: #e57067;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 10px;
+    position: relative;
+    font-weight: bold;
+    font-size: 14px;
+  }
   .button {
     cursor: pointer;
     background: #f2eeef;
