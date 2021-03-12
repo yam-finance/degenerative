@@ -448,6 +448,16 @@
             </div>
           </div>
 
+          <Container id="thebox-nav" :size="440" v-if="tokenSelected">
+            <div class="row row-item-col">
+              <a class="flexitem warning-message">
+                Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+              </a>
+            </div>
+          </Container>
+
+          <Space size="10" class="flex" v-if="tokenSelected" />
+
           <div class="info" v-if="info">
             <label>
               <b>{{ tokenSelected ? formAssetName(assetName, asset[tokenSelected]) : "No Synthetic" }} Selected</b>
@@ -605,6 +615,7 @@ export default {
       showInfo: false,
       showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
+      assetIncrease: 0,
       tokenAmt: null,
       collatAmt: null,
       pricedCR: 0,
@@ -1439,6 +1450,7 @@ export default {
       // this.assetName = null,
       this.price = 0;
       this.aprAssetValue = 0;
+      this.assetIncrease = 0;
       this.settleTime = false;
       this.tokenAmt = null;
       this.collatAmt = null;
@@ -1693,6 +1705,12 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
+      
+      if (this.liquidationPrice == 0) {
+        this.assetIncrease = 0;
+      } else {
+        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+      }
     },
     async makeApproval(identifier, spenderAddress, tokenAddress) {
       if (spenderAddress) {
@@ -2097,6 +2115,17 @@ div.error {
 }
 
 #thebox-nav {
+  .warning-message {
+    cursor: auto;
+    background: #f2eeef;
+    color: #e57067;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 10px;
+    position: relative;
+    font-weight: bold;
+    font-size: 14px;
+  }
   .button {
     cursor: pointer;
     background: #f2eeef;
