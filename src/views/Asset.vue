@@ -493,32 +493,6 @@
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
 
-            <label>
-              <b>Suggestion</b>
-            </label>
-            <label
-              v-if="$route.params.key === 'ustonks'"
-              v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Most efficient Mint amount:
-              <b>{{ efficientMintAmount }}</b>
-            </label>
-            <label
-              v-if="$route.params.key === 'ustonks'"
-              v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Most efficient LP amount:
-              <b>{{ efficientLPAmount }}</b>
-            </label>
-
             <br />
             <label>
               <b>Your Account</b>
@@ -570,6 +544,32 @@
             >
               Current Collateral Ratio:
               <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+            </label>
+
+            <label>
+              <b>Suggestion</b>
+            </label>
+            <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Most efficient Mint amount:
+              <b>{{ efficientMintAmount }}</b>
+            </label>
+            <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Most efficient LP amount:
+              <b>{{ efficientLPAmount }}</b>
             </label>
           </div>
         </Container>
