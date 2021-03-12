@@ -1077,7 +1077,9 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if (
+        } 
+        /*
+        else if (
           (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
@@ -1100,6 +1102,7 @@ export default {
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
+        */
       }
     },
     async settleTimeCheckExpired() {
@@ -1322,7 +1325,7 @@ export default {
         }
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
-          if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
+          if (this.pricedTxCR && Number(this.pricedTxCR) < Number(this.gcr)) {
             this.hasError = true;
             this.currentError = thisError;
           } else {
