@@ -155,6 +155,18 @@
 
         <Space size="10" class="flex" />
 
+        <Container id="thebox-nav" :size="440" v-if="tokenSelected">
+          <div class="row row-item-col">
+            <a class="flexitem warning-message">
+              Most efficient Mint amount {{ efficientMintAmount }}
+              <br/>
+              Most efficient LP amount {{ efficientLPAmount }}
+            </a>
+          </div>
+        </Container>
+
+        <Space size="10" class="flex" v-if="tokenSelected" />
+
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
@@ -616,6 +628,8 @@ export default {
       showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       assetIncrease: 0,
+      efficientMintAmount: 0,
+      efficientLPAmount: 0,
       tokenAmt: null,
       collatAmt: null,
       pricedCR: 0,
@@ -1705,6 +1719,8 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
+      this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
+      this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
       
       if (this.liquidationPrice == 0) {
         this.assetIncrease = 0;
