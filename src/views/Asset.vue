@@ -491,8 +491,8 @@
                 placement: 'left-center',
               }"
             >
-              Collateral Ratio (Post-Tx):
-              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+              Current Tx Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
 
             <br />
@@ -544,8 +544,8 @@
                 placement: 'left-center',
               }"
             >
-              Current Collateral Ratio:
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+              Collateral Ratio (Post-Tx):
+              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
           </div>
         </Container>
