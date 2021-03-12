@@ -155,16 +155,6 @@
 
         <Space size="10" class="flex" />
 
-        <Container id="thebox-nav" :size="440" v-if="tokenSelected">
-          <div class="row row-item-col">
-            <a class="flexitem warning-message">
-              Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
-            </a>
-          </div>
-        </Container>
-
-        <Space size="10" class="flex" v-if="tokenSelected" />
-
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
@@ -457,6 +447,16 @@
               </button>
             </div>
           </div>
+
+          <Container id="thebox-nav" :size="440" v-if="tokenSelected">
+            <div class="row row-item-col">
+              <a class="flexitem warning-message">
+                Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+              </a>
+            </div>
+          </Container>
+
+          <Space size="10" class="flex" v-if="tokenSelected" />
 
           <div class="info" v-if="info">
             <label>
@@ -1689,7 +1689,9 @@ export default {
       }
       this.collatAmt = collatAmount;
       this.posUpdateHandler();
-      this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+      if (this.liquidationPrice != 0) {
+        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+      }
     },
     collatHandler() {
       this.posUpdateHandler();
@@ -2111,7 +2113,7 @@ div.error {
 
 #thebox-nav {
   .warning-message {
-    cursor: pointer;
+    cursor: auto;
     background: #f2eeef;
     color: #e57067;
     text-align: center;
