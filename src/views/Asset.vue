@@ -284,7 +284,7 @@
                   :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && withdrawType != 'existing'"
                   id
                   class="numeric setvalue"
                   type="number"
@@ -292,8 +292,10 @@
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
+                <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
+                  <b>{{ '0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '') }}</b>
+                </label>
                 <button
                   id="act"
                   @click="act"
@@ -2258,5 +2260,8 @@ div.error {
   @media (max-width: 540px) {
     left: -60px;
   }
+}
+.withdrawLabel {
+  padding-left: 20px;
 }
 </style>
