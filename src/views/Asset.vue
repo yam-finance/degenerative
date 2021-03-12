@@ -155,18 +155,6 @@
 
         <Space size="10" class="flex" />
 
-        <Container id="thebox-nav" :size="440" v-if="tokenSelected">
-          <div class="row row-item-col">
-            <a class="flexitem warning-message">
-              Most efficient Mint amount {{ efficientMintAmount }}
-              <br/>
-              Most efficient LP amount {{ efficientLPAmount }}
-            </a>
-          </div>
-        </Container>
-
-        <Space size="10" class="flex" v-if="tokenSelected" />
-
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
@@ -503,6 +491,28 @@
             >
               Collateral Ratio (Post-Tx):
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+            </label>
+            <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Most efficient Mint amount:
+              <b>{{ efficientMintAmount }}</b>
+            </label>
+            <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{
+                content: 'Collateral ratio of your position after the tx',
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Most efficient LP amount:
+              <b>{{ efficientLPAmount }}</b>
             </label>
 
             <br />
