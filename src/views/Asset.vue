@@ -1689,9 +1689,6 @@ export default {
       }
       this.collatAmt = collatAmount;
       this.posUpdateHandler();
-      if (this.liquidationPrice != 0) {
-        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
-      }
     },
     collatHandler() {
       this.posUpdateHandler();
@@ -1708,6 +1705,12 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
+      
+      if (this.liquidationPrice == 0) {
+        this.assetIncrease = 0;
+      } else {
+        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+      }
     },
     async makeApproval(identifier, spenderAddress, tokenAddress) {
       if (spenderAddress) {
