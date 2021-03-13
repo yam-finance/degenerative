@@ -545,7 +545,7 @@
               Current Collateral Ratio:
               <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
-
+            <br />
             <label>
               <b>Suggestion</b>
             </label>
