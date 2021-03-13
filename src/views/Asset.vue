@@ -284,7 +284,7 @@
                   :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && (navAct == 'withdraw' && withdrawType != 'existing')"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && withdrawType !== 'existing'"
                   id
                   class="numeric setvalue"
                   type="number"
