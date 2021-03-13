@@ -1282,6 +1282,13 @@ export default {
 
       const assetInstance = this.asset[this.tokenSelected];
 
+      let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
+      minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
+      if (this.tokenAmt && this.tokenAmt > minTokens) {
+        this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
+        this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
+      }
+
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
@@ -1333,8 +1340,6 @@ export default {
         //   this.currentError = "Insufficient";
         //   return;
         // }
-        let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
-        minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
         if (this.tokenAmt && this.tokenAmt < minTokens) {
           this.hasError = true;
           this.currentError = "Minimum mint amount is " + minTokens;
@@ -1733,8 +1738,6 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
-      this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
-      this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
       
       if (this.liquidationPrice == 0) {
         this.assetIncrease = 0;
