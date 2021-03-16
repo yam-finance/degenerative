@@ -284,7 +284,7 @@
                   :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && withdrawType !== 'existing'"
                   id
                   class="numeric setvalue"
                   type="number"
@@ -292,8 +292,10 @@
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
+                <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
+                  <b>Withdraw {{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
+                </label>
                 <button
                   id="act"
                   @click="act"
@@ -448,6 +450,16 @@
             </div>
           </div>
 
+          <Container id="thebox-nav" :size="440" v-if="tokenSelected">
+            <div class="row row-item-col">
+              <a class="flexitem warning-message">
+                Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+              </a>
+            </div>
+          </Container>
+
+          <Space size="10" class="flex" v-if="tokenSelected" />
+
           <div class="info" v-if="info">
             <label>
               <b>{{ tokenSelected ? formAssetName(assetName, asset[tokenSelected]) : "No Synthetic" }} Selected</b>
@@ -479,8 +491,8 @@
                 placement: 'left-center',
               }"
             >
-              Collateral Ratio (Post-Tx):
-              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
+              Current Tx Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
 
             <br />
@@ -532,8 +544,8 @@
                 placement: 'left-center',
               }"
             >
-              Current Collateral Ratio:
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+              Collateral Ratio (Post-Tx):
+              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
           </div>
         </Container>
@@ -605,6 +617,7 @@ export default {
       showInfo: false,
       showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
+      assetIncrease: 0,
       tokenAmt: null,
       collatAmt: null,
       pricedCR: 0,
@@ -1066,7 +1079,9 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if (
+        } 
+        /*
+        else if (
           (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
@@ -1089,6 +1104,7 @@ export default {
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
+        */
       }
     },
     async settleTimeCheckExpired() {
@@ -1311,7 +1327,7 @@ export default {
         }
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
-          if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
+          if (this.pricedTxCR && Number(this.pricedTxCR) < Number(this.gcr)) {
             this.hasError = true;
             this.currentError = thisError;
           } else {
@@ -1439,6 +1455,7 @@ export default {
       // this.assetName = null,
       this.price = 0;
       this.aprAssetValue = 0;
+      this.assetIncrease = 0;
       this.settleTime = false;
       this.tokenAmt = null;
       this.collatAmt = null;
@@ -1666,7 +1683,7 @@ export default {
       let collatAmount = 0;
       switch (assetInstance.collateral) {
         case "WETH":
-          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(6);
           break;
         case "USDC":
           collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
@@ -1693,6 +1710,12 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
+      
+      if (this.liquidationPrice == 0) {
+        this.assetIncrease = 0;
+      } else {
+        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+      }
     },
     async makeApproval(identifier, spenderAddress, tokenAddress) {
       if (spenderAddress) {
@@ -2097,6 +2120,17 @@ div.error {
 }
 
 #thebox-nav {
+  .warning-message {
+    cursor: auto;
+    background: #f2eeef;
+    color: #e57067;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 10px;
+    position: relative;
+    font-weight: bold;
+    font-size: 14px;
+  }
   .button {
     cursor: pointer;
     background: #f2eeef;
@@ -2226,5 +2260,8 @@ div.error {
   @media (max-width: 540px) {
     left: -60px;
   }
+}
+.withdrawLabel {
+  padding-left: 20px;
 }
 </style>
