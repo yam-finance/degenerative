@@ -6,6 +6,8 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
+          <a class="asset-detail-switch tutorial" :href="`https://docs.degenerative.finance/synthetics/faqs`" target="_blank">FAQs</a>
+          <Space size="sm" />
           <a class="asset-detail-switch tutorial" :href="`${userGuide}`" target="_blank">Guide</a>
           <Space size="sm" />
           <a class="asset-detail-switch" :href="`https://docs.degenerative.finance/synthetics/${$route.params.key}`" target="_blank">Info</a>
@@ -278,6 +280,7 @@
                   id
                   class="numeric setvalue"
                   type="number"
+                  min="0"
                   name
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
@@ -288,6 +291,7 @@
                   id
                   class="numeric setvalue"
                   type="number"
+                  min="0"
                   name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
@@ -453,7 +457,7 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Your position will get liquidated if the asset increases by {{ assetIncrease }}%.
+                Watch your Risk Levels: Your position will be liquidated if 2hr TWAP increases by {{ assetIncrease }}%.
               </a>
             </div>
           </Container>
@@ -466,7 +470,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Asset price at which your position will be liquidated',
+                content: '2hr TWAP at which your position will be liquidiated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -486,7 +490,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
+                content: 'Collateral ratio of this transaction',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -539,7 +543,7 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Collateral ratio of this particular tx',
+                content: 'Collateral ratio of your entire position',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
