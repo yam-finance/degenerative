@@ -1036,8 +1036,8 @@ export default new Vuex.Store({
         const assetReserveValue = calcAsset + calcCollateral;
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100) / 2;
-        const aprCalculateExtra = ((weekRewards * 52) / assetReserveValue) * 100;
+        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100);
+        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100);
         const totalAprCalculation = aprCalculate + aprCalculateExtra;
         console.debug("aprCalculate %", totalAprCalculation);
         return totalAprCalculation;
