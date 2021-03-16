@@ -978,7 +978,9 @@ export default new Vuex.Store({
         let baseCollateral;
         const web3 = new Web3(Vue.prototype.$provider);
         const contractLp = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.assetInstance.pool.address);
+        const contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
         const contractLpCall = await contractLp.methods.getReserves().call();
+        const contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
         const ethPrice = await getPriceByContract(WETH);
         const umaPrice = await getPriceByContract(UMA);
         const yamPrice = await getPriceByContract(YAM);
@@ -1024,7 +1026,7 @@ export default new Vuex.Store({
         let calcCollateral = 0;
         const normalRewards = umaRewards * umaPrice + yamRewards * yamPrice;
         const weekRewards = umaWeekRewards * umaPrice + yamWeekRewards * yamPrice;
-        const assetReserve0 = (new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber()) * 0.5;
+        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
         if (payload.assetName === "USTONKS") {
           calcAsset = assetReserve1 * tokenPrice;
@@ -1033,9 +1035,14 @@ export default new Vuex.Store({
           calcAsset = assetReserve0 * tokenPrice;
           calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
-        const assetReserveValue = calcAsset + calcCollateral;
+
+        let empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+        empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        console.log("EMP TVl", empTVL)
+
+        const uniLpPair = calcAsset + calcCollateral;
+        const assetReserveValue = empTVL + (uniLpPair * 0.5);
         console.debug("assetReserveValue", assetReserveValue);
-        // the second division is for the mint and it should be changed later for full accuracy
         const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100);
         const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100);
         const totalAprCalculation = aprCalculate + aprCalculateExtra;
