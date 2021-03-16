@@ -999,7 +999,7 @@ export default new Vuex.Store({
 
         const current = moment().unix();
         const week1Until = 1615665600;
-        const week2Until = 1616270400;
+        const week2Until = 1616788800;
         const yamRewards = 0;
         const umaRewards = rewards[payload.assetInstance.emp.address];
         let yamWeekRewards = 0;
@@ -1024,7 +1024,7 @@ export default new Vuex.Store({
         let calcCollateral = 0;
         const normalRewards = umaRewards * umaPrice + yamRewards * yamPrice;
         const weekRewards = umaWeekRewards * umaPrice + yamWeekRewards * yamPrice;
-        const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
+        const assetReserve0 = (new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber()) * 0.5;
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
         if (payload.assetName === "USTONKS") {
           calcAsset = assetReserve1 * tokenPrice;
@@ -1037,7 +1037,7 @@ export default new Vuex.Store({
         console.debug("assetReserveValue", assetReserveValue);
         // the second division is for the mint and it should be changed later for full accuracy
         const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100) / 2;
-        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100) / 2;
+        const aprCalculateExtra = ((weekRewards * 52) / assetReserveValue) * 100;
         const totalAprCalculation = aprCalculate + aprCalculateExtra;
         console.debug("aprCalculate %", totalAprCalculation);
         return totalAprCalculation;
