@@ -590,11 +590,10 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import store from "@/store";
 import { mapActions, mapGetters } from "vuex";
-import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, getEmpTVL, getIndexFromSpreadsheet, formAssetName } from "../utils";
+import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian, getCurrentTWAP, getIndexFromSpreadsheet, formAssetName } from "../utils";
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { WETH, USDC } from "@/utils/addresses";
-import EMPContract from "@/utils/abi/emp.json";
 import Assets from "../../protocol/assets.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -1446,7 +1445,7 @@ export default {
         assetPrice: price,
       };
       const resultBase = await this.getMiningRewards(asset);
-      this.empTVL = await this.getEmpTVL(asset);
+      this.empTVL = await this.getEmpTVL({ assetInstance: this.asset[this.tokenSelected] });
       let result;
       if (this.asset[this.tokenSelected] && this.asset[this.tokenSelected].apr) {
         if (this.asset[this.tokenSelected].apr.force >= 0) {

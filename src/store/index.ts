@@ -1053,7 +1053,7 @@ export default new Vuex.Store({
       }
     },
 
-    getEmpTVL: async ({ commit, dispatch }, payload: { assetInstance: any; }) => {
+    getEmpTVL: async ({ commit, dispatch }, payload: { assetInstance: any; combine: boolean; }) => {
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
@@ -1062,10 +1062,19 @@ export default new Vuex.Store({
         const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
         const ethPrice = await getPriceByContract(WETH);
         const web3 = new Web3(Vue.prototype.$provider);
-        const contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
-        const contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-        let empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
-        empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        let contractEmp;
+        let contractEmpCall;
+        let empTVL;
+
+        if (payload.combine) {
+          console.log("Combine TVL");
+          empTVL = 1;
+        } else {
+          contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
+          contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
+          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+          empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        }
 
         return empTVL.toFixed(2);
       } catch (e) {
