@@ -111,7 +111,7 @@ import { mapActions } from "vuex";
 export default {
   data() {
     return {
-      combinedTVL: false,
+      combinedTVL: 0,
     };
   },
   computed: {
