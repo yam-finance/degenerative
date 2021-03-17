@@ -110,7 +110,7 @@
               >
                 <b>TVL:</b>
                 {{ empTVL || empTVL > 0 || empTVL == -1 ? (empTVL === -1 ? "0" : empTVL) : "..." }}
-                {{ asset[tokenSelected].collateral }}
+                USD
               </span>
             </span>
           </div>

@@ -1036,7 +1036,9 @@ export default new Vuex.Store({
           calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
 
-        const empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+        let empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+        empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+
         const uniLpPair = calcAsset + calcCollateral;
         const assetReserveValue = empTVL + (uniLpPair * 0.5);
         console.debug("assetReserveValue", assetReserveValue);
@@ -1062,9 +1064,10 @@ export default new Vuex.Store({
         const web3 = new Web3(Vue.prototype.$provider);
         const contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
         const contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-        const empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber().toFixed(2);
+        let empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+        empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
 
-        return empTVL;
+        return empTVL.toFixed(2);
       } catch (e) {
         console.error("error", e);
         return 0;
