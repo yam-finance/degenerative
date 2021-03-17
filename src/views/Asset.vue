@@ -546,31 +546,31 @@
               <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
             </label>
             <br />
-            <label>
-              <b>Suggestion</b>
-            </label>
-            <label
-              v-if="$route.params.key === 'ustonks'"
-              v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Most efficient Mint amount:
-              <b>{{ efficientMintAmount }}</b>
-            </label>
-            <label
-              v-if="$route.params.key === 'ustonks'"
-              v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
-                delay: { show: 150, hide: 100 },
-                placement: 'left-center',
-              }"
-            >
-              Most efficient LP amount:
-              <b>{{ efficientLPAmount }}</b>
-            </label>
+            <div v-if="$route.params.key === 'ustonks'">
+              <label>
+                <b>Suggestion</b>
+              </label>
+              <label
+                v-tooltip="{
+                  content: 'Most efficient capital allocation for minting',
+                  delay: { show: 150, hide: 100 },
+                  placement: 'left-center',
+                }"
+              >
+                Most efficient Mint amount:
+                <b>{{ efficientMintAmount }}</b>
+              </label>
+              <label
+                v-tooltip="{
+                  content: 'Most efficient capital allocation for lp',
+                  delay: { show: 150, hide: 100 },
+                  placement: 'left-center',
+                }"
+              >
+                Most efficient LP amount:
+                <b>{{ efficientLPAmount }}</b>
+              </label>
+            </div>
           </div>
         </Container>
 
@@ -1284,9 +1284,12 @@ export default {
 
       let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
       minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
-      if (this.tokenAmt && this.tokenAmt > minTokens) {
+      if ((this.balanceUSDC / this.price) > minTokens) {
         this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
         this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
+      } else {
+        this.efficientMintAmount = "Not enough USDC!";
+        this.efficientLPAmount = "Not enough USDC!";
       }
 
       this.hasError = false;
