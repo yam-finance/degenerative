@@ -444,36 +444,34 @@
             <label>
               <b>{{ tokenSelected ? formAssetName(assetName, asset[tokenSelected]) : "No Synthetic" }} Selected</b>
             </label>
-              <label
-                v-if="$route.params.key === 'ustonks'"
-                v-tooltip="{                  
-                  content: 'Index market price of ' + assetName,
-                  delay: { show: 150, hide: 100 },
-                  placement: 'left-center',
-                }"
-              >
-                Index:                
-                <b>
-                  {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
-                  USDC
-                </b>
-              </label>
-            
-            
-              <label
-                v-if="$route.params.key === 'ugas'"
-                v-tooltip="{
-                  content: 'TWAP price of ' + assetName,
-                  delay: { show: 150, hide: 100 },
-                  placement: 'left-center',
-                }"
-              >
-                TWAP:
-                <b>
-                  {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
-                  WETH
-                </b>
-              </label> 
+            <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{                  
+                content: 'Index market price of ' + assetName,
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Index:                
+              <b>
+                {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
+                USDC
+              </b>
+            </label>            
+            <label
+              v-if="$route.params.key === 'ugas'"
+              v-tooltip="{
+                content: 'TWAP price of ' + assetName,
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              TWAP:
+              <b>
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
+                WETH
+              </b>
+            </label> 
             <label
               v-tooltip="{
                 content: '2hr TWAP at which your position will be liquidiated',
