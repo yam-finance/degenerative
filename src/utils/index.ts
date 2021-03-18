@@ -623,6 +623,7 @@ export const get30DMedian = async () => {
   return data;
 };
 
+// TODO: Path needs to be changed after api update.
 export const getCurrentTWAP = async () => {
   const web3 = new Web3();
   const data: any = await requestHttp("https://data.yam.finance/current-twap");

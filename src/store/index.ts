@@ -6,6 +6,7 @@ import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
+import Assets from "../../protocol/assets.json";
 import {
   stateSave,
   stateLoad,
@@ -978,7 +979,9 @@ export default new Vuex.Store({
         let baseCollateral;
         const web3 = new Web3(Vue.prototype.$provider);
         const contractLp = new web3.eth.Contract((UNIContract.abi as unknown) as AbiItem, payload.assetInstance.pool.address);
+        const contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
         const contractLpCall = await contractLp.methods.getReserves().call();
+        const contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
         const ethPrice = await getPriceByContract(WETH);
         const umaPrice = await getPriceByContract(UMA);
         const yamPrice = await getPriceByContract(YAM);
@@ -999,7 +1002,7 @@ export default new Vuex.Store({
 
         const current = moment().unix();
         const week1Until = 1615665600;
-        const week2Until = 1616270400;
+        const week2Until = 1616788800;
         const yamRewards = 0;
         const umaRewards = rewards[payload.assetInstance.emp.address];
         let yamWeekRewards = 0;
@@ -1033,14 +1036,62 @@ export default new Vuex.Store({
           calcAsset = assetReserve0 * tokenPrice;
           calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
-        const assetReserveValue = calcAsset + calcCollateral;
+
+        let empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+        empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+
+        const uniLpPair = calcAsset + calcCollateral;
+        const assetReserveValue = empTVL + (uniLpPair * 0.5);
         console.debug("assetReserveValue", assetReserveValue);
-        // the second division is for the mint and it should be changed later for full accuracy
-        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100) / 2;
-        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100) / 2;
+        const aprCalculate = (((normalRewards * 52 * 0.82) / assetReserveValue) * 100);
+        const aprCalculateExtra = (((weekRewards * 52) / assetReserveValue) * 100);
         const totalAprCalculation = aprCalculate + aprCalculateExtra;
         console.debug("aprCalculate %", totalAprCalculation);
         return totalAprCalculation;
+      } catch (e) {
+        console.error("error", e);
+        return 0;
+      }
+    },
+
+    getEmpTVL: async ({ commit, dispatch }, payload: { assetInstance: any; combine: boolean; }) => {
+      if (!Vue.prototype.$web3) {
+        await dispatch("connect");
+      }
+
+      try {
+        const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
+        const ethPrice = await getPriceByContract(WETH);
+        const web3 = new Web3(Vue.prototype.$provider);
+        const formatter = new Intl.NumberFormat('en-US');
+        let contractEmp;
+        let contractEmpCall;
+        let empTVL;
+
+        if (payload.combine) {
+          const empAddressArray = [
+            "0x4f1424cef6ace40c0ae4fc64d74b734f1eaf153c", 
+            "0x4e8d60a785c2636a63c5bd47c7050d21266c8b43", 
+            "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
+            "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+            "0x516f595978d87b67401dab7afd8555c3d28a3af4",
+          ];
+          /*
+          for (const empAddress in empAddressArray) {
+            contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddressArray[empAddress]);
+            contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
+            empTVL += new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+            empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          }
+          */
+        } else {
+          contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
+          contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
+          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+          empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+        }
+
+        return formatter.format(empTVL.toFixed());
       } catch (e) {
         console.error("error", e);
         return 0;
