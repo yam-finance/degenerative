@@ -459,7 +459,7 @@
               </b>
             </label>            
             <label
-              v-if="$route.params.key === 'ugas'"
+              v-if="$route.params.key === 'ugas' && formAssetName(assetName, asset[tokenSelected]) == 'UGASJAN21'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
