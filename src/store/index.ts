@@ -1091,7 +1091,7 @@ export default new Vuex.Store({
           empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
 
-        return formatter.format(empTVL);
+        return formatter.format(empTVL.toFixed());
       } catch (e) {
         console.error("error", e);
         return 0;
