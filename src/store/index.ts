@@ -1063,6 +1063,7 @@ export default new Vuex.Store({
         const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
         const ethPrice = await getPriceByContract(WETH);
         const web3 = new Web3(Vue.prototype.$provider);
+        const formatter = new Intl.NumberFormat('en-US');
         let contractEmp;
         let contractEmpCall;
         let empTVL;
@@ -1077,7 +1078,7 @@ export default new Vuex.Store({
           ];
           /*
           for (const empAddress in empAddressArray) {
-            contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddress);
+            contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddressArray[empAddress]);
             contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
             empTVL += new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
             empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
@@ -1089,8 +1090,6 @@ export default new Vuex.Store({
           empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
           empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
-
-        const formatter = new Intl.NumberFormat('en-US');
 
         return formatter.format(empTVL);
       } catch (e) {
