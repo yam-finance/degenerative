@@ -555,6 +555,32 @@
               Collateral Ratio (Post-Tx):
               <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
+            <br />
+            <div v-if="$route.params.key === 'ustonks'">
+              <label>
+                <b>Suggestion</b>
+              </label>
+              <label
+                v-tooltip="{
+                  content: 'Most efficient capital allocation for minting',
+                  delay: { show: 150, hide: 100 },
+                  placement: 'left-center',
+                }"
+              >
+                Most efficient Mint amount:
+                <b>{{ efficientMintAmount }}</b>
+              </label>
+              <label
+                v-tooltip="{
+                  content: 'Most efficient capital allocation for lp',
+                  delay: { show: 150, hide: 100 },
+                  placement: 'left-center',
+                }"
+              >
+                Most efficient LP amount:
+                <b>{{ efficientLPAmount }}</b>
+              </label>
+            </div>
           </div>
         </Container>
 
@@ -625,6 +651,8 @@ export default {
       showInfoButtonText: "Gas Info",
       liquidationPrice: 0,
       assetIncrease: 0,
+      efficientMintAmount: 0,
+      efficientLPAmount: 0,
       tokenAmt: null,
       collatAmt: null,
       pricedCR: 0,
@@ -1268,6 +1296,16 @@ export default {
 
       const assetInstance = this.asset[this.tokenSelected];
 
+      let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
+      minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
+      if ((this.balanceUSDC / this.price) > minTokens) {
+        this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
+        this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
+      } else {
+        this.efficientMintAmount = "Not enough USDC!";
+        this.efficientLPAmount = "Not enough USDC!";
+      }
+
       this.hasError = false;
       this.currentError = "";
       if (this.navAct == "withdraw") {
@@ -1319,8 +1357,6 @@ export default {
         //   this.currentError = "Insufficient";
         //   return;
         // }
-        let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
-        minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
         if (this.tokenAmt && this.tokenAmt < minTokens) {
           this.hasError = true;
           this.currentError = "Minimum mint amount is " + minTokens;
@@ -2133,14 +2169,12 @@ div.error {
 #thebox-nav {
   .warning-message {
     cursor: auto;
-    background: #f2eeef;
     color: #e57067;
     text-align: center;
-    border-radius: 5px;
     padding: 5px 10px;
     position: relative;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: normal;
+    font-size: 12px;
   }
   .button {
     cursor: pointer;
