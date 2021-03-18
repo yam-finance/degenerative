@@ -6,8 +6,6 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
-          <a class="asset-detail-switch tutorial" :href="`https://docs.degenerative.finance/synthetics/faqs`" target="_blank">FAQs</a>
-          <Space size="sm" />
           <a class="asset-detail-switch tutorial" :href="`${userGuide}`" target="_blank">Guide</a>
           <Space size="sm" />
           <a class="asset-detail-switch" :href="`https://docs.degenerative.finance/synthetics/${$route.params.key}`" target="_blank">Info</a>
