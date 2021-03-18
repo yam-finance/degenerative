@@ -1090,7 +1090,12 @@ export default new Vuex.Store({
           empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
         }
 
-        return empTVL.toFixed(2);
+        const formatter = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        });
+
+        return formatter.format(empTVL);
       } catch (e) {
         console.error("error", e);
         return 0;
