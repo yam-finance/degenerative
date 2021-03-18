@@ -6,6 +6,8 @@
         <h2 class="flex">
           <span>{{ $route.params.key.toUpperCase() }}</span>
           <SpacePush />
+          <a class="asset-detail-switch tutorial" :href="`https://docs.degenerative.finance/synthetics/faqs`" target="_blank">FAQs</a>
+          <Space size="sm" />
           <a class="asset-detail-switch tutorial" :href="`${userGuide}`" target="_blank">Guide</a>
           <Space size="sm" />
           <a class="asset-detail-switch" :href="`https://docs.degenerative.finance/synthetics/${$route.params.key}`" target="_blank">Info</a>
@@ -90,50 +92,26 @@
               >
             </span>
             <span>
-              <div v-if="$route.params.key === 'ugas'">
-                <span v-if="!tokenSelected">
-                  <b
-                    v-tooltip="{
-                      content: 'Select asset first.',
-                      delay: { show: 150, hide: 100 },
-                    }"
-                    >TWAP</b
-                  >
-                </span>
-                <span
-                  v-if="tokenSelected"
+              <span v-if="!tokenSelected">
+                <b
                   v-tooltip="{
-                    content: 'TWAP price of ' + assetName,
+                    content: 'Select asset first.',
                     delay: { show: 150, hide: 100 },
                   }"
+                  >TVL</b
                 >
-                  <b>TWAP:</b>
-                  {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
-                  {{ asset[tokenSelected].collateral }}
-                </span>
-              </div>
-              <div v-if="$route.params.key === 'ustonks'">
-                <span v-if="!tokenSelected">
-                  <b
-                    v-tooltip="{
-                      content: 'Select asset first.',
-                      delay: { show: 150, hide: 100 },
-                    }"
-                    >Index</b
-                  >
-                </span>
-                <span
-                  v-if="tokenSelected"
-                  v-tooltip="{
-                    content: 'Index market price of ' + assetName,
-                    delay: { show: 150, hide: 100 },
-                  }"
-                >
-                  <b>Index:</b>
-                  {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
-                  {{ asset[tokenSelected].collateral }}
-                </span>
-              </div>
+              </span>
+              <span
+                v-if="tokenSelected"
+                v-tooltip="{
+                  content: 'Total Value Locked in ' + assetName,
+                  delay: { show: 150, hide: 100 },
+                }"
+              >
+                <b>TVL:</b>
+                {{ empTVL || empTVL > 0 || empTVL == -1 ? (empTVL === -1 ? "0" : empTVL) : "..." }}
+                USD
+              </span>
             </span>
           </div>
         </Container>
@@ -278,22 +256,26 @@
                   id
                   class="numeric setvalue"
                   type="number"
+                  min="0"
                   name
                   v-model="tokenAmt"
                   v-on:keyup="tokenHandler"
                   :placeholder="'0.00 ' + (tokenSelected ? formAssetName(assetName, asset[tokenSelected]) + ' ' : '') + 'Tokens'"
                 />
                 <input
-                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade'"
+                  v-if="tokenSelected && navAct != 'redeem' && navAct !== 'lptrade' && withdrawType !== 'existing'"
                   id
                   class="numeric setvalue"
                   type="number"
+                  min="0"
                   name
                   v-model="collatAmt"
                   v-on:keyup="collatHandler"
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
-                  :disabled="navAct == 'withdraw' && withdrawType == 'existing'"
                 />
+                <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
+                  <b>Withdraw {{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
+                </label>
                 <button
                   id="act"
                   @click="act"
@@ -451,7 +433,7 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Your position will be liquidated if price gets to {{ assetIncrease }}%
+                Watch your Risk Levels: Your position will be liquidated if 2hr TWAP increases by {{ assetIncrease }}%.
               </a>
             </div>
           </Container>
@@ -463,8 +445,36 @@
               <b>{{ tokenSelected ? formAssetName(assetName, asset[tokenSelected]) : "No Synthetic" }} Selected</b>
             </label>
             <label
+              v-if="$route.params.key === 'ustonks'"
+              v-tooltip="{                  
+                content: 'Index market price of ' + assetName,
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              Index:                
+              <b>
+                {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
+                USDC
+              </b>
+            </label>            
+            <label
+              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
-                content: 'Asset price at which your position will be liquidated',
+                content: 'TWAP price of ' + assetName,
+                delay: { show: 150, hide: 100 },
+                placement: 'left-center',
+              }"
+            >
+              TWAP:
+              <b>
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
+                WETH
+              </b>
+            </label> 
+            <label
+              v-tooltip="{
+                content: '2hr TWAP at which your position will be liquidiated',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
@@ -484,14 +494,14 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Collateral ratio of your position after the tx',
+                content: 'Collateral ratio of this transaction',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Collateral Ratio (Post-Tx):
-              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
-            </label>
+              Current Tx Collateral Ratio:
+              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+            </label>          
 
             <br />
             <label>
@@ -537,13 +547,13 @@
             </label>
             <label
               v-tooltip="{
-                content: 'Collateral ratio of this particular tx',
+                content: 'Collateral ratio of your entire position',
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Current Collateral Ratio:
-              <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
+              Collateral Ratio (Post-Tx):
+              <b>{{ isFinite(pricedCR) ? numeral(pricedCR, "0.0000a") : 0 }}</b>
             </label>
             <br />
             <div v-if="$route.params.key === 'ustonks'">
@@ -610,7 +620,6 @@ import { getLiquidationPrice, getUniswapDataDaily, splitChartData, get30DMedian,
 import BigNumber from "bignumber.js";
 import { getOffchainPriceFromTokenSymbol, isPricefeedInvertedFromTokenSymbol } from "../utils/getOffchainPrice";
 import { WETH, USDC } from "@/utils/addresses";
-import EMPContract from "@/utils/abi/emp.json";
 import Assets from "../../protocol/assets.json";
 
 const ethDecs = new BigNumber(10).pow(new BigNumber(18));
@@ -661,6 +670,7 @@ export default {
       chartOptionsMedianValues: [{ name: "Initializing", value: 200 }],
       medianData: [],
       currentTWAP: 0,
+      empTVL: 0,
       indexPrice: 0,
       chartOptionsCandle: {},
       balanceWETH: 0,
@@ -766,6 +776,7 @@ export default {
       "checkContractApprovals",
       "getMiningRewards",
       "getUniPrice",
+      "getEmpTVL",
     ]),
     ...mapGetters(["empStateOld", "empState"]),
     async initAsset() {
@@ -1105,7 +1116,9 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } else if (
+        } 
+        /*
+        else if (
           (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
             new BigNumber(this.currPos.tokensOutstanding) /
             this.price <
@@ -1128,6 +1141,7 @@ export default {
           this.hasError = true;
           this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
+        */
       }
     },
     async settleTimeCheckExpired() {
@@ -1358,7 +1372,7 @@ export default {
         }
         const thisError = "Collateral Ratio below global minimum";
         if (!this.hasError || this.currentError == thisError) {
-          if (this.pricedCR && Number(this.pricedCR) < Number(this.gcr)) {
+          if (this.pricedTxCR && Number(this.pricedTxCR) < Number(this.gcr)) {
             this.hasError = true;
             this.currentError = thisError;
           } else {
@@ -1467,6 +1481,7 @@ export default {
         assetPrice: price,
       };
       const resultBase = await this.getMiningRewards(asset);
+      this.empTVL = await this.getEmpTVL({ assetInstance: this.asset[this.tokenSelected] });
       let result;
       if (this.asset[this.tokenSelected] && this.asset[this.tokenSelected].apr) {
         if (this.asset[this.tokenSelected].apr.force >= 0) {
@@ -1490,6 +1505,7 @@ export default {
       this.settleTime = false;
       this.tokenAmt = null;
       this.collatAmt = null;
+      this.empTVL = 0;
     },
     async lastPrice(specificToken) {
       const specificTokenSelected = specificToken ? specificToken : this.tokenSelected;
@@ -1714,7 +1730,7 @@ export default {
       let collatAmount = 0;
       switch (assetInstance.collateral) {
         case "WETH":
-          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(4);
+          collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.0001) * COLLAT_BUFFER_FACTOR).toFixed(6);
           break;
         case "USDC":
           collatAmount = ((this.tokenAmt * this.gcr * this.price + 0.01) * COLLAT_BUFFER_FACTOR).toFixed(2);
@@ -2289,5 +2305,8 @@ div.error {
   @media (max-width: 540px) {
     left: -60px;
   }
+}
+.withdrawLabel {
+  padding-left: 20px;
 }
 </style>
