@@ -6,7 +6,7 @@
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
-        <p class="subtitle">TVL: {{ combinedTVL }}</p>
+        <!-- <p class="subtitle">TVL: {{ combinedTVL }}</p> -->
       </div>
       <div class="row">
         <div class="item">
