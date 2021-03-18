@@ -1068,7 +1068,15 @@ export default new Vuex.Store({
 
         if (payload.combine) {
           console.log("Combine TVL");
-          empTVL = 1;
+          const empAddressArray = [payload.assetInstance.emp.address];
+          /*
+          for (empAddress in empAddressArray) {
+            contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddress);
+            contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
+            empTVL += new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
+            empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          }
+          */
         } else {
           contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
           contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
