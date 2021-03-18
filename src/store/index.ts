@@ -6,6 +6,7 @@ import Vuex, { Commit, Dispatch } from "vuex";
 import { getInstance } from "@snapshot-labs/lock/plugins/vue";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatUnits } from "@ethersproject/units";
+import Assets from "../../protocol/assets.json";
 import {
   stateSave,
   stateLoad,
@@ -1067,10 +1068,15 @@ export default new Vuex.Store({
         let empTVL;
 
         if (payload.combine) {
-          console.log("Combine TVL");
-          const empAddressArray = [payload.assetInstance.emp.address];
+          const empAddressArray = [
+            "0x4f1424cef6ace40c0ae4fc64d74b734f1eaf153c", 
+            "0x4e8d60a785c2636a63c5bd47c7050d21266c8b43", 
+            "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
+            "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
+            "0x516f595978d87b67401dab7afd8555c3d28a3af4",
+          ];
           /*
-          for (empAddress in empAddressArray) {
+          for (const empAddress in empAddressArray) {
             contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddress);
             contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
             empTVL += new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
