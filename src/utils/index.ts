@@ -632,7 +632,7 @@ export const getCurrentTWAP = async () => {
 };
 
 export const getIndexFromSpreadsheet = async () => {
-  const data: any = await requestHttp("https://data.yam.finance/current-index");
+  const data: any = await requestHttp("https://data.yam.finance/ustonks/current-index");
   const indexValue = new BigNumber(data.price).decimalPlaces(2);
 
   return indexValue;
