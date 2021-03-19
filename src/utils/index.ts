@@ -618,21 +618,22 @@ export async function getDevMiningEmps() {
 }
 
 export const get30DMedian = async () => {
-  const data: any = await requestHttp("https://data.yam.finance/median");
+  const data: any = await requestHttp("https://data.yam.finance/median-history");
   // return data.slice(Math.max(data.length - 20, 0));
   return data;
 };
 
+// TODO: Path needs to be changed after api update.
 export const getCurrentTWAP = async () => {
   const web3 = new Web3();
-  const data: any = await requestHttp("https://data.yam.finance/current-twap");
+  const data: any = await requestHttp("https://data.yam.finance/twap");
   const currentTWAP = new BigNumber(web3.utils.fromWei(data.price.toString(), "ether")).decimalPlaces(4);
 
   return currentTWAP;
 };
 
 export const getIndexFromSpreadsheet = async () => {
-  const data: any = await requestHttp("https://data.yam.finance/current-index");
+  const data: any = await requestHttp("https://data.yam.finance/ustonks/index");
   const indexValue = new BigNumber(data.price).decimalPlaces(2);
 
   return indexValue;
