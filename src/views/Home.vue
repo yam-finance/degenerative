@@ -6,7 +6,7 @@
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
-        <!-- <p class="subtitle">TVL: {{ combinedTVL }}</p> -->
+        <p class="subtitle">TVL: {{ combinedTVL ? combinedTVL : "..." }}</p>
       </div>
       <div class="row">
         <div class="item">
@@ -111,7 +111,7 @@ import { mapActions } from "vuex";
 export default {
   data() {
     return {
-      combinedTVL: 0,
+      combinedTVL: null,
     };
   },
   computed: {
@@ -125,7 +125,8 @@ export default {
   methods: {
     ...mapActions(["getEmpTVL"]),
     async initHome() {
-      this.combinedTVL = this.getEmpTVL({ combine: true });
+      console.log("Loading combined tvl ...");
+      this.combinedTVL = await this.getEmpTVL({ combine: true });
     },
   },
 };
