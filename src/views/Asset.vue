@@ -783,7 +783,7 @@ export default {
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
 
       this.medianData = await get30DMedian();
-      this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
+      // this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
       this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
