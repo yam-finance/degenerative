@@ -431,7 +431,7 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Watch your Risk Levels: Your position will be liquidated if 2hr TWAP increases by {{ assetIncrease }}%.
+                Watch your Risk Levels: Your position will be liquidated if {{ formAssetName(assetName, asset[tokenSelected]) }} increases by {{ assetIncrease }}%.
               </a>
             </div>
           </Container>
@@ -1761,7 +1761,7 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
-      
+
       if (this.liquidationPrice == 0) {
         this.assetIncrease = 0;
       } else {
