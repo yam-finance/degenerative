@@ -89,7 +89,6 @@ const fetchTxs = async (_type: string, _userAddress: string, _count: number, _en
   return _txs;
 };
 
-// TODO: Change the api key before merging with Master.
 export const getTxStats = async (
   provider: provider,
   userAddress: string,
@@ -623,7 +622,6 @@ export const get30DMedian = async () => {
   return data;
 };
 
-// TODO: Path needs to be changed after api update.
 export const getCurrentTWAP = async (poolAddress) => {
   const web3 = new Web3();
   const data: any = await requestHttp(`https://data.yam.finance/twap/pair/${poolAddress}`);

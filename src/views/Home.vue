@@ -6,7 +6,7 @@
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
-        <p class="subtitle">TVL: {{ combinedTVL ? `${combinedTVL} USD` : "..." }}</p>
+        <p class="tvl">TVL: {{ combinedTVL ? `${combinedTVL} USD` : "..." }}</p>
       </div>
       <div class="row">
         <div class="item">
@@ -173,6 +173,13 @@ export default {
   .subtitle {
     font-size: 28px;
     font-weight: 100;
+    @media (max-width: 420px) {
+      font-size: 18px;
+    }
+  }
+  .tvl {
+    font-size: 28px;
+    font-weight: bold;
     @media (max-width: 420px) {
       font-size: 18px;
     }
