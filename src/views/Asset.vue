@@ -843,6 +843,7 @@ export default {
       const tempChartData = [];
       const tempChartTWAPData = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      this.chartOptionsCandle = {};
 
       if (this.assetName == "UGAS") {
         for (const element of this.chartOptionsMedianValues) {
