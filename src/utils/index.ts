@@ -627,6 +627,11 @@ export const get30DMedian = async () => {
 export const getCurrentTWAP = async (poolAddress) => {
   const web3 = new Web3();
   const data: any = await requestHttp(`https://data.yam.finance/twap/pair/${poolAddress}`);
+
+  if (!data) {
+    return -1;
+  }
+
   const currentTWAP = new BigNumber(web3.utils.fromWei(data.price.toString(), "ether")).decimalPlaces(4);
 
   return currentTWAP;
