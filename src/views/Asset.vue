@@ -1084,28 +1084,6 @@ export default {
         } else if (tn < Number(this.currPos.withdrawalRequestPassTimestamp)) {
           this.hasError = true;
           this.currentError = "Withdrawal still pending approval";
-        } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
-            new BigNumber(this.currPos.tokensOutstanding) /
-            this.price <
-          this.gcr
-        ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]);
-          console.log("numerator", numerator);
-          console.log("denom", this.currPos.tokensOutstanding);
-          const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
-            new BigNumber(this.currPos.tokensOutstanding);
-          console.log(
-            "HERE",
-            newcr.toString(),
-            new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]),
-            this.currPos.tokensOutstanding,
-            this.gcr
-          );
-          this.hasError = true;
-          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
