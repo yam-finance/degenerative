@@ -457,7 +457,7 @@
               </b>
             </label>            
             <label
-              v-if="$route.params.key === 'ugas' && formAssetName(assetName, asset[tokenSelected]) == 'UGASJAN21'"
+              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
@@ -783,7 +783,7 @@ export default {
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
 
       this.medianData = await get30DMedian();
-      // this.currentTWAP = await getCurrentTWAP();
+      // this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
       this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
