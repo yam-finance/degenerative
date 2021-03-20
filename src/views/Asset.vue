@@ -783,7 +783,6 @@ export default {
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
 
       this.medianData = await get30DMedian();
-      // this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
       this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
@@ -803,6 +802,12 @@ export default {
       if (this.$refs.gasStats && this.$route.params.key == "ugas") {
         await this.$refs.gasStats.getAccountStats();
       }
+    },
+    async getAssetTWAP() {
+      if (!this.tokenSelected) {
+        return;
+      }
+      this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
     },
     async getUserBalances() {
       this.balanceWETH = await this.getUserBalanceWETH();
@@ -1411,6 +1416,7 @@ export default {
         return;
       }
 
+      await this.getAssetTWAP();
       const assetInstance = this.asset[this.tokenSelected];
       console.log("assetInstance", assetInstance);
       let k;
