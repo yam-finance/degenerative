@@ -52,7 +52,7 @@
                 }"
               >
                 <b>APR:</b>
-                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? `${aprAssetValue === -1 ? "0" : aprAssetValue} %` : "..." }}
               </span>
             </span>
           </div>
@@ -107,8 +107,7 @@
                 }"
               >
                 <b>TVL:</b>
-                {{ empTVL || empTVL > 0 || empTVL == -1 ? (empTVL === -1 ? "0" : empTVL) : "..." }}
-                USD
+                {{ empTVL || empTVL > 0 || empTVL == -1 ? `${empTVL === -1 ? "0" : empTVL} USD` : "..." }}
               </span>
             </span>
           </div>
