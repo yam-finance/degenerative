@@ -1069,20 +1069,22 @@ export default new Vuex.Store({
         let empTVL;
 
         if (payload.combine) {
+          let assetTVL = new BigNumber(0);
+
           for (const assets in assetsObject) {
             const assetDetails = assetsObject[assets];
 
             for (const asset in assetDetails) {
-              let assetTVL;
               const baseAsset = new BigNumber(10).pow(assetDetails[asset].token.decimals);
               contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, assetDetails[asset].emp.address);
               contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-              assetTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
-              assetTVL *= (assetDetails[asset].collateral == "WETH" ? ethPrice : 1);
-              empTVL += assetTVL;
+              let currentAssetTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset);
+              currentAssetTVL = currentAssetTVL.multipliedBy(assetDetails[asset].collateral == "WETH" ? ethPrice : 1);
+              assetTVL = assetTVL.plus(currentAssetTVL);
             }
           }
 
+          empTVL = assetTVL.toNumber();
           empTVL = formatter.format(empTVL.toFixed());
 
           return empTVL;
@@ -1090,8 +1092,8 @@ export default new Vuex.Store({
           const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
           contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
           contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
-          empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset);
+          empTVL = empTVL.multipliedBy(payload.assetInstance.collateral == "WETH" ? ethPrice : 1).toNumber();
           empTVL = formatter.format(empTVL.toFixed());
 
           return empTVL;

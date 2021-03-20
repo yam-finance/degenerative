@@ -6,7 +6,7 @@
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
-        <p class="subtitle">TVL: {{ combinedTVL ? combinedTVL : "..." }}</p>
+        <p class="subtitle">TVL: {{ combinedTVL ? `${combinedTVL} USD` : "..." }}</p>
       </div>
       <div class="row">
         <div class="item">
@@ -104,7 +104,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapActions } from "vuex";
 
@@ -114,24 +113,17 @@ export default {
       combinedTVL: null,
     };
   },
-  computed: {
-    style() {
-      return null;
-    },
-  },
   async mounted() {
     await this.initHome();
   },
   methods: {
     ...mapActions(["getEmpTVL"]),
     async initHome() {
-      console.log("Loading combined tvl ...");
       this.combinedTVL = await this.getEmpTVL({ combine: true });
     },
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .home {
   background-size: 1420px 2254px;
@@ -241,25 +233,3 @@ a {
   color: var(--primary);
 }
 </style>
-
-<script>
-export default {
-  name: "Home",
-  head: {},
-  data() {
-    return {
-      delay: 200,
-      scroller: 0,
-    };
-  },
-  components: {},
-  //   methods: {},
-  //   created() {},
-  //   destroyed() {},
-  mounted() {
-    if (this.wavesActive) {
-      this.showWaves();
-    }
-  },
-};
-</script>
