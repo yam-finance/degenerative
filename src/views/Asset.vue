@@ -1075,7 +1075,7 @@ export default {
     checkWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos && this.tokenSelected) {
-        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(colDec[this.asset[this.tokenSelected].collateral]);
+        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(colDec[this.asset[this.tokenSelected].collateral]).toNumber();
         const tn = new Date().getTime() / 1000;
         if (Number(this.currPos.withdrawalRequestPassTimestamp) == 0) {
           this.hasError = true;
