@@ -827,6 +827,10 @@ export default {
       if (!this.tokenSelected || !this.asset[this.tokenSelected].token.address) {
         return;
       }
+
+      this.chartOptionsCandle = {};
+      this.chartDisplay = false;
+
       const redColor = "#ad3c3c";
       const redBorderColor = "#ad3c3c";
       const greenColor = "#48ad3c";
@@ -842,7 +846,6 @@ export default {
       const tempChartData = [];
       const tempChartTWAPData = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      this.chartOptionsCandle = {};
 
       if (this.assetName == "UGAS") {
         for (const element of this.chartOptionsMedianValues) {
