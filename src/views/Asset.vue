@@ -456,7 +456,6 @@
               </b>
             </label>            
             <label
-              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
@@ -746,6 +745,7 @@ export default {
       this.settleTimeCheckExpired();
     },
     $route: async function(newVal, oldVal) {
+      await this.resetNumbers();
       await this.initAsset();
     }
   },
@@ -1484,6 +1484,8 @@ export default {
       // this.asset = {},
       // this.assetName = null,
       this.price = 0;
+      this.currentTWAP = 0;
+      this.gcr = 0;
       this.aprAssetValue = 0;
       this.assetIncrease = 0;
       this.settleTime = false;
