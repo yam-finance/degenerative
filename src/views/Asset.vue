@@ -52,7 +52,7 @@
                 }"
               >
                 <b>APR:</b>
-                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? (aprAssetValue === -1 ? "0" : aprAssetValue) : "..." }}%
+                {{ aprAssetValue || aprAssetValue > 0 || aprAssetValue == -1 ? `${aprAssetValue === -1 ? "0" : aprAssetValue} %` : "..." }}
               </span>
             </span>
           </div>
@@ -107,8 +107,7 @@
                 }"
               >
                 <b>TVL:</b>
-                {{ empTVL || empTVL > 0 || empTVL == -1 ? (empTVL === -1 ? "0" : empTVL) : "..." }}
-                USD
+                {{ empTVL || empTVL > 0 || empTVL == -1 ? `${empTVL === -1 ? "0" : empTVL} USD` : "..." }}
               </span>
             </span>
           </div>
@@ -431,7 +430,7 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Watch your Risk Levels: Your position will be liquidated if 2hr TWAP increases by {{ assetIncrease }}%.
+                Watch your Risk Levels: Your position will be liquidated if {{ formAssetName(assetName, asset[tokenSelected]) }} increases by {{ assetIncrease }}%.
               </a>
             </div>
           </Container>
@@ -457,7 +456,7 @@
               </b>
             </label>            
             <label
-              v-if="$route.params.key === 'ugas' && formAssetName(assetName, asset[tokenSelected]) == 'UGASJAN21'"
+              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
@@ -466,7 +465,7 @@
             >
               TWAP:
               <b>
-                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "0" : currentTWAP) : "..." }}
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : currentTWAP) : "..." }}
                 WETH
               </b>
             </label> 
@@ -783,7 +782,6 @@ export default {
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
 
       this.medianData = await get30DMedian();
-      // this.currentTWAP = await getCurrentTWAP();
       this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
@@ -803,6 +801,12 @@ export default {
       if (this.$refs.gasStats && this.$route.params.key == "ugas") {
         await this.$refs.gasStats.getAccountStats();
       }
+    },
+    async getAssetTWAP() {
+      if (!this.tokenSelected) {
+        return;
+      }
+      this.currentTWAP = await getCurrentTWAP(this.asset[this.tokenSelected].pool.address);
     },
     async getUserBalances() {
       this.balanceWETH = await this.getUserBalanceWETH();
@@ -839,6 +843,7 @@ export default {
       const tempChartData = [];
       const tempChartTWAPData = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      this.chartOptionsCandle = {};
 
       if (this.assetName == "UGAS") {
         for (const element of this.chartOptionsMedianValues) {
@@ -1079,28 +1084,6 @@ export default {
         } else if (tn < Number(this.currPos.withdrawalRequestPassTimestamp)) {
           this.hasError = true;
           this.currentError = "Withdrawal still pending approval";
-        } else if (
-          (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
-            new BigNumber(this.currPos.tokensOutstanding) /
-            this.price <
-          this.gcr
-        ) {
-          const numerator = new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]);
-          console.log("numerator", numerator);
-          console.log("denom", this.currPos.tokensOutstanding);
-          const newcr =
-            (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
-            new BigNumber(this.currPos.tokensOutstanding);
-          console.log(
-            "HERE",
-            newcr.toString(),
-            new BigNumber(this.currPos.rawCollateral),
-            new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral]),
-            this.currPos.tokensOutstanding,
-            this.gcr
-          );
-          this.hasError = true;
-          this.currentError = "Withdrawal would put position below Global Collat Ratio";
         }
       }
     },
@@ -1411,6 +1394,7 @@ export default {
         return;
       }
 
+      await this.getAssetTWAP();
       const assetInstance = this.asset[this.tokenSelected];
       console.log("assetInstance", assetInstance);
       let k;
@@ -1755,7 +1739,7 @@ export default {
       const newPos = Number(this.tokenAmt) + Number(this.existingTokens);
       this.pricedCR = newPos > 0 ? (newCollat / newPos / this.price).toFixed(4) : 0;
       this.runChecks();
-      
+
       if (this.liquidationPrice == 0) {
         this.assetIncrease = 0;
       } else {
