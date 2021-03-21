@@ -465,8 +465,7 @@
             >
               TWAP:
               <b>
-                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : currentTWAP) : "..." }}
-                WETH
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : `${currentTWAP} WETH`) : "..." }}
               </b>
             </label> 
             <label
