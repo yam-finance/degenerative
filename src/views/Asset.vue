@@ -456,7 +456,6 @@
               </b>
             </label>            
             <label
-              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
@@ -465,8 +464,7 @@
             >
               TWAP:
               <b>
-                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : currentTWAP) : "..." }}
-                WETH
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : `${currentTWAP} WETH`) : "..." }}
               </b>
             </label> 
             <label
@@ -747,6 +745,7 @@ export default {
       this.settleTimeCheckExpired();
     },
     $route: async function(newVal, oldVal) {
+      await this.resetNumbers();
       await this.initAsset();
     }
   },
@@ -828,6 +827,10 @@ export default {
       if (!this.tokenSelected || !this.asset[this.tokenSelected].token.address) {
         return;
       }
+
+      this.chartOptionsCandle = {};
+      this.chartDisplay = false;
+
       const redColor = "#ad3c3c";
       const redBorderColor = "#ad3c3c";
       const greenColor = "#48ad3c";
@@ -843,7 +846,6 @@ export default {
       const tempChartData = [];
       const tempChartTWAPData = [];
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      this.chartOptionsCandle = {};
 
       if (this.assetName == "UGAS") {
         for (const element of this.chartOptionsMedianValues) {
@@ -1073,7 +1075,7 @@ export default {
     checkWithdraw() {
       this.updateLiqPrice(false, true);
       if (this.currPos && this.tokenSelected) {
-        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(colDec[this.asset[this.tokenSelected].collateral]);
+        this.collatAmt = new BigNumber(this.currPos.withdrawalRequestAmount).div(colDec[this.asset[this.tokenSelected].collateral]).toNumber();
         const tn = new Date().getTime() / 1000;
         if (Number(this.currPos.withdrawalRequestPassTimestamp) == 0) {
           this.hasError = true;
@@ -1482,6 +1484,8 @@ export default {
       // this.asset = {},
       // this.assetName = null,
       this.price = 0;
+      this.currentTWAP = 0;
+      this.gcr = 0;
       this.aprAssetValue = 0;
       this.assetIncrease = 0;
       this.settleTime = false;

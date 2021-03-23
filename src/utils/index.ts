@@ -626,7 +626,7 @@ export const getCurrentTWAP = async (poolAddress) => {
   const web3 = new Web3();
   const data: any = await requestHttp(`https://data.yam.finance/twap/pair/${poolAddress}`);
 
-  if (!data) {
+  if (JSON.stringify(data) == JSON.stringify({})) {
     return -1;
   }
 
