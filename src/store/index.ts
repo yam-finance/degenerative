@@ -1002,7 +1002,7 @@ export default new Vuex.Store({
 
         const current = moment().unix();
         const week1Until = 1615665600;
-        const week2Until = 1616788800;
+        const week2Until = 1616961600;
         const yamRewards = 0;
         const umaRewards = rewards[payload.assetInstance.emp.address];
         let yamWeekRewards = 0;
