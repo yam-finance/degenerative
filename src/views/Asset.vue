@@ -129,7 +129,9 @@
         </Container>
 
         <Space size="10" class="flex" />
-
+        <NetworkSwitch />
+        <CircleLoader />
+        <TextLoader />
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
@@ -271,7 +273,14 @@
                   :placeholder="'0.00 ' + asset[tokenSelected].collateral + (navAct === 'mint' ? ' Collateral' : '')"
                 />
                 <label class="withdrawLabel" v-if="navAct == 'withdraw' && withdrawType == 'existing'">
-                  <b>Withdraw {{ (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) + ' ' + asset[tokenSelected].collateral }}</b>
+                  <b
+                    >Withdraw
+                    {{
+                      (asset[tokenSelected].collateral == "WETH" ? numeral(collatAmt, "0.0000a") : numeral(collatAmt, "0.00a")) +
+                        " " +
+                        asset[tokenSelected].collateral
+                    }}</b
+                  >
                 </label>
                 <button
                   id="act"
@@ -430,7 +439,8 @@
           <Container id="thebox-nav" :size="440" v-if="tokenSelected">
             <div class="row row-item-col">
               <a class="flexitem warning-message">
-                Watch your Risk Levels: Your position will be liquidated if {{ formAssetName(assetName, asset[tokenSelected]) }} increases by {{ assetIncrease }}%.
+                Watch your Risk Levels: Your position will be liquidated if {{ formAssetName(assetName, asset[tokenSelected]) }} increases by
+                {{ assetIncrease }}%.
               </a>
             </div>
           </Container>
@@ -443,18 +453,18 @@
             </label>
             <label
               v-if="$route.params.key === 'ustonks'"
-              v-tooltip="{                  
+              v-tooltip="{
                 content: 'Index market price of ' + assetName,
                 delay: { show: 150, hide: 100 },
                 placement: 'left-center',
               }"
             >
-              Index:                
+              Index:
               <b>
                 {{ indexPrice || indexPrice > 0 || indexPrice == -1 ? (indexPrice === -1 ? "0" : indexPrice) : "..." }}
                 USDC
               </b>
-            </label>            
+            </label>
             <label
               v-if="$route.params.key === 'ugas'"
               v-tooltip="{
@@ -467,7 +477,7 @@
               <b>
                 {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : `${currentTWAP} WETH`) : "..." }}
               </b>
-            </label> 
+            </label>
             <label
               v-tooltip="{
                 content: '2hr TWAP at which your position will be liquidiated',
@@ -497,7 +507,7 @@
             >
               Current Tx Collateral Ratio:
               <b>{{ numeral(pricedTxCR, "0.0000a") }}</b>
-            </label>          
+            </label>
 
             <br />
             <label>
@@ -513,7 +523,6 @@
               Your {{ formAssetName(assetName, asset[tokenSelected]) }}:
               <b>{{ tokenBalance ? numeral(Number(tokenBalance), "0.00a") : "0" }}</b>
             </label>
-
 
             <br />
             <label>
@@ -748,7 +757,7 @@ export default {
     $route: async function(newVal, oldVal) {
       await this.resetNumbers();
       await this.initAsset();
-    }
+    },
   },
   components: {},
   methods: {
@@ -1100,7 +1109,7 @@ export default {
         } else if (Number(this.currPos.rawCollateral) == 0) {
           this.hasError = true;
           this.currentError = "No Collateral to withdraw from this position";
-        } 
+        }
         /*
         else if (
           (new BigNumber(this.currPos.rawCollateral) - new BigNumber(this.collatAmt).times(colDec[this.asset[this.tokenSelected].collateral])) /
@@ -1266,12 +1275,7 @@ export default {
       const assetInstance = this.asset[this.tokenSelected];
       const pos = Number(new BigNumber(this.currPos.tokensOutstanding).div(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals))));
       const col = Number(new BigNumber(this.currPos.rawCollateral).div(colDec[this.asset[this.tokenSelected].collateral]));
-      this.currLiquidationPrice = getLiquidationPrice(
-        col,
-        pos,
-        this.collReq.div(colDec.WETH),
-        isPricefeedInvertedFromTokenSymbol("uGAS")
-      ).toFixed(4);
+      this.currLiquidationPrice = getLiquidationPrice(col, pos, this.collReq.div(colDec.WETH), isPricefeedInvertedFromTokenSymbol("uGAS")).toFixed(4);
     },
     runChecks() {
       if (!this.tokenSelected) {
@@ -1282,7 +1286,7 @@ export default {
 
       let minTokens = new BigNumber(this.currEMP.minSponsorTokens);
       minTokens = minTokens.dividedBy(new BigNumber(10).pow(new BigNumber(assetInstance.token.decimals)));
-      if ((this.balanceUSDC / this.price) > minTokens) {
+      if (this.balanceUSDC / this.price > minTokens) {
         this.efficientMintAmount = (Number(this.balanceUSDC) / (Math.pow(this.gcr, -1) + 1)).toFixed(2);
         this.efficientLPAmount = (this.efficientMintAmount / this.gcr).toFixed(2);
       } else {
@@ -1712,7 +1716,7 @@ export default {
     },
     tokenHandler() {
       const assetInstance = this.asset[this.tokenSelected];
-      const COLLAT_BUFFER_FACTOR = 1.0 + (25 * (0.01/100)) // 25 bps extra
+      const COLLAT_BUFFER_FACTOR = 1.0 + 25 * (0.01 / 100); // 25 bps extra
 
       let collatAmount = 0;
       switch (assetInstance.collateral) {
@@ -1748,7 +1752,7 @@ export default {
       if (this.liquidationPrice == 0) {
         this.assetIncrease = 0;
       } else {
-        this.assetIncrease = (((this.liquidationPrice / this.price) - 1) * 100).toFixed(2);
+        this.assetIncrease = ((this.liquidationPrice / this.price - 1) * 100).toFixed(2);
       }
     },
     async makeApproval(identifier, spenderAddress, tokenAddress) {
