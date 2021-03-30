@@ -1002,7 +1002,7 @@ export default new Vuex.Store({
 
         const current = moment().unix();
         const week1Until = 1615665600;
-        const week2Until = 1616788800;
+        const week2Until = 1616961600;
         const yamRewards = 0;
         const umaRewards = rewards[payload.assetInstance.emp.address];
         let yamWeekRewards = 0;
@@ -1060,7 +1060,7 @@ export default new Vuex.Store({
       }
 
       try {
-        const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
+        const assetsObject = Assets;
         const ethPrice = await getPriceByContract(WETH);
         const web3 = new Web3(Vue.prototype.$provider);
         const formatter = new Intl.NumberFormat('en-US');
@@ -1069,29 +1069,35 @@ export default new Vuex.Store({
         let empTVL;
 
         if (payload.combine) {
-          const empAddressArray = [
-            "0x4f1424cef6ace40c0ae4fc64d74b734f1eaf153c", 
-            "0x4e8d60a785c2636a63c5bd47c7050d21266c8b43", 
-            "0xfa3aa7ee08399a4ce0b4921c85ab7d645ccac669",
-            "0xeaa081a9fad4607cdf046fea7d4bf3dfef533282",
-            "0x516f595978d87b67401dab7afd8555c3d28a3af4",
-          ];
-          /*
-          for (const empAddress in empAddressArray) {
-            contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, empAddressArray[empAddress]);
-            contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-            empTVL += new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
-            empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          let assetTVL = new BigNumber(0);
+
+          for (const assets in assetsObject) {
+            const assetDetails = assetsObject[assets];
+
+            for (const asset in assetDetails) {
+              const baseAsset = new BigNumber(10).pow(assetDetails[asset].token.decimals);
+              contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, assetDetails[asset].emp.address);
+              contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
+              let currentAssetTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset);
+              currentAssetTVL = currentAssetTVL.multipliedBy(assetDetails[asset].collateral == "WETH" ? ethPrice : 1);
+              assetTVL = assetTVL.plus(currentAssetTVL);
+            }
           }
-          */
+
+          empTVL = assetTVL.toNumber();
+          empTVL = formatter.format(empTVL.toFixed());
+
+          return empTVL;
         } else {
+          const baseAsset = new BigNumber(10).pow(payload.assetInstance.token.decimals);
           contractEmp = new web3.eth.Contract((EMPContract.abi as unknown) as AbiItem, payload.assetInstance.emp.address);
           contractEmpCall = await contractEmp.methods.rawTotalPositionCollateral().call();
-          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset).toNumber();
-          empTVL *= (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
-        }
+          empTVL = new BigNumber(contractEmpCall).dividedBy(baseAsset);
+          empTVL = empTVL.multipliedBy(payload.assetInstance.collateral == "WETH" ? ethPrice : 1).toNumber();
+          empTVL = formatter.format(empTVL.toFixed());
 
-        return formatter.format(empTVL.toFixed());
+          return empTVL;
+        }
       } catch (e) {
         console.error("error", e);
         return 0;

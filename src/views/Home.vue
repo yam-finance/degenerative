@@ -6,7 +6,7 @@
       <div class="getdegenerative degenerative">
         <div class="large-title">Get Degenerative</div>
         <p class="subtitle">Cutting Edge DeFi Derivatives.</p>
-        <!-- <p class="subtitle">TVL: {{ combinedTVL }}</p> -->
+        <p class="tvl">TVL: {{ combinedTVL ? `${combinedTVL} USD` : "..." }}</p>
       </div>
       <div class="row">
         <div class="item">
@@ -104,20 +104,14 @@
     </div>
   </div>
 </template>
-
 <script>
 import { mapActions } from "vuex";
 
 export default {
   data() {
     return {
-      combinedTVL: 0,
+      combinedTVL: null,
     };
-  },
-  computed: {
-    style() {
-      return null;
-    },
   },
   async mounted() {
     await this.initHome();
@@ -125,12 +119,11 @@ export default {
   methods: {
     ...mapActions(["getEmpTVL"]),
     async initHome() {
-      this.combinedTVL = this.getEmpTVL({ combine: true });
+      this.combinedTVL = await this.getEmpTVL({ combine: true });
     },
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .home {
   background-size: 1420px 2254px;
@@ -180,6 +173,13 @@ export default {
   .subtitle {
     font-size: 28px;
     font-weight: 100;
+    @media (max-width: 420px) {
+      font-size: 18px;
+    }
+  }
+  .tvl {
+    font-size: 28px;
+    font-weight: bold;
     @media (max-width: 420px) {
       font-size: 18px;
     }
@@ -240,25 +240,3 @@ a {
   color: var(--primary);
 }
 </style>
-
-<script>
-export default {
-  name: "Home",
-  head: {},
-  data() {
-    return {
-      delay: 200,
-      scroller: 0,
-    };
-  },
-  components: {},
-  //   methods: {},
-  //   created() {},
-  //   destroyed() {},
-  mounted() {
-    if (this.wavesActive) {
-      this.showWaves();
-    }
-  },
-};
-</script>
