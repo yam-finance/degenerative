@@ -129,17 +129,14 @@
         </Container>
 
         <Space size="10" class="flex" />
-        <NetworkSwitch />
-        <CircleLoader />
-        <TextLoader />
+        <!-- <TextLoader /> -->
         <Container :size="440">
           <button class="chart-button" @click="chartDisplay = !chartDisplay">Chart</button>
           <transition name="fade" mode="out-in">
             <div class="assetchart-wrapper" v-if="chartDisplay && tokenSelected">
-              <div v-if="assetChartData && tokenSelected">
-                <div class="assetchart">
-                  <chart :options="chartOptionsCandle" />
-                </div>
+              <div class="assetchart">
+                <CircleLoader class="loader" v-if="!assetChartData" />
+                <chart :options="chartOptionsCandle" />
               </div>
             </div>
           </transition>
@@ -2105,9 +2102,16 @@ div.error {
 
 .echarts,
 .assetchart {
-  width: 100%;
-  height: 160px;
-  margin-bottom: 15px;
+  &:not(.loader) {
+    width: 100%;
+    height: 160px;
+    margin-bottom: 15px;
+  }
+}
+
+.loader {
+  padding-top: 60px;
+  margin-left: 50%;
 }
 
 .wrapETH {

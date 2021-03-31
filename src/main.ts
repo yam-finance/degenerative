@@ -41,7 +41,6 @@ Vue.component("CardLink", () => import("@/components/CardLink.vue"));
 Vue.component("Button", () => import("@/components/Button.vue"));
 Vue.component("CircleLoader", () => import("@/components/loader/CircleLoader.vue"));
 Vue.component("TextLoader", () => import("@/components/loader/TextLoader.vue"));
-Vue.component("NetworkSwitch", () => import("@/components/NetworkSwitch.vue"));
 Vue.component("chart", ECharts);
 Vue.component("VuePicker", VuePicker);
 Vue.component("VuePickerOption", VuePickerOption);
