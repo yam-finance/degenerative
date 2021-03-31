@@ -837,6 +837,7 @@ export default {
 
       this.chartOptionsCandle = {};
       this.chartDisplay = false;
+      this.assetChartData = null;
 
       const redColor = "#ad3c3c";
       const redBorderColor = "#ad3c3c";
