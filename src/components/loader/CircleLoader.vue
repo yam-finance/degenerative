@@ -37,8 +37,8 @@ export default {
   margin-right: 0.75rem;
   color: rgba(0, 0, 0, 1);
   width: 1.25rem;
-  -webkit-animation: spin 1s linear infinite;
-  animation: spin 1s linear infinite;
+  -webkit-animation: spin 0.5s linear infinite;
+  animation: spin 0.5s linear infinite;
 }
 
 @-webkit-keyframes spin {
