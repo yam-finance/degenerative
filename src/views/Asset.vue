@@ -463,7 +463,6 @@
               </b>
             </label>
             <label
-              v-if="$route.params.key === 'ugas'"
               v-tooltip="{
                 content: 'TWAP price of ' + assetName,
                 delay: { show: 150, hide: 100 },
