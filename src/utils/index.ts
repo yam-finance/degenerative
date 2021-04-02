@@ -625,7 +625,7 @@ export const get30DMedian = async () => {
 export const getCurrentTWAP = async (poolAddress) => {
   const web3 = new Web3();
   const data: any = await requestHttp(`https://data.yam.finance/twap/pair/${poolAddress}`);
-  if (JSON.stringify(data) == JSON.stringify({}) || poolAddress === "0xedf187890af846bd59f560827ebd2091c49b75df") {
+  if (JSON.stringify(data) == JSON.stringify({})) {
     return -1;
   }
 
