@@ -628,7 +628,9 @@ export const getCurrentTWAP = async (poolAddress) => {
   if (JSON.stringify(data) == JSON.stringify({}) || poolAddress === "0xedf187890af846bd59f560827ebd2091c49b75df") {
     return -1;
   }
-  const currentTWAP = new BigNumber(web3.utils.fromWei(data.price, "ether")).decimalPlaces(4);
+
+  const currentTWAP = data.price.decimalPlaces(data.roundingDecimals);
+  
   return currentTWAP;
 };
 
