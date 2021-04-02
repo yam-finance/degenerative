@@ -630,7 +630,7 @@ export const getCurrentTWAP = async (poolAddress) => {
     return -1;
   }
 
-  const currentTWAP = new BigNumber(web3.utils.fromWei(data.price, "ether")).decimalPlaces(4);
+  const currentTWAP = data.price.decimalPlaces(4);
 
   return currentTWAP;
 };
