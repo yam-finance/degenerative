@@ -629,7 +629,7 @@ export const getCurrentTWAP = async (poolAddress) => {
     return -1;
   }
 
-  const currentTWAP = data.price.decimalPlaces(data.roundingDecimals);
+  const currentTWAP = new BigNumber(data.price).decimalPlaces(data.roundingDecimals);
   
   return currentTWAP;
 };
