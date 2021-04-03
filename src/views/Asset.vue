@@ -471,7 +471,7 @@
             >
               TWAP:
               <b>
-                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : `${currentTWAP}` + asset[tokenSelected].collateral) : "..." }}
+                {{ currentTWAP || currentTWAP > 0 || currentTWAP == -1 ? (currentTWAP === -1 ? "expired" : `${currentTWAP} ` + asset[tokenSelected].collateral) : "..." }}
               </b>
             </label>
             <label
