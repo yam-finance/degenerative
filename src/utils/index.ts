@@ -625,19 +625,17 @@ export const get30DMedian = async () => {
 export const getCurrentTWAP = async (poolAddress) => {
   const web3 = new Web3();
   const data: any = await requestHttp(`https://data.yam.finance/twap/pair/${poolAddress}`);
-
   if (JSON.stringify(data) == JSON.stringify({})) {
     return -1;
   }
 
-  const currentTWAP = new BigNumber(web3.utils.fromWei(data.price.toString(), "ether")).decimalPlaces(4);
-
+  const currentTWAP = new BigNumber(data.price).decimalPlaces(data.roundingDecimals);
+  
   return currentTWAP;
 };
 
 export const getIndexFromSpreadsheet = async () => {
   const data: any = await requestHttp("https://data.yam.finance/ustonks/index");
   const indexValue = new BigNumber(data.price).decimalPlaces(2);
-
   return indexValue;
 };
