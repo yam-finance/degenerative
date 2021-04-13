@@ -440,6 +440,11 @@
                 {{ assetIncrease }}%.
               </a>
             </div>
+            <div class="row row-item-col" v-if="navAct === 'redeem'">
+              <a class="flexitem warning-message">
+                You need to redeem ALL your open positions or leave a minimum of 1 {{ formAssetName(assetName, asset[tokenSelected]) }} if you want to redeem before the expiry.
+              </a>
+            </div>
           </Container>
 
           <Space size="10" class="flex" v-if="tokenSelected" />
