@@ -1043,7 +1043,7 @@ export default {
         this.chartOptionsMedianValues = [];
         for (let i = 0; i < this.medianData.length; i++) {
           this.chartOptionsMedianValues.push({
-            name: this.moment(this.medianData[i].timestamp).format("MM/DD"),
+            name: this.moment.unix(this.medianData[i].timestamp).format("MM/DD"),
             value: Number(parseFloat(this.medianData[i].price / 10 ** 9).toFixed(0)),
           });
         }
