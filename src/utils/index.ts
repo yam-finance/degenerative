@@ -651,8 +651,8 @@ export const getCurrentTWAP = async (poolAddress) => {
   return currentTWAP;
 };
 
-export const getIndexFromSpreadsheet = async () => {
-  const data: any = await requestHttp("https://data.yam.finance/ustonks/index");
+export const getIndexFromSpreadsheet = async (cycle) => {
+  const data: any = await requestHttp(`https://data.yam.finance/ustonks/index/${cycle}`);
   const indexValue = new BigNumber(data.price).decimalPlaces(2);
   return indexValue;
 };

@@ -791,7 +791,6 @@ export default {
       this.assetName = Assets[this.$route.params.key] ? this.$route.params.key.toUpperCase() : "NONE";
 
       this.medianData = await get30DMedian();
-      this.indexPrice = await getIndexFromSpreadsheet();
 
       if (this.tokenSelected) {
         this.fetchApprovalAll();
@@ -1401,6 +1400,8 @@ export default {
       if (!this.tokenSelected) {
         return;
       }
+
+      this.indexPrice = await getIndexFromSpreadsheet(asset[tokenSelected].cycle + asset[tokenSelected].year);
 
       await this.getAssetTWAP();
       const assetInstance = this.asset[this.tokenSelected];
