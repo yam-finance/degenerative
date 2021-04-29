@@ -26,15 +26,22 @@
             <a href="https://discord.gg/fbHX7NRa52">Yam Discord</a> to ask questions anytime.
           </div>
 
-          <div v-if="$route.params.key === 'ustonks'">
-            <br />
-            <b>uSTONKS NFT Giveaway</b> <span>The first 100 users to Mint $10K USDC worth of uSTONKS, then LP uSTONKS/USDC for 3 weeks qualify.</span><br />
-            <span><b>uSTONKS-JUN21</b> is a synthetic that will expire at 4:00PM EST on June 30th.</span>
-          </div>
+          <div class="asset-notice">
 
-          <div v-if="$route.params.key === 'ugas'">
-            <br />
-            <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
+            <div v-if="$route.params.key === 'ustonks'">
+              <br />
+              <span v-if="tokenSelected && asset[tokenSelected].cycle === 'APR'">
+                <b>uSTONKS-APR21</b> is a synthetic that will expire at 4:00PM EST on April 30th 2021. <b>To continue to receive mint+LP rewards please migrate to uSTONKS-JUN21</b>.
+              </span>
+              <span v-if="tokenSelected && asset[tokenSelected].cycle === 'JUN'">
+                <b>uSTONKS-JUN21</b> is a synthetic that will expire at 4:00PM EST on June 30th.
+              </span>
+            </div>
+
+            <div v-if="$route.params.key === 'ugas'">
+              <br />
+              <span><b>uGAS-JUN21</b> is a 90 day contract synthetic that will expire at 4:00PM EST on June 30th.</span>
+            </div>
           </div>
         </div>
 
@@ -2276,6 +2283,10 @@ div.error {
   &:active {
     background: #f2edef;
   }
+}
+.asset-notice {
+  color: #e57067;
+  font-size: 15px;
 }
 .asset-info {
   margin: 0px 20px 0px 20px;
