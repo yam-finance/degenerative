@@ -885,12 +885,9 @@ export default new Vuex.Store({
       }
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
-        Vue.prototype.$provider,
         store.state.account,
         startTimestamp,
         endTimestamp,
-        0,
-        0
       ); // Zeros can be replaced by block numbers if necessary.
       return [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH];
     },
