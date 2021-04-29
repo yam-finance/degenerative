@@ -1401,7 +1401,7 @@ export default {
         return;
       }
 
-      this.indexPrice = await getIndexFromSpreadsheet(asset[tokenSelected].cycle + asset[tokenSelected].year);
+      this.indexPrice = await getIndexFromSpreadsheet(this.asset[this.tokenSelected].cycle + this.asset[this.tokenSelected].year);
 
       await this.getAssetTWAP();
       const assetInstance = this.asset[this.tokenSelected];
