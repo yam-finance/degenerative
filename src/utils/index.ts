@@ -51,10 +51,10 @@ export const getTxStats = async (
 ): Promise<string[]> => {
 
   try {
-    let url = `http://yam.api/account-stats?address=${userAddress}&startTimeStamp=${startTimeStamp}&endTimeStamp=${endTimeStamp}`;
-    let response = await fetch(url);
-    let json = await response.json();
-    let txs = json["result"];
+    const url = `http://yam.api/account-stats?address=${userAddress}&startTimeStamp=${startTimeStamp}&endTimeStamp=${endTimeStamp}`;
+    const response = await fetch(url);
+    const json = await response.json();
+    const txs = json["result"];
 
     const totalGasFeeETH = new BigNumber(txs["totalGasFeeETH"]).decimalPlaces(3).toString();
     const averageTxPriceGWEI = new BigNumber(txs["averageTxPriceGWEI"]).decimalPlaces(3).toString();
