@@ -57,11 +57,13 @@ const defaultState = () => {
       UGASMAR21_WETH: false,
       UGASJUN21_WETH: false,
       USTONKSAPR21_USDC: false,
+      USTONKSJUN21_USDC: false,
       EMPUGASJAN21_UGASJAN21: false,
       EMPUGASFEB21_UGASFEB21: false,
       EMPUGASMAR21_UGASMAR21: false,
       EMPUGASJUN21_UGASJUN21: false,
       EMPUSTONKSAPR21_USTONKSAPR21: false,
+      EMPUSTONKSJUN21_USTONKSJUN21: false,
     },
     web3: {
       core: null,
