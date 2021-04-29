@@ -51,7 +51,7 @@ export const getTxStats = async (
 ): Promise<string[]> => {
 
   try {
-    const url = `http://yam.api/account-stats?address=${userAddress}&startTimeStamp=${startTimeStamp}&endTimeStamp=${endTimeStamp}`;
+    const url = `http://api.yam.finance/account-stats?address=${userAddress}&startTimeStamp=${startTimeStamp}&endTimeStamp=${endTimeStamp}`;
     const response = await fetch(url);
     const json = await response.json();
     const txs = json["result"];
