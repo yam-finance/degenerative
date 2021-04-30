@@ -425,7 +425,6 @@
               </button>
               <button
                 class="button settle"
-                :disabled="assetName == 'USTONKS'"
                 @click="settleAsset"
                 v-if="
                   tokenSelected &&
