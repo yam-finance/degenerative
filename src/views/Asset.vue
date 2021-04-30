@@ -27,7 +27,6 @@
           </div>
 
           <div class="asset-notice">
-
             <div v-if="$route.params.key === 'ustonks'">
               <br />
               <span v-if="tokenSelected && asset[tokenSelected].cycle === 'APR'">
