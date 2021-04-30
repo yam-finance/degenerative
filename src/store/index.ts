@@ -57,11 +57,13 @@ const defaultState = () => {
       UGASMAR21_WETH: false,
       UGASJUN21_WETH: false,
       USTONKSAPR21_USDC: false,
+      USTONKSJUN21_USDC: false,
       EMPUGASJAN21_UGASJAN21: false,
       EMPUGASFEB21_UGASFEB21: false,
       EMPUGASMAR21_UGASMAR21: false,
       EMPUGASJUN21_UGASJUN21: false,
       EMPUSTONKSAPR21_USTONKSAPR21: false,
+      EMPUSTONKSJUN21_USTONKSJUN21: false,
     },
     web3: {
       core: null,
@@ -1030,8 +1032,13 @@ export default new Vuex.Store({
         const assetReserve0 = new BigNumber(contractLpCall._reserve0).dividedBy(baseAsset).toNumber();
         const assetReserve1 = new BigNumber(contractLpCall._reserve1).dividedBy(baseCollateral).toNumber();
         if (payload.assetName === "USTONKS") {
-          calcAsset = assetReserve1 * tokenPrice;
-          calcCollateral = assetReserve0 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          if(payload.assetInstance.cycle === "APR") {
+            calcAsset = assetReserve1 * tokenPrice;
+            calcCollateral = assetReserve0 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          } else {
+            calcAsset = assetReserve0 * tokenPrice;
+            calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);
+          }
         } else {
           calcAsset = assetReserve0 * tokenPrice;
           calcCollateral = assetReserve1 * (payload.assetInstance.collateral == "WETH" ? ethPrice : 1);

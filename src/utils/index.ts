@@ -615,7 +615,13 @@ const emplistDataBackup = {
 export async function getDevMiningEmps() {
   const assets: any = Assets;
   if (assets) {
-    const data = [assets["ugas"][1].emp.address, assets["ugas"][2].emp.address, assets["ugas"][3].emp.address, assets["ustonks"][0].emp.address];
+    const data = [
+      assets["ugas"][1].emp.address,
+      assets["ugas"][2].emp.address,
+      assets["ugas"][3].emp.address,
+      assets["ustonks"][0].emp.address,
+      assets["ustonks"][1].emp.address
+    ];
 
     const umadata: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
     const empWhitelistUpdated = mergeUnique(umadata.empWhitelist, data);
