@@ -410,6 +410,7 @@
               <Space size="10" />
               <button
                 class="button settle"
+                :disabled="assetName == 'USTONKS'"
                 @click="makeApprovalEmp('Settle')"
                 v-if="
                   tokenSelected &&
@@ -425,6 +426,7 @@
               </button>
               <button
                 class="button settle"
+                :disabled="assetName == 'USTONKS'"
                 @click="settleAsset"
                 v-if="
                   tokenSelected &&
