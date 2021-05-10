@@ -848,19 +848,19 @@ export default new Vuex.Store({
       switch (payload.interval.toLowerCase()) {
         case "day":
           date.setHours(date.getHours() - 24);
-          startTimestamp = date.getTime();
+          startTimestamp = date.getTime() / 1000;
           break;
         case "week":
           date.setHours(date.getHours() - 168);
-          startTimestamp = date.getTime();
+          startTimestamp = date.getTime() / 1000;
           break;
         case "month":
           date.setMonth(date.getMonth() - 1);
-          startTimestamp = date.getTime();
+          startTimestamp = date.getTime() / 1000;
           break;
         case "year":
           date.setFullYear(date.getFullYear() - 1);
-          startTimestamp = date.getTime();
+          startTimestamp = date.getTime() / 1000;
           break;
         default:
           startTimestamp = 0;
@@ -868,14 +868,14 @@ export default new Vuex.Store({
 
       if (payload.startDate != null) {
         date = new Date(payload.startDate);
-        startTimestamp = date.getTime();
+        startTimestamp = date.getTime() / 1000;
       } else {
         startTimestamp = 0;
       }
 
       if (payload.endDate != null) {
         date = new Date(payload.endDate);
-        endTimestamp = date.getTime();
+        endTimestamp = date.getTime() / 1000;
       } else {
         const now = new Date();
         endTimestamp = now.getTime();
