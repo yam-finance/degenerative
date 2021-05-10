@@ -869,19 +869,16 @@ export default new Vuex.Store({
       if (payload.startDate != null) {
         date = new Date(payload.startDate);
         startTimestamp = date.getTime();
-
-        if (payload.endDate == null) {
-          endTimestamp = 0;
-        }
+      } else {
+        startTimestamp = 0;
       }
 
       if (payload.endDate != null) {
         date = new Date(payload.endDate);
         endTimestamp = date.getTime();
-
-        if (payload.startDate == null) {
-          startTimestamp = 0;
-        }
+      } else {
+        const now = new Date();
+        endTimestamp = now.getTime();
       }
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(

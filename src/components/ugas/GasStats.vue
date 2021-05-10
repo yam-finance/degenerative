@@ -238,8 +238,8 @@ export default {
       failedTxCount: "",
       failedTxGasCostETH: "",
       failedTxGasCostUSD: "",
-      inputStartDate: "",
-      inputEndDate: "",
+      inputStartDate: null,
+      inputEndDate: null,
     };
   },
   props: {
