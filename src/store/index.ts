@@ -878,7 +878,7 @@ export default new Vuex.Store({
         endTimestamp = date.getTime() / 1000;
       } else {
         const now = new Date();
-        endTimestamp = now.getTime();
+        endTimestamp = now.getTime() / 1000;
       }
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(
