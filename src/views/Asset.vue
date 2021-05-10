@@ -359,9 +359,8 @@
                         target="_blank"
                         class="clicklptrade"
                         :href="
-                          `https://app.uniswap.org/#/swap?use=V2?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
-                            asset[tokenSelected].token.address
-                          }`
+                          `https://app.uniswap.org/#/swap?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
+                            asset[tokenSelected].token.address}&use=V2`
                         "
                         v-tooltip="{
                           content: 'Click here to buy the ' + assetName + ' asset',
