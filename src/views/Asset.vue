@@ -340,7 +340,7 @@
                         target="_blank"
                         class="clicklptrade"
                         :href="
-                          'https://app.uniswap.org/#/add/' +
+                          'https://app.uniswap.org/#/add/v2/' +
                             (asset[tokenSelected].collateral == 'WETH' ? 'ETH' : USDC) +
                             '/' +
                             asset[tokenSelected].token.address
@@ -359,7 +359,7 @@
                         target="_blank"
                         class="clicklptrade"
                         :href="
-                          `https://app.uniswap.org/#/swap?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
+                          `https://app.uniswap.org/#/swap?use=V2?inputCurrency=${assetName == 'UGAS' ? 'ETH' : USDC}&outputCurrency=${
                             asset[tokenSelected].token.address
                           }`
                         "
