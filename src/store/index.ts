@@ -845,6 +845,21 @@ export default new Vuex.Store({
       let startTimestamp = 0;
       let endTimestamp = 0;
 
+      if (payload.startDate != null) {
+        date = new Date(payload.startDate);
+        startTimestamp = Math.floor(date.getTime() / 1000);
+      } else {
+        startTimestamp = 0;
+      }
+
+      if (payload.endDate != null) {
+        date = new Date(payload.endDate);
+        endTimestamp = Math.floor(date.getTime() / 1000);
+      } else {
+        const now = new Date();
+        endTimestamp = Math.floor(now.getTime() / 1000);
+      }
+
       switch (payload.interval.toLowerCase()) {
         case "day":
           date.setHours(date.getHours() - 24);
@@ -864,21 +879,6 @@ export default new Vuex.Store({
           break;
         default:
           startTimestamp = 0;
-      }
-
-      if (payload.startDate != null) {
-        date = new Date(payload.startDate);
-        startTimestamp = Math.floor(date.getTime() / 1000);
-      } else {
-        startTimestamp = 0;
-      }
-
-      if (payload.endDate != null) {
-        date = new Date(payload.endDate);
-        endTimestamp = Math.floor(date.getTime() / 1000);
-      } else {
-        const now = new Date();
-        endTimestamp = Math.floor(now.getTime() / 1000);
       }
 
       const [txGasCostETH, averageTxPrice, txCount, failedTxCount, failedTxGasCostETH] = await getTxStats(

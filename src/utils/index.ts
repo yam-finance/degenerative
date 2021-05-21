@@ -54,7 +54,7 @@ export const getTxStats = async (
     const url = `https://api.yam.finance/account-stats?address=${userAddress}&startTimeStamp=${startTimeStamp}&endTimeStamp=${endTimeStamp}`;
     const response = await fetch(url);
     const json = await response.json();
-    const txs = json["result"];
+    const txs = json;
 
     const totalGasFeeETH = new BigNumber(txs["totalGasFeeETH"]).decimalPlaces(3).toString();
     const averageTxPriceGWEI = new BigNumber(txs["averageTxPriceGWEI"]).decimalPlaces(3).toString();
