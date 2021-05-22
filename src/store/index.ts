@@ -355,7 +355,7 @@ export default new Vuex.Store({
         const res = await uniPair.methods.getReserves().call();
         reserves0 = new BigNumber(res._reserve0);
         reserves1 = new BigNumber(res._reserve1);
-        if (token0 == payload.tokenA || token0.toLowerCase() == USDC) {
+        if (String(token0).toLowerCase() != payload.tokenA.toLowerCase() || token0.toLowerCase() == USDC) {
           return reserves0.dividedBy(reserves1);
         } else {
           return reserves1.dividedBy(reserves0);

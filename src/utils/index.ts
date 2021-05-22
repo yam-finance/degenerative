@@ -624,6 +624,7 @@ export async function getDevMiningEmps() {
     ];
 
     const umadata: any = await requestHttp(`https://raw.githubusercontent.com/UMAprotocol/protocol/master/packages/affiliates/payouts/devmining-status.json`);
+    umadata.empWhitelist =  umadata.empWhitelist.map(address => address.toLowerCase());
     const empWhitelistUpdated = mergeUnique(umadata.empWhitelist, data);
     umadata.empWhitelist = empWhitelistUpdated;
     return umadata;
