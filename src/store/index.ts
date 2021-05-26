@@ -274,10 +274,6 @@ export default new Vuex.Store({
             account: "0x397ff1542f962076d0bfe58ea045ffa2d347aca0",
           })
           Vue.prototype.degenSDK = degenSDK;
-          const usdcValue = await degenSDK.methods.getUserBalanceWETH()
-          console.log("Test 1", usdcValue);
-          console.log("Test 2", Vue.prototype.degenSDK.network);
-          console.log("Test 3", Vue.prototype.degenSDK.account);
         }
       }
     },
