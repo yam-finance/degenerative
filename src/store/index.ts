@@ -35,8 +35,8 @@ import UNIFactContract from "@/utils/abi/uniFactory.json";
 import WETHContract from "@/utils/abi/weth.json";
 import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
-const Degenerative = require('degenerative-sdk')
-// import { Degenerative } from "degenerative-sdk";
+// const Degenerative = require('degenerative-sdk')
+import { Degenerative } from "degenerative-sdk";
 
 Vue.use(Vuex);
 
