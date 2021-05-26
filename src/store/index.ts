@@ -270,8 +270,13 @@ export default new Vuex.Store({
           //   network: "mainnet",
           //   account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           // });
-          // Vue.prototype.$degenerative = degenerative; 
-          // console.log(Vue.prototype.$degenerative.methods.getUserBalanceUSDC());
+          const degenSDK = await new Degenerative({
+            provider: Vue.prototype.$provider,
+            network: "mainnet",
+            account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+          })
+          Vue.prototype.degenSDK = degenSDK;
+          Vue.prototype.degenSDK.methods.getUserBalanceUSDC()
         }
       }
     },
