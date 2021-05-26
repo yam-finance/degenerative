@@ -269,14 +269,15 @@ export default new Vuex.Store({
           //   network: "mainnet",
           //   account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           // });
+          const provider  = (new Web3Provider(auth.web3.provider as any)).provider;
           /* @ts-ignore */
           const degenSDK = await new Degenerative({
-            provider: Vue.prototype.$provider,
+            provider: provider,
             network: "mainnet",
-            account: "0x2FAF487A4414Fe77e2327F0bf4AE2a264a776AD2",
+            account: "0x397ff1542f962076d0bfe58ea045ffa2d347aca0",
           })
           Vue.prototype.degenSDK = degenSDK;
-          const usdcValue = await Vue.prototype.degenSDK.methods.getUserBalanceUSDC(); 
+          const usdcValue = await degenSDK.methods.getUserBalanceWETH()
           console.log("Test 1", usdcValue);
           console.log("Test 2", Vue.prototype.degenSDK.network);
           console.log("Test 3", Vue.prototype.degenSDK.account);
