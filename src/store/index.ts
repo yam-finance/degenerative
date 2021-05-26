@@ -36,7 +36,6 @@ import WETHContract from "@/utils/abi/weth.json";
 import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
 // const Degenerative = require('degenerative-sdk')
-/* @ts-ignore */
 import { Degenerative } from "degenerative-sdk";
 
 Vue.use(Vuex);
@@ -270,13 +269,15 @@ export default new Vuex.Store({
           //   network: "mainnet",
           //   account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           // });
-          const degenSDK = await new Degenerative({
+          const degenSDK: Degenerative = await new Degenerative({
             provider: Vue.prototype.$provider,
             network: "mainnet",
             account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           })
           Vue.prototype.degenSDK = degenSDK;
-          Vue.prototype.degenSDK.methods.getUserBalanceUSDC()
+          console.log("Test 1", Vue.prototype.degenSDK.methods.getUserBalanceUSDC());
+          console.log("Test 2", Vue.prototype.degenSDK.network);
+          console.log("Test 3", Vue.prototype.degenSDK.account);
         }
       }
     },
