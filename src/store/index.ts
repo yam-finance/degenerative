@@ -37,6 +37,7 @@ import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
 // const Degenerative = require('degenerative-sdk')
 import { Degenerative } from "degenerative-sdk";
+import { ExternalProvider  } from "@ethersproject/providers";
 
 Vue.use(Vuex);
 
@@ -265,10 +266,10 @@ export default new Vuex.Store({
           Vue.prototype.$provider = auth.web3.provider;
           await dispatch("loadProvider");
 
-          const provider  = (new Web3Provider(auth.provider as any)).provider;
+          const provider = (new Web3Provider(auth.provider as any)).provider;
           /* @ts-ignore */
           const degenSDK = await new Degenerative({
-            provider: provider,
+            provider: provider, 
             network: "mainnet",
             account: "0x397ff1542f962076d0bfe58ea045ffa2d347aca0",
           })
