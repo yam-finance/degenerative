@@ -36,6 +36,7 @@ import WETHContract from "@/utils/abi/weth.json";
 import { UMA, USDC, WETH, YAM } from "@/utils/addresses";
 import mixin from "./../mixins";
 // const Degenerative = require('degenerative-sdk')
+/* @ts-ignore */
 import { Degenerative } from "degenerative-sdk";
 
 Vue.use(Vuex);
@@ -120,6 +121,7 @@ const defaultState = () => {
     currPos: {},
     provider: {},
     connector: {},
+    degenerative: {}
   };
 };
 
@@ -263,6 +265,13 @@ export default new Vuex.Store({
           Vue.prototype.$web3 = auth.web3;
           Vue.prototype.$provider = auth.web3.provider;
           await dispatch("loadProvider");
+          // const degenerative: Degenerative = await new Degenerative({
+          //   provider: auth.web3.provider,
+          //   network: "mainnet",
+          //   account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+          // });
+          // Vue.prototype.$degenerative = degenerative; 
+          // console.log(Vue.prototype.$degenerative.methods.getUserBalanceUSDC());
         }
       }
     },
