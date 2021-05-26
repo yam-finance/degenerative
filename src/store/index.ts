@@ -269,13 +269,15 @@ export default new Vuex.Store({
           //   network: "mainnet",
           //   account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           // });
-          const degenSDK: Degenerative = await new Degenerative({
+          /* @ts-ignore */
+          const degenSDK = await new Degenerative({
             provider: Vue.prototype.$provider,
             network: "mainnet",
             account: "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
           })
           Vue.prototype.degenSDK = degenSDK;
-          console.log("Test 1", Vue.prototype.degenSDK.methods.getUserBalanceUSDC());
+          const usdcValue = await Vue.prototype.degenSDK.methods.getUserBalanceUSDC() 
+          console.log("Test 1", usdcValue);
           console.log("Test 2", Vue.prototype.degenSDK.network);
           console.log("Test 3", Vue.prototype.degenSDK.account);
         }
