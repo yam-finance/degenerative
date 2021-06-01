@@ -119,7 +119,8 @@ const defaultState = () => {
     currPos: {},
     provider: {},
     connector: {},
-    degenerative: {}
+    degenerative: {},
+    degenSDK: {}
   };
 };
 
@@ -263,19 +264,6 @@ export default new Vuex.Store({
           Vue.prototype.$web3 = auth.web3;
           Vue.prototype.$provider = auth.web3.provider;
           await dispatch("loadProvider");
-
-          const provider = (new Web3Provider(auth.provider as any)).provider;
-          /* @ts-ignore */
-          const degenSDK = await new Degenerative({
-            provider: provider, 
-            network: "mainnet",
-            account: "0x397ff1542f962076d0bfe58ea045ffa2d347aca0",
-          })
-          Vue.prototype.degenSDK = degenSDK;
-          const usdcValue = await degenSDK.methods.getUserBalanceWETH()
-          console.log("Test 1", usdcValue);
-          console.log("Test 2", Vue.prototype.degenSDK.network);
-          console.log("Test 3", Vue.prototype.degenSDK.account);
         }
       }
     },
@@ -312,6 +300,19 @@ export default new Vuex.Store({
         commit("ON_PROVIDER_SUCCESS", { account });
         // await dispatch("fetchAllowanceEMP", { spenderAddress: store.state.approvals.tokenEMP, tokenAddress: WETH });
         stateSave("account", account);
+
+        /// @dev Initialize degen-sdk
+        const provider = (new Web3Provider(auth.provider as any)).provider;
+        /* @ts-ignore */
+        const degenSDK = await new Degenerative({
+          provider: provider, 
+          network: "mainnet",
+          account: account,
+        })
+        Vue.prototype.$degenSDK = degenSDK;
+        const usdcValue = await degenSDK.methods.getUserBalanceWETH()
+        // console.log("Network", Vue.prototype.$degenSDK.network);
+        // console.log("Account", Vue.prototype.$degenSDK.account);
       } catch (e) {
         commit("ON_PROVIDER_FAILURE", { e });
         return Promise.reject();
@@ -918,8 +919,10 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const balance = await getBalance(Vue.prototype.$provider, USDC, store.state.account);
-      return balance;
+
+      const usdcBalance = await Vue.prototype.$degenSDK.methods.getUserBalanceUSDC()
+      // const balance = await getBalance(Vue.prototype.$provider, USDC, store.state.account);
+      return usdcBalance;
     },
     checkContractApprovals: async ({ commit, dispatch }) => {
       return store.state.approvals;
