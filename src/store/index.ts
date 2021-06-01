@@ -909,8 +909,10 @@ export default new Vuex.Store({
       if (!Vue.prototype.$web3) {
         await dispatch("connect");
       }
-      const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
-      return balance;
+
+      const wethBalance = await Vue.prototype.$degenSDK.methods.getUserBalanceWETH()
+      // const balance = await getBalance(Vue.prototype.$provider, WETH, store.state.account);
+      return wethBalance;
     },
     getUserBalanceUSDC: async ({ commit, dispatch }) => {
       await sleep(500);
