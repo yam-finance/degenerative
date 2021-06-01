@@ -119,7 +119,6 @@ const defaultState = () => {
     currPos: {},
     provider: {},
     connector: {},
-    degenerative: {},
     degenSDK: {}
   };
 };
